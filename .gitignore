@@ -1,0 +1,42 @@
+# ---------------------------------------------------------------- segreti
+# Prima di tutto il resto: qui dentro non entra niente che assomigli a una
+# chiave. Se un giorno serve un esempio, si chiama .env.esempio e contiene
+# solo i nomi delle variabili, mai i valori.
+.env
+.env.*
+!.env.esempio
+*.env.rtf
+*.pem
+*.key
+
+# ------------------------------------------------------------ dipendenze
+node_modules/
+.pnp
+.pnp.js
+
+# ---------------------------------------------------------- cose costruite
+dist/
+dist-ssr/
+build/
+*.local
+
+# ------------------------------------------------------- roba di passaggio
+# gli archivi che uso per portare i file da una parte all'altra
+sync*.tgz
+*.tar.gz
+_to_delete/
+
+# ------------------------------------------------------------- il sistema
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+.vite/
+coverage/
+/tmp/
+
+# -------------------------------------------------------------- editor
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp

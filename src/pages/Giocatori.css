@@ -1,0 +1,24 @@
+.squadre {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.squadre .tb-name {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.squadre .tb-sm {
+  height: 17px;
+}
+
+.piu {
+  font-family: var(--font-mono);
+  font-style: normal;
+  font-size: 0.62rem;
+  color: var(--gold-600);
+}

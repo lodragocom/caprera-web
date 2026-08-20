@@ -1,0 +1,316 @@
+/* --------------------------------------------- scelta della giornata */
+.scelta-giornata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 18px;
+}
+
+.scelta-giornata button {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border-soft);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.scelta-giornata button:hover { color: var(--text); }
+
+.scelta-giornata button.on {
+  background: var(--gold-500);
+  border-color: var(--gold-500);
+  color: #111;
+  font-weight: 700;
+}
+
+/* --------------------------------------------- intestazione partita */
+.testa-partita {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.squadra-riga {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.squadra-riga.fine { justify-content: flex-end; }
+.squadra-riga img { width: 34px; height: 34px; object-fit: contain; flex: none; }
+.squadra-riga strong { font-size: 0.98rem; }
+
+.squadra-riga .modulo {
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  border: 1px solid var(--border-soft);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+.risultato {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.risultato b { font-size: 1.5rem; }
+.risultato .fp { font-size: 0.68rem; color: var(--text-dim); }
+
+.risultato em {
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 0.52rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.esito-V b { color: var(--win); }
+.esito-N b { color: var(--draw); }
+.esito-P b { color: var(--loss); }
+
+/* --------------------------------------------- il campo */
+.due-campo {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 1100px) {
+  .due-campo { grid-template-columns: 1fr; }
+}
+
+.campo {
+  position: relative;
+  aspect-ratio: 68 / 100;
+  border-radius: 10px;
+  /* verde molto desaturato: il campo deve fare da sfondo, non gridare */
+  background:
+    repeating-linear-gradient(
+      180deg,
+      rgba(63, 174, 116, 0.07) 0 10%,
+      rgba(63, 174, 116, 0.04) 10% 20%
+    ),
+    #10261d;
+  border: 1px solid rgba(63, 174, 116, 0.22);
+  overflow: hidden;
+}
+
+.linee span {
+  position: absolute;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.linee .meta { left: 0; right: 0; top: 50%; border-width: 1px 0 0; }
+
+.linee .cerchio {
+  left: 50%; top: 50%;
+  width: 26%; aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+}
+
+.linee .area {
+  left: 50%;
+  width: 52%;
+  height: 15%;
+  transform: translateX(-50%);
+}
+
+.linee .area-giu { bottom: 0; border-bottom: 0; }
+.linee .area-su { top: 0; border-top: 0; }
+
+.giocatore {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: 20%;
+}
+
+.giocatore.fuori { opacity: 0.4; }
+
+.pallino {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(0, 0, 0, 0.4);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* Il voto e' sovrapposto al pallino e centrato per conto proprio invece di
+   affidarsi all'allineamento del genitore: il pallino contiene anche la
+   fascia da capitano, che e' fuori flusso, e cosi' il numero resta al centro
+   comunque sia risolto il layout del contenitore. */
+.pallino .v {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #0b0f0d;
+}
+
+.pallino.role-P { background: #e0b23c; }
+.pallino.role-D { background: #5fa9e0; }
+.pallino.role-C { background: #6fc98d; }
+.pallino.role-A { background: #e0705f; }
+
+.pallino .fascia {
+  position: absolute;
+  top: -5px; right: -8px;
+  font-family: var(--font-mono);
+  font-size: 0.44rem;
+  letter-spacing: 0.05em;
+  background: var(--gold-500);
+  color: #111;
+  border-radius: 3px;
+  padding: 1px 3px;
+}
+
+.giocatore .etichetta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.giocatore .etichetta b {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #e8f0ea;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.bonus { display: inline-flex; gap: 2px; }
+
+.b {
+  font-style: normal;
+  font-size: 0.6rem;
+  line-height: 1;
+}
+
+.b-gol, .b-rigore, .b-gol-vittoria { color: #7ee0a4; }
+.b-assist { color: #8fd0ff; }
+.b-giallo { color: #e8c752; }
+.b-rosso, .b-autogol, .b-rigore-sbagliato, .b-gol-subito { color: #e0705f; }
+.b-imbattuto, .b-rigore-parato { color: #7ee0a4; }
+
+.campo-box .legenda {
+  margin: 10px 0 0;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  line-height: 1.55;
+}
+
+/* --------------------------------------------- colonna di destra */
+.colonna {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mod-riga {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mod {
+  display: flex;
+  flex-direction: column;
+  padding: 7px 11px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-soft);
+}
+
+.mod b { font-size: 0.88rem; color: var(--gold-400); }
+
+.mod em {
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.conta-bonus {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+}
+
+.conta-bonus li {
+  display: grid;
+  grid-template-columns: 18px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border-soft);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.conta-bonus li:last-child { border-bottom: 0; }
+
+.lista-panchina {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+
+.lista-panchina li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border-soft);
+  font-size: 0.8rem;
+}
+
+.lista-panchina li:last-child { border-bottom: 0; }
+.lista-panchina b { color: var(--text); font-weight: 500; }
+.lista-panchina .voto { margin-left: auto; color: var(--text-muted); }
+.lista-panchina.spenta { opacity: 0.55; }
+
+/* i turni di coppa su una riga a parte: sono pochi ma hanno nomi lunghi */
+.scelta-giornata.coppe {
+  margin-top: -10px;
+  margin-bottom: 20px;
+}
+
+.scelta-giornata.coppe button {
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-color: rgba(197, 160, 74, 0.28);
+}

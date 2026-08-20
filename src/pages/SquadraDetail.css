@@ -1,0 +1,183 @@
+.team-hero {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  padding: 30px 34px;
+  margin-bottom: 18px;
+  position: relative;
+  overflow: hidden;
+  border-left: 4px solid var(--accent);
+}
+
+.team-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, color-mix(in srgb, var(--accent) 22%, transparent), transparent 58%);
+  pointer-events: none;
+}
+
+.hero-logo {
+  height: 116px;
+  width: auto;
+  flex-shrink: 0;
+  filter: drop-shadow(0 8px 22px rgba(0, 0, 0, 0.5));
+}
+
+.team-hero h1 {
+  font-size: clamp(2rem, 5vw, 3.2rem);
+}
+
+.former,
+.titles {
+  margin: 8px 0 0;
+  font-size: 0.83rem;
+}
+
+.former {
+  color: var(--text-dim);
+}
+
+.titles {
+  color: var(--gold-400);
+  font-weight: 500;
+}
+
+@media (max-width: 640px) {
+  .team-hero { flex-direction: column; text-align: center; gap: 16px; padding: 24px; }
+  .hero-logo { height: 88px; }
+}
+
+/* --------------------------------------------------------------- kpi */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+  gap: 10px;
+  margin-bottom: 46px;
+}
+
+.kpi {
+  padding: 15px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.kpi strong {
+  font-family: var(--font-display);
+  font-size: 1.62rem;
+  font-weight: 400;
+  color: var(--cream);
+  line-height: 1;
+}
+
+.kpi span {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.block {
+  margin-bottom: 48px;
+}
+
+/* ------------------------------------------------------------- chart */
+.chart-wrap {
+  background: var(--navy-850);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  padding: 14px 10px 6px;
+}
+
+.chart {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.chart-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  fill: var(--text-dim);
+}
+
+/* ------------------------------------------------------------ roster */
+.roster-meta {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  align-self: flex-end;
+  padding-bottom: 9px;
+}
+
+.roster-meta b {
+  color: var(--cream);
+  font-weight: 600;
+}
+
+.roster-meta .roles {
+  color: var(--gold-600);
+  font-size: 0.75rem;
+}
+
+.club {
+  font-size: 0.74rem;
+  letter-spacing: 0.05em;
+}
+
+/* ------------------------------------------------------ mini matches */
+.mini-matches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(256px, 1fr));
+  gap: 8px;
+}
+
+.mini {
+  display: grid;
+  grid-template-columns: 2.2rem 1.3rem 1fr auto auto;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 13px;
+  font-size: 0.83rem;
+}
+
+.mini .rnd {
+  font-size: 0.66rem;
+  color: var(--text-dim);
+}
+
+/* le gare di coppa si distinguono a colpo d'occhio da quelle di campionato */
+.mini.di-coppa {
+  border-left: 2px solid var(--gold-500);
+}
+
+.mini.di-coppa .rnd {
+  font-size: 0.58rem;
+  color: var(--gold-400);
+  letter-spacing: 0.02em;
+}
+
+.ha {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  border: 1px solid var(--border-soft);
+  border-radius: 4px;
+  text-align: center;
+  padding: 1px 0;
+}
+
+.ha.is-home {
+  color: var(--gold-500);
+  border-color: var(--border);
+}
+
+.mini-score {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--cream);
+}

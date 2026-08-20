@@ -1,0 +1,45 @@
+.team-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+a.team-badge:hover .tb-name {
+  color: var(--gold-400);
+}
+
+.tb-logo {
+  width: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.tb-sm { height: 20px; }
+.tb-md { height: 26px; }
+.tb-lg { height: 44px; }
+
+/* segnaposto per le società storiche, che non hanno stemma */
+.tb-fallback {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border-radius: 5px;
+  font-family: var(--font-mono);
+  font-size: 0.52em;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--cream);
+  opacity: 0.85;
+}
+
+.tb-name {
+  font-weight: 500;
+  color: var(--text);
+  transition: color 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}

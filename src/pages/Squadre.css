@@ -1,0 +1,113 @@
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(288px, 1fr));
+  gap: 16px;
+}
+
+.team-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 22px 22px 22px 26px;
+  overflow: hidden;
+  transition: transform 0.18s, border-color 0.18s;
+}
+
+.team-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--gold-600);
+}
+
+.team-accent {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+}
+
+.team-card > img {
+  height: 76px;
+  width: auto;
+  flex-shrink: 0;
+  filter: drop-shadow(0 5px 14px rgba(0, 0, 0, 0.4));
+}
+
+.team-card-body {
+  min-width: 0;
+  flex: 1;
+}
+
+.team-card h2 {
+  font-size: 1.28rem;
+  line-height: 1.15;
+}
+
+.team-card .code {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  color: var(--gold-600);
+  margin: 3px 0 12px;
+}
+
+.team-card dl {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin: 0;
+}
+
+.team-card dt {
+  font-family: var(--font-mono);
+  font-size: 0.54rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 2px;
+}
+
+.team-card dd {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--cream);
+}
+
+/* --------------------------------------------------- società storiche */
+.storiche {
+  margin-top: 56px;
+  padding-top: 8px;
+}
+
+.storiche .lede {
+  margin: -6px 0 20px;
+  font-size: 0.86rem;
+}
+
+.team-card.inactive {
+  opacity: 0.72;
+}
+
+.team-card.inactive:hover {
+  opacity: 1;
+}
+
+.team-crest-fallback {
+  display: grid;
+  place-items: center;
+  width: 76px;
+  height: 76px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  letter-spacing: 0.06em;
+  color: var(--cream);
+}
+
+.team-card .years {
+  color: var(--text-dim);
+  letter-spacing: 0.06em;
+}

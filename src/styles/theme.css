@@ -1,0 +1,415 @@
+/* ============================================================
+   Federazione Caprera — design system
+   Navy araldico + oro, ripreso dallo stemma della lega.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap');
+
+:root {
+  /* superfici */
+  --navy-900: #060d19;
+  --navy-850: #0a1424;
+  --navy-800: #0f1c31;
+  --navy-700: #16294a;
+  --navy-600: #1f375f;
+
+  /* accenti */
+  --gold-400: #d9b46a;
+  --gold-500: #c9a227;
+  --gold-600: #a8863f;
+
+  /* testo */
+  --cream: #f4f0e6;
+  --text: #e8e4da;
+  --text-muted: #9aa7bd;
+  --text-dim: #64748b;
+
+  /* semantica */
+  --win: #3fae74;
+  --draw: #b0803a;
+  --loss: #c85b5b;
+
+  --border: rgba(217, 180, 106, 0.16);
+  --border-soft: rgba(255, 255, 255, 0.07);
+
+  --radius: 10px;
+  --radius-lg: 16px;
+
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.45);
+
+  --font-display: 'Bebas Neue', 'Impact', sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Roboto Mono', ui-monospace, monospace;
+
+  --maxw: 1200px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--navy-900);
+  background-image:
+    radial-gradient(ellipse 900px 500px at 50% -8%, rgba(31, 55, 95, 0.55), transparent 70%);
+  background-attachment: fixed;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  color: var(--cream);
+  margin: 0;
+  line-height: 1.08;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+::selection {
+  background: var(--gold-500);
+  color: var(--navy-900);
+}
+
+/* --------------------------------------------------- layout primitives */
+.container {
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+
+.wide {
+  max-width: 1440px;
+}
+
+.page {
+  padding-block: 44px 88px;
+  animation: rise 0.35s ease-out both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.page-head {
+  margin-bottom: 32px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 20px;
+}
+
+.page-head h1 {
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold-500);
+  margin-bottom: 10px;
+}
+
+.lede {
+  color: var(--text-muted);
+  max-width: 62ch;
+  margin-top: 10px;
+}
+
+/* --------------------------------------------------- cards & surfaces */
+.card {
+  background: linear-gradient(160deg, var(--navy-800), var(--navy-850));
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+
+.section-title {
+  font-size: 1.55rem;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--border), transparent);
+}
+
+/* --------------------------------------------------- controls */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.field > label {
+  font-family: var(--font-mono);
+  font-size: 0.63rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+select,
+input[type='search'],
+input[type='text'] {
+  background: var(--navy-850);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 9px 13px;
+  font: inherit;
+  font-size: 0.9rem;
+  min-width: 150px;
+  transition: border-color 0.15s;
+}
+
+select:focus-visible,
+input:focus-visible {
+  outline: none;
+  border-color: var(--gold-500);
+}
+
+.seg {
+  display: inline-flex;
+  background: var(--navy-850);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 3px;
+  gap: 3px;
+}
+
+.seg button {
+  background: none;
+  border: 0;
+  color: var(--text-muted);
+  padding: 6px 14px;
+  border-radius: 7px;
+  font-size: 0.83rem;
+  font-weight: 500;
+  transition: all 0.15s;
+}
+
+.seg button:hover {
+  color: var(--cream);
+}
+
+.seg button[aria-pressed='true'] {
+  background: var(--gold-500);
+  color: var(--navy-900);
+  font-weight: 600;
+}
+
+/* --------------------------------------------------- tables */
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  background: var(--navy-850);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+thead th {
+  background: var(--navy-800);
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  font-weight: 500;
+  text-align: right;
+  padding: 12px 10px;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+thead th:first-child,
+thead th.left {
+  text-align: left;
+}
+
+tbody td {
+  padding: 10px;
+  text-align: right;
+  border-bottom: 1px solid var(--border-soft);
+  white-space: nowrap;
+}
+
+tbody td:first-child,
+tbody td.left {
+  text-align: left;
+}
+
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+tbody tr:hover td {
+  background: rgba(217, 180, 106, 0.05);
+}
+
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.strong {
+  color: var(--cream);
+  font-weight: 600;
+}
+
+.muted {
+  color: var(--text-dim);
+}
+
+/* --------------------------------------------------- badges */
+.badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.09em;
+  padding: 2px 7px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  color: var(--gold-400);
+  text-transform: uppercase;
+}
+
+.role-P { color: #e0b64c; border-color: rgba(224, 182, 76, 0.35); }
+.role-D { color: #6aa9e0; border-color: rgba(106, 169, 224, 0.35); }
+.role-C { color: #63c99a; border-color: rgba(99, 201, 154, 0.35); }
+.role-A { color: #e0776a; border-color: rgba(224, 119, 106, 0.35); }
+
+.gold-text {
+  color: var(--gold-400);
+}
+
+/* Pallini forma V/N/P — usati da Classifica e dalla scheda società */
+.form {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.dot {
+  width: 19px;
+  height: 19px;
+  border-radius: 5px;
+  display: grid;
+  place-items: center;
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 500;
+  color: var(--navy-900);
+  flex-shrink: 0;
+}
+
+.dot-V { background: var(--win); }
+.dot-N { background: var(--draw); }
+.dot-P { background: var(--loss); }
+
+.note {
+  margin-top: 18px;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+.empty {
+  padding: 56px 20px;
+  text-align: center;
+  color: var(--text-dim);
+}
+
+@media (max-width: 640px) {
+  .container { padding-inline: 16px; }
+  .page { padding-block: 28px 60px; }
+  table { font-size: 0.8rem; }
+  tbody td, thead th { padding: 8px 6px; }
+}
+
+/* Selettore di stagione a pillole. Sta qui e non in una pagina perche' lo
+   usano Coppe, la scheda di una societa' e la dashboard del mister: nel
+   foglio di una pagina lazy sparirebbe dalle altre. */
+.scelta-stagione {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 18px;
+}
+
+.scelta-stagione button {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border-soft);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.scelta-stagione button:hover { color: var(--text); }
+
+.scelta-stagione button.on {
+  background: var(--gold-500);
+  border-color: var(--gold-500);
+  color: #111;
+  font-weight: 700;
+}

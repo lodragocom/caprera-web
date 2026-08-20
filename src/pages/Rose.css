@@ -1,0 +1,73 @@
+.budget-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.budget {
+  display: grid;
+  grid-template-columns: 190px 1fr 3rem 4.2rem;
+  align-items: center;
+  gap: 14px;
+  font-size: 0.84rem;
+}
+
+.bar {
+  height: 9px;
+  background: var(--navy-800);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.bar span {
+  display: block;
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.budget .spent {
+  text-align: right;
+  font-weight: 600;
+  color: var(--cream);
+}
+
+.budget .size {
+  font-size: 0.7rem;
+  text-align: right;
+}
+
+@media (max-width: 680px) {
+  .budget {
+    grid-template-columns: 1fr 3rem;
+    grid-template-areas: 'name spent' 'bar bar';
+    gap: 6px 10px;
+    padding-bottom: 8px;
+  }
+  .budget .team-badge { grid-area: name; }
+  .budget .bar { grid-area: bar; }
+  .budget .spent { grid-area: spent; }
+  .budget .size { display: none; }
+}
+
+.role-seg {
+  align-self: flex-end;
+}
+
+.result-count {
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin: 0 0 10px;
+}
+
+.table-wrap.tall {
+  max-height: 74vh;
+  overflow-y: auto;
+}
+
+.fin-lede {
+  margin: -6px 0 16px;
+  font-size: 0.84rem;
+}

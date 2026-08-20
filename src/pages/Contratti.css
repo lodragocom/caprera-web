@@ -1,0 +1,133 @@
+.avviso {
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  border-left: 3px solid var(--draw);
+  line-height: 1.6;
+}
+
+.avviso strong {
+  color: var(--gold-400);
+}
+
+.under {
+  color: var(--gold-500);
+  margin-left: 5px;
+  font-size: 0.7rem;
+}
+
+/* --------------------------------------------------- barra stagioni */
+.gantt {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.gantt i {
+  width: 18px;
+  height: 9px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.gantt i.on {
+  background: var(--gold-600);
+}
+
+/* ------------------------------------------------------------ slot */
+.slot-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.slot {
+  padding: 14px 16px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    'badge value'
+    'bar   label';
+  align-items: center;
+  gap: 6px 10px;
+}
+
+.slot .badge { grid-area: badge; }
+
+.slot strong {
+  grid-area: value;
+  justify-self: end;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: var(--cream);
+  line-height: 1;
+}
+
+.slot .su {
+  color: var(--text-dim);
+  font-size: 0.95rem;
+}
+
+.slot-label {
+  grid-area: label;
+  justify-self: end;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.slot-bar {
+  grid-area: bar;
+  display: inline-flex;
+  gap: 3px;
+}
+
+.slot-bar i {
+  width: 12px;
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.09);
+}
+
+/* ------------------------------------------- intestazione della barra */
+.gantt-head {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.gantt-head i {
+  width: 18px;
+  font-style: normal;
+  text-align: center;
+}
+
+.gantt-head b {
+  font-weight: 500;
+  font-size: 0.58rem;
+  letter-spacing: 0;
+  color: var(--text-dim);
+  display: block;
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.periodo {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.legenda {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  margin: 0 0 12px;
+  max-width: 70ch;
+}
+
+@media (max-width: 900px) {
+  .cov-head, .gantt { display: none; }
+}

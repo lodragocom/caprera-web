@@ -1,0 +1,102 @@
+.shiny-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.status {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--draw);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+.status.on {
+  color: var(--win);
+}
+
+.status.on::before {
+  background: var(--win);
+  animation: none;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+
+.open-link {
+  font-size: 0.83rem;
+  font-weight: 500;
+  color: var(--gold-500);
+}
+
+.open-link:hover {
+  color: var(--gold-400);
+}
+
+/* L'app Shiny e' pensata per desktop: le diamo un'area ampia e la
+   lasciamo scrollare internamente invece di forzare 2100px di larghezza. */
+.shiny-frame {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: #fff;
+  height: min(1400px, calc(100vh - 120px));
+  min-height: 640px;
+}
+
+.shiny-frame iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+.shiny-skeleton {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  background: var(--navy-850);
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  z-index: 1;
+}
+
+.spinner {
+  width: 34px;
+  height: 34px;
+  border: 3px solid var(--border);
+  border-top-color: var(--gold-500);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.shiny-frame + .note a {
+  color: var(--gold-500);
+}

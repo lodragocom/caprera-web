@@ -1,0 +1,131 @@
+.asta-tot {
+  display: flex;
+  gap: 20px;
+  align-self: flex-end;
+  padding-bottom: 9px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.asta-tot b { color: var(--cream); font-weight: 600; }
+
+/* ------------------------------------------------------ top acquisti */
+.top-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px;
+}
+
+.top-card {
+  display: grid;
+  grid-template-columns: 1.6rem 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+}
+
+.top-card .pos {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+
+.top-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.top-body strong {
+  font-size: 0.92rem;
+  color: var(--cream);
+}
+
+.top-meta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.top-meta .club {
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+}
+
+.prezzo {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--gold-400);
+  line-height: 1;
+}
+
+/* --------------------------------------------------- spesa per ruolo */
+.ruoli {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.ruolo-riga {
+  display: grid;
+  grid-template-columns: 190px 1fr 3.2rem;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.83rem;
+}
+
+.stack {
+  display: flex;
+  height: 11px;
+  border-radius: 5px;
+  overflow: hidden;
+  background: var(--navy-800);
+}
+
+.stack i { display: block; height: 100%; }
+
+.seg-P { background: #e0b64c; }
+.seg-D { background: #6aa9e0; }
+.seg-C { background: #63c99a; }
+.seg-A { background: #e0776a; }
+
+.ruolo-riga .tot {
+  text-align: right;
+  font-weight: 600;
+  color: var(--cream);
+}
+
+.legenda-ruoli {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.legenda-ruoli span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legenda-ruoli i {
+  width: 12px;
+  height: 8px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+@media (max-width: 680px) {
+  .ruolo-riga {
+    grid-template-columns: 1fr 3.2rem;
+    grid-template-areas: 'nome tot' 'bar bar';
+    gap: 6px 10px;
+    padding-bottom: 8px;
+  }
+  .ruolo-riga .team-badge { grid-area: nome; }
+  .ruolo-riga .stack { grid-area: bar; }
+  .ruolo-riga .tot { grid-area: tot; }
+}

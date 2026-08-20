@@ -1,0 +1,95 @@
+.round-block {
+  margin-bottom: 34px;
+}
+
+.round-title {
+  font-size: 1.05rem;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
+  color: var(--gold-500);
+  letter-spacing: 0.1em;
+}
+
+.round-title em {
+  font-family: var(--font-mono);
+  font-style: normal;
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  border: 1px solid var(--border-soft);
+  border-radius: 4px;
+  padding: 2px 7px;
+}
+
+.match-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 10px;
+}
+
+.match {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 14px;
+  min-height: 58px;
+}
+
+.match.pending {
+  opacity: 0.62;
+}
+
+.side {
+  min-width: 0;
+}
+
+.side.away {
+  justify-self: end;
+}
+
+.side.away .team-badge {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+.side.win .tb-name {
+  color: var(--cream);
+  font-weight: 600;
+}
+
+.score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 52px;
+}
+
+.score strong {
+  font-size: 1.14rem;
+  font-weight: 600;
+  color: var(--cream);
+  letter-spacing: 0.02em;
+}
+
+.score .sep {
+  color: var(--text-dim);
+  margin-inline: 3px;
+  font-weight: 400;
+}
+
+.score .fp {
+  font-size: 0.62rem;
+  color: var(--text-dim);
+  margin-top: 1px;
+}
+
+.score .tbd {
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}

@@ -1,0 +1,451 @@
+.coppe-grid {
+  display: grid;
+  /* piu' larghe di prima: ora le schede contengono anche i tabelloni */
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  /* ogni scheda alta quanto il suo contenuto: senza questo, una riga della
+     griglia prende l'altezza della scheda piu' lunga e le altre restano vuote */
+  align-items: start;
+  gap: 14px;
+  margin-bottom: 56px;
+}
+
+.coppa {
+  padding: 22px;
+  border-left: 3px solid var(--accent);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.coppa header {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.coppa h2 {
+  font-size: 1.3rem;
+}
+
+.novita,
+.attiva {
+  font-family: var(--font-mono);
+  font-size: 0.53rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.novita {
+  color: var(--gold-400);
+  border: 1px solid var(--border);
+}
+
+.attiva {
+  color: var(--win);
+  border: 1px solid rgba(63, 174, 116, 0.35);
+}
+
+.formula {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.62;
+}
+
+.nota-coppa {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+.premi {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+.premio {
+  display: flex;
+  flex-direction: column;
+  padding: 7px 11px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-soft);
+}
+
+.premio b {
+  font-size: 0.9rem;
+  color: var(--gold-400);
+  font-weight: 600;
+}
+
+.premio em {
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 0.52rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.gold-text { color: var(--gold-400); }
+
+/* --------------------------------------------- peso del montepremi */
+.peso-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.peso-riga {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.peso-riga:last-child { border-bottom: 0; }
+
+.peso-nome {
+  font-size: 0.87rem;
+  color: var(--text);
+}
+
+.peso-bar {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.peso-bar i {
+  width: 22px;
+  height: 8px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.peso-bar i.on {
+  background: var(--gold-500);
+}
+
+/* --------------------------------------------- albo della stagione */
+.albo-stagione {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.trofeo {
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border-soft);
+  border-left: 3px solid var(--accent, var(--gold-500));
+  background: rgba(255, 255, 255, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.trofeo.campione {
+  --accent: var(--gold-500);
+  background: rgba(197, 160, 74, 0.07);
+}
+
+.trofeo .sq {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.trofeo .sq img {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  flex: none;
+}
+
+.trofeo .etichetta {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+/* .avviso e' definita in Contratti.css, che sta in un chunk lazy diverso:
+   se non la ripetiamo qui la pagina Coppe la perde quando viene caricata
+   da sola. Stessa ragione della duplicazione in AreaMister.css. */
+.avviso {
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  border-left: 3px solid var(--draw);
+  line-height: 1.6;
+}
+
+.avviso strong { color: var(--gold-400); }
+
+/* --------------------------------------------- tabelloni */
+.tabellone {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 6px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-soft);
+}
+
+/* tabelloni con molti turni (i gironi di qualificazione: 10 giornate) */
+.tabellone.lungo {
+  max-height: 560px;
+  overflow-y: auto;
+  padding-right: 8px;
+  scrollbar-width: thin;
+}
+
+.turno h4 {
+  margin: 0 0 6px;
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
+/* una sfida: una gara sola, oppure andata e ritorno con il verdetto sotto */
+.sfida {
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.sfida:last-child { border-bottom: 0; }
+
+/* l'andata e il ritorno vanno letti insieme: una barretta li tiene uniti */
+.sfida.doppia {
+  border-left: 2px solid var(--border);
+  padding-left: 10px;
+  margin-bottom: 2px;
+}
+
+.sfida .match { border-bottom: 0; }
+
+.verdetto {
+  margin: 1px 0 3px;
+  font-size: 0.68rem;
+  color: var(--text-dim);
+}
+
+.verdetto strong { color: var(--gold-400); font-weight: 600; }
+.verdetto .agg { font-family: var(--font-mono); }
+.verdetto .come { font-style: italic; }
+.verdetto .aperto { color: var(--text-muted); font-style: italic; }
+
+.match {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.match:last-child { border-bottom: 0; }
+
+.match .girone {
+  position: absolute;
+  left: -14px;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
+.match .sq {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  min-width: 0;
+}
+
+.match .sq:last-child { justify-content: flex-end; }
+.match .sq span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.match .sq img { width: 20px; height: 20px; object-fit: contain; flex: none; }
+.match .sq:hover span { color: var(--text); }
+.match .sq.vinta span { color: var(--text); font-weight: 600; }
+
+.match .score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.match .score em {
+  font-style: normal;
+  font-size: 0.55rem;
+  color: var(--text-dim);
+}
+
+.trofeo .dettaglio {
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+/* --------------------------------------------- albo d'oro: una scheda per coppa */
+.albo-griglia {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  align-items: start;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.albo-card {
+  padding: 18px 20px;
+  border-left: 3px solid var(--accent, var(--gold-500));
+}
+
+.albo-card header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.albo-card h3 { font-size: 1.02rem; margin: 0; }
+
+.albo-card .edizioni {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.albo-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.albo-lista li {
+  display: grid;
+  grid-template-columns: 58px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.albo-lista li:last-child { border-bottom: 0; }
+
+.albo-lista .stagione {
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+}
+
+/* la detentrice in carica: e' la riga che si cerca per prima */
+.albo-lista li.in-carica {
+  background: linear-gradient(90deg, rgba(217, 180, 106, 0.11), transparent 78%);
+  margin-inline: -8px;
+  padding-inline: 8px;
+  border-radius: 5px;
+}
+
+.albo-lista li.in-carica .stagione { color: var(--gold-400); }
+
+.albo-lista .sq {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 0.83rem;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.albo-lista .sq img { width: 22px; height: 22px; object-fit: contain; flex: none; }
+.albo-lista .sq span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.albo-lista .sq:hover span { color: var(--gold-400); }
+
+.albo-lista .dettaglio {
+  font-family: var(--font-mono);
+  font-size: 0.48rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.recordman {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-soft);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* la Classifica Fantapunti non ha tabellone: e' una graduatoria */
+.riga-fp {
+  display: grid;
+  grid-template-columns: 22px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border-soft);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.riga-fp:last-child { border-bottom: 0; }
+.riga-fp .pos { color: var(--text-dim); }
+
+.riga-fp .sq {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+/* senza misura esplicita lo stemma esce a grandezza naturale */
+.riga-fp .sq img { width: 20px; height: 20px; object-fit: contain; flex: none; }
+.riga-fp .sq span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.riga-fp .sq.vinta span { color: var(--text); font-weight: 600; }
+.riga-fp .sq:hover span { color: var(--text); }
+
+.nota-turno {
+  margin: -2px 0 6px;
+  font-size: 0.66rem;
+  line-height: 1.5;
+  color: var(--text-dim);
+  font-style: italic;
+}

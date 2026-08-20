@@ -1,0 +1,114 @@
+.bacheca {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 12px;
+}
+
+.trofeo {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.medaglie {
+  display: flex;
+  gap: 8px;
+}
+
+.m {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+  min-width: 34px;
+  text-align: center;
+  padding: 3px 0;
+  border-radius: 6px;
+  border: 1px solid var(--border-soft);
+  color: var(--text-dim);
+}
+
+.m.oro {
+  color: var(--navy-900);
+  background: var(--gold-500);
+  border-color: transparent;
+  font-weight: 600;
+}
+
+.m.argento {
+  color: var(--cream);
+  background: rgba(255, 255, 255, 0.14);
+  border-color: transparent;
+}
+
+.m.bronzo {
+  color: var(--cream);
+  background: rgba(176, 128, 58, 0.32);
+  border-color: transparent;
+}
+
+.anni {
+  margin: 0;
+  font-size: 0.68rem;
+  color: var(--gold-600);
+  line-height: 1.5;
+}
+
+.season-cell {
+  color: var(--gold-500);
+  font-size: 0.82rem;
+}
+
+.muted-badge .tb-name {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* --------------------------------------------- coppe */
+.coppe-vinte {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.coppa-vinta {
+  padding: 13px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.coppa-vinta .etichetta {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+/* i trofei di coppa nella bacheca, sotto gli anni di campionato */
+.coppe-mini {
+  margin: 4px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.coppe-mini span {
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold-400);
+  border: 1px solid var(--border-soft);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+.coppa-vinta .dettaglio {
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}

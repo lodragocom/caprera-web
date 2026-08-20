@@ -1,0 +1,12 @@
+tr.podium .pos {
+  color: var(--gold-500);
+  font-weight: 600;
+}
+
+tr.last .pos {
+  color: var(--loss);
+}
+
+@media (max-width: 780px) {
+  .form-col { display: none; }
+}

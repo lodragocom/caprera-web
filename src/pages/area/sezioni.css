@@ -1,0 +1,328 @@
+/* KPI, duplicati perche' questo e' un chunk lazy a se' */
+.dash-main .kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(116px, 1fr));
+  gap: 10px;
+  margin-bottom: 26px;
+}
+
+.dash-main .kpi {
+  padding: 15px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dash-main .kpi strong {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 400;
+  color: var(--cream);
+  line-height: 1;
+}
+
+.dash-main .kpi span {
+  font-family: var(--font-mono);
+  font-size: 0.54rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.dash-main .gold-text { color: var(--gold-400); }
+
+.due {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 1000px) {
+  .due { grid-template-columns: 1fr; }
+}
+
+.pannello {
+  padding: 22px 24px;
+  margin-bottom: 16px;
+}
+
+.pannello h2 {
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pannello h2 em {
+  margin-left: auto;
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--gold-600);
+}
+
+.pannello-sub {
+  font-size: 0.79rem;
+  color: var(--text-dim);
+  margin: 0 0 14px;
+  line-height: 1.6;
+}
+
+.vuoto { font-size: 0.85rem; color: var(--text-dim); }
+
+/* -------------------------------------------------------- avvisi */
+.avvisi { list-style: none; margin: 0; padding: 0; }
+
+.avvisi li {
+  padding: 11px 14px;
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+  border-left: 3px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.avvisi li.rosso { border-left-color: var(--loss); }
+.avvisi li.giallo { border-left-color: var(--draw); }
+.avvisi li.verde { border-left-color: var(--win); }
+
+.avvisi b { display: block; font-size: 0.88rem; color: var(--cream); margin-bottom: 3px; }
+.avvisi span { font-size: 0.79rem; color: var(--text-muted); line-height: 1.55; }
+
+/* --------------------------------------------------------- forma */
+.forma-mini { display: flex; gap: 4px; margin-bottom: 14px; }
+
+.forma-mini .dot {
+  width: 20px; height: 20px; border-radius: 5px;
+  display: grid; place-items: center;
+  font-style: normal; font-family: var(--font-mono);
+  font-size: 0.6rem; font-weight: 500; color: var(--navy-900);
+}
+
+.forma-mini .dot-V { background: var(--win); }
+.forma-mini .dot-N { background: var(--draw); }
+.forma-mini .dot-P { background: var(--loss); }
+
+.ultime { list-style: none; margin: 0; padding: 0; }
+
+.ultime li {
+  display: flex; align-items: center; gap: 12px;
+  padding: 7px 0; border-bottom: 1px solid var(--border-soft);
+  font-size: 0.82rem; color: var(--text-muted);
+}
+
+.ultime li:last-child { border-bottom: 0; }
+.ultime .g { font-size: 0.7rem; color: var(--text-dim); width: 2.2rem; }
+.ultime .casa { color: var(--gold-600); }
+.ultime b { margin-left: auto; color: var(--cream); }
+
+/* ---------------------------------------------------------- slot */
+.slot-mini { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+.sm {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  padding: 16px 8px; border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-soft);
+}
+
+.sm.pieno { border-color: rgba(200, 91, 91, 0.4); background: rgba(200, 91, 91, 0.07); }
+
+.sm strong {
+  font-family: var(--font-display); font-size: 1.6rem;
+  color: var(--cream); font-weight: 400;
+}
+
+.sm strong i { font-style: normal; font-size: 1rem; color: var(--text-dim); }
+
+.sm > span:last-child {
+  font-family: var(--font-mono); font-size: 0.53rem;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim);
+}
+
+/* --------------------------------------------------- liste rosa */
+.lista-rosa, .lista-contratti { list-style: none; margin: 0; padding: 0; }
+
+.lista-rosa li, .lista-contratti li {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 0; border-bottom: 1px solid var(--border-soft);
+  font-size: 0.85rem;
+}
+
+.lista-rosa li:last-child, .lista-contratti li:last-child { border-bottom: 0; }
+.lista-rosa b, .lista-contratti b { color: var(--cream); font-weight: 600; }
+
+.lista-rosa .club { font-size: 0.65rem; color: var(--text-dim); letter-spacing: 0.05em; }
+.costo { margin-left: auto; color: var(--gold-400); font-weight: 600; }
+.scad { margin-left: auto; font-size: 0.72rem; color: var(--text-dim); }
+
+.u {
+  font-style: normal; font-family: var(--font-mono); font-size: 0.5rem;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold-500);
+  border: 1px solid var(--border); border-radius: 3px; padding: 1px 4px;
+}
+
+.under { color: var(--gold-500); }
+.periodo { font-size: 0.74rem; color: var(--text-muted); white-space: nowrap; }
+.reparto h2 { text-transform: none; }
+
+/* -------------------------------------------------- flusso crediti */
+.flusso { display: flex; flex-direction: column; }
+
+.friga {
+  display: flex; justify-content: space-between; align-items: baseline;
+  gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border-soft);
+  font-size: 0.86rem;
+}
+
+.friga span { color: var(--text-muted); }
+.friga b { color: var(--text); font-size: 0.98rem; }
+
+.friga.totale {
+  border-bottom: 0; border-top: 1px solid var(--border);
+  margin-top: 4px; padding-top: 14px;
+}
+
+.friga.totale span { color: var(--cream); font-weight: 600; }
+.friga.totale b { color: var(--gold-400); font-size: 1.25rem; }
+
+/* -------------------------------------------------------- trofei */
+.trofei { display: flex; flex-direction: column; gap: 9px; }
+
+.trofeo-mini {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; border-radius: var(--radius);
+  background: rgba(217, 180, 106, 0.09); border: 1px solid var(--border);
+}
+
+.coppa-icona { font-size: 1.4rem; }
+.trofeo-mini strong { display: block; font-size: 0.88rem; color: var(--cream); }
+.trofeo-mini span { font-size: 0.73rem; color: var(--gold-500); }
+
+/* ----------------------------------------------------- andamento */
+.andamento { display: flex; align-items: flex-end; gap: 6px; height: 140px; }
+
+.anno {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; gap: 5px; height: 100%;
+}
+
+.a-bar {
+  flex: 1; width: 100%; display: flex; align-items: flex-end;
+  background: rgba(255, 255, 255, 0.03); border-radius: 4px; overflow: hidden;
+}
+
+.a-bar i { display: block; width: 100%; border-radius: 4px 4px 0 0; min-height: 4px; }
+.a-lab, .a-pos { font-size: 0.58rem; color: var(--text-dim); }
+.a-pos { color: var(--text-muted); }
+
+/* ------------------------------------------------------ textarea */
+.pannello textarea {
+  width: 100%; background: var(--navy-900);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  color: var(--text); padding: 13px 15px; font: inherit;
+  font-size: 0.88rem; line-height: 1.65; resize: vertical;
+}
+
+.pannello textarea:focus-visible { outline: none; border-color: var(--gold-500); }
+.nota-salva { font-size: 0.72rem; color: var(--text-dim); margin: 8px 0 0; }
+
+/* avversario nelle ultime 5: l'etichetta "in casa con" e' piccola e grigia,
+   il nome della societa' e' quello che si legge davvero */
+.ultime .avversario {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ultime .avversario em {
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  flex: none;
+}
+
+.coppe-mister {
+  margin: 12px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-soft);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.coppe-mister span {
+  font-family: var(--font-mono);
+  font-size: 0.52rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--gold-400);
+  border: 1px solid var(--border-soft);
+  border-radius: 4px;
+  padding: 3px 7px;
+}
+
+/* ------------------------------------------------ coppe del mister */
+.esiti-anno,
+.conteggio-coppe {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.esiti-anno li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.esiti-anno li:last-child,
+.conteggio-coppe li:last-child { border-bottom: 0; }
+
+.esiti-anno b { font-size: 0.88rem; font-weight: 600; color: var(--text); }
+
+.esiti-anno span {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+/* la coppa vinta quest'anno non deve passare inosservata */
+.esiti-anno li.vinta b { color: var(--gold-400); }
+
+.esiti-anno li.vinta span {
+  color: var(--navy-900);
+  background: var(--gold-500);
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-weight: 700;
+}
+
+.conteggio-coppe li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.conteggio-coppe b { font-size: 0.88rem; font-weight: 600; color: var(--text); }
+.conteggio-coppe .num { color: var(--gold-400); font-weight: 700; }
+
+.conteggio-coppe em {
+  grid-column: 1 / -1;
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--text-dim);
+}
