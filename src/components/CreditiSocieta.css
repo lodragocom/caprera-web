@@ -1,0 +1,18 @@
+.crediti-premi td,
+.crediti-premi th {
+  white-space: nowrap;
+}
+
+.crediti-premi tfoot td {
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+/* i crediti guadagnati e quelli persi si distinguono a colpo d'occhio */
+.cr {
+  font-weight: 600;
+}
+
+.cr.su  { color: var(--win); }
+.cr.giu { color: var(--loss); }

@@ -1,90 +1,124 @@
 # Federazione Caprera — sito web
 
-Frontend in **React + Vite** (JavaScript) per la Lega Caprera: classifiche,
-risultati, schede società, rose storiche e la dashboard statistica R Shiny.
+Sito e area riservata della Lega Caprera: dieci stagioni di campionato, coppe,
+rose, contratti e crediti. **React 19 + Vite 8**, JavaScript.
 
-I dati sono **JSON statici** generati dai file Excel/CSV della Federazione:
-nessun backend da avviare, il sito è deployabile come pure static.
+I dati stanno su **Supabase** (Postgres). Il sito non ha un backend proprio:
+parla direttamente col database, e chi vede cosa lo decidono le regole di riga
+del database, non queste pagine. Lo schema e il caricamento stanno nell'altro
+repository, `caprera-dati`.
 
 ## Avvio
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173
-npm run build    # output in dist/
-npm run preview  # anteprima della build
+cp .env.esempio .env     # e riempi le due righe
+npm run dev              # http://localhost:5173
+npm run build            # output in dist/
+npm run preview
 ```
 
-## Struttura
+`.env` vuole due valori, presi da Supabase → Project Settings → API:
 
 ```
-scripts/build-data.py   conversione Excel/CSV -> JSON (da rilanciare a ogni aggiornamento dati)
-public/logos/           stemmi in WebP (512px, ottimizzati da ~16 MB a ~530 KB)
+VITE_SUPABASE_URL=https://<progetto>.supabase.co
+VITE_SUPABASE_ANON_KEY=<la chiave pubblicabile>
+```
+
+La chiave `anon` è fatta per stare dentro una pagina web e da sola non apre
+niente: senza tessera si leggono partite, classifiche e formazioni, mentre
+contratti e crediti restano chiusi. `.env` è comunque in `.gitignore`.
+
+## Com'è fatto
+
+```
 src/
-  data/*.json           dati generati — NON editare a mano
-  lib/core.js           anagrafica squadre, classifiche, riepilogo (bundle iniziale)
-  lib/data.js           calendario e rose (~560 KB, solo rotte lazy)
-  components/           Layout, TeamBadge
-  pages/                Home, Classifica, Risultati, Squadre, SquadraDetail, Rose, Statistiche
-  styles/theme.css      design system (navy + oro, dallo stemma della lega)
+  lib/supabase.js     il collegamento; legge lo schema `public`
+  lib/archivio.js     TUTTE le letture dal database, piu' la cache di visita
+  lib/auth.jsx        la Tessera del Tifoso: chi sei, per quale societa', con quali incarichi
+  lib/coppe.js        logica pura dei tabelloni (chi passa il turno, e perche')
+  lib/formazioni.js   formazioni e bonus
+  lib/core.js         anagrafica societa' e stemmi — l'unica cosa ancora su file
+  components/moto.jsx il vocabolario del movimento (vedi sotto)
+  pages/              il sito pubblico
+  pages/area/         la dashboard del mister
+  styles/theme.css    navy e oro, dallo stemma della lega
+public/logos/         stemmi in WebP
+collaudo/             il banco di prova (vedi collaudo/README.md)
+scripts/              conversione dei file storici -> JSON -> database (roba di una volta sola)
+data-src/             i file originali della Federazione
 ```
 
-## Aggiornare i dati
+### L'archivio
 
-I sorgenti stanno in `06_caprera_project/`. Lo script legge:
+Le pagine non sanno che esiste Supabase: chiedono "la classifica del 2025-26" e
+ricevono righe. `archivio.js` si impone tre regole, scritte in cima al file:
+si chiede solo quello che serve, si chiede una volta sola per visita, e non si
+mente mai sul non sapere — se il database non risponde la pagina lo dice, non
+finge un archivio vuoto.
 
-| File | Cosa contiene |
-|---|---|
-| `calendario.xls` | calendario e risultati, 2016-17 → 2025-26 (è un CSV incapsulato in una colonna Excel) |
-| `tabella_rose_per_stagione(1).csv` | rose storiche con costo, presenze, MV e fantamedia |
-| `Listone_Fantapazz.csv` | quotazioni Fantapazz correnti |
+Lo schema vero è `caprera`; il sito legge da `public`, dove ogni tabella si
+affaccia con una vista sottile in `security_invoker`. Il motivo è pratico:
+l'API di Supabase serve solo gli schemi elencati in un'impostazione del
+cruscotto, e una spunta in un pannello non si versiona. Le viste sì.
 
-Poi:
+### La Tessera del Tifoso
+
+Il mister entra con l'email di Fantapazz e una password che sceglie lui. La
+società non la sceglie: gliela ha già assegnata la Presidenza, emettendo una
+tessera intestata a quell'email.
+
+Gli **incarichi** (Presidenza, Tesoriere, Direttore Mercato, Giudice Sportivo,
+Addetto Stampa, Mister) sono righe di tabella, non `if` nel codice: due colonne,
+`vede_tutto` e `puo_scrivere`, e sono le stesse su cui il database ha scritto le
+regole di riga. Il sito le legge per decidere cosa mostrare, mai cosa permettere.
+
+`/area/tessera` è la sola pagina dove il mister scrive: nome, cognome,
+soprannome, telefono, link della videochiamata dell'asta, password. Società e
+incarichi si vedono ma non si toccano — e non è una gentilezza di quella pagina,
+è che il database non glielo lascia fare.
+
+### Il movimento
+
+`components/moto.jsx` è il vocabolario, e ha tre regole: il movimento spiega,
+non decora; niente dura più di 400 ms; `prefers-reduced-motion` è sempre
+rispettato. Le pagine usano `Pagina`, `Cascata`, `Voce`, `Riga`, `Numero`,
+`Scheletro`, `Sezione` invece di inventarsi animazioni per conto proprio.
+
+## Prima di spedire
+
+Non spedire una pagina che non hai visto girare. La pagina Coppe è morta una
+volta per una riga che leggeva un punteggio complessivo dove non c'era, e a
+occhio sembrava solo che i link non rispondessero.
 
 ```bash
-python3 scripts/build-data.py
 npm run build
+npx vite preview --port 4180 &
+node collaudo/collaudo-sito.mjs     # tutto il sito pubblico
+node collaudo/collaudo-area.mjs     # accesso, dashboard, tessera
 ```
 
-Se il percorso dei sorgenti cambia, aggiorna la costante `SRC` in cima allo script.
-
-### Nomi delle società
-
-Le società cambiano nome quasi ogni anno (Smit ne cambia uno a stagione), quindi
-`build-data.py` normalizza 28 varianti storiche su 10 id canonici tramite la
-tabella `TEAMS`. Per aggiungere un nome nuovo basta inserirlo negli `aliases`
-della squadra corrispondente.
-
-**Da verificare:** la catena storica di due società è stata dedotta dagli slot
-per stagione, non da una fonte esplicita:
-
-- `TARGARYEN` → `La Casata dei Draghi` → `Hokuto` → `Real Militum` → **Roburro**
-- `FCZ` → `Smit TrasCapitano` → … → **Smit Gaspacho**
-
-Se una delle due è sbagliata, correggi gli `aliases` e rilancia lo script.
-
-## Dati mancanti
-
-- Le **rose 2025-26** non sono ancora nei sorgenti (`tabella_rose_per_stagione`
-  si ferma al 2024-25). Il calendario 2025-26 c'è ma senza risultati.
-- **Contratti, clausole rescissorie e slot** del Jobs Act non esistono in forma
-  strutturata: servirebbe un file dedicato per mostrarli nel sito.
-- Coppa Italia, CL/EL/Conference e Supercoppe non sono nel calendario:
-  le classifiche riguardano il solo campionato.
+I collaudi girano contro un **finto Supabase** (`collaudo/finto-supabase.mjs`),
+che parla il minimo dialetto di PostgREST usato davvero e ha davanti un Postgres
+locale con lo stesso archivio. `collaudo/README.md` spiega come si accende.
 
 ## Deploy
 
-Build statica: `dist/` va bene su Vercel, Netlify, GitHub Pages o dentro il
-WordPress attuale. Per il routing client-side serve un rewrite di tutte le
-richieste su `index.html` (`vercel.json`, `_redirects` o `.htaccess`).
+Build statica: `dist/` va su Vercel, Netlify o GitHub Pages. Serve un rewrite di
+tutte le richieste su `index.html` per il routing client-side. Se il sito non sta
+in root, imposta `base` in `vite.config.js`: il codice usa
+`import.meta.env.BASE_URL` per stemmi e router, quindi si adatta da solo.
 
-Se il sito non sta in root, imposta `base` in `vite.config.js`: il codice usa
-`import.meta.env.BASE_URL` per logo e router, quindi si adatta da solo.
+Le variabili `VITE_*` vanno impostate anche sull'host: finiscono dentro il
+bundle al momento della build, non vengono lette a runtime.
 
-## Note
+## Cose ancora aperte
 
-- I font (Bebas Neue, Inter, Roboto Mono) arrivano da Google Fonts. Per un
-  deploy senza dipendenze esterne, scaricali in `public/fonts` e sostituisci
-  l'`@import` in `src/styles/theme.css`.
-- La pagina Statistiche incorpora `caprera.shinyapps.io` in un iframe. Su piano
-  gratuito shinyapps mette l'app in stand-by: il primo caricamento è lento.
+- I contratti veri di Guido (358 righe con clausole e ingaggi) non sono ancora
+  caricati.
+- 111 righe di rosa su 2.999 non sono agganciate a un calciatore del listone.
+- La tabella dei punti Ranking Caprera non è nel regolamento in PDF.
+- Le email di conferma partono dal mittente di Supabase: manca l'SMTP della
+  Federazione.
+- La pagina Statistiche incorpora `caprera.shinyapps.io` in un iframe. Sul piano
+  gratuito l'app va in stand-by e il primo caricamento è lento.

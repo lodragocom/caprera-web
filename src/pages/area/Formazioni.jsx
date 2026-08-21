@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '../../lib/auth'
 import { getTeam, logoUrl } from '../../lib/core'
 import {
-  stagioniDi, caricaStagione, impegniDi, partitaDi, disponi, contaBonus, schierati,
+  stagioniDi, impegniDi, partitaDi, disponi, contaBonus, schierati,
 } from '../../lib/formazioni'
 import './Formazioni.css'
 
@@ -48,26 +48,49 @@ function Maglia({ g }) {
 export default function Formazioni() {
   const { sessione } = useAuth()
   const team = getTeam(sessione.team)
-  const stagioni = stagioniDi(team.id)
-  const [stagione, setStagione] = useState(stagioni[stagioni.length - 1])
-  const [dati, setDati] = useState(null)
-  const [n, setN] = useState(null)
 
+  const [stagioni, setStagioni] = useState([])
+  const [stagione, setStagione] = useState(null)
+  const [impegni, setImpegni] = useState([])
+  const [n, setN] = useState(null)
+  const [p, setP] = useState(null)
+  const [guasto, setGuasto] = useState(null)
+
+  /* Le stagioni in cui questa societa' ha giocato. */
   useEffect(() => {
     let vivo = true
-    setDati(null)
-    caricaStagione(stagione).then((d) => {
+    stagioniDi(team.id)
+      .then((ss) => { if (vivo) { setStagioni(ss); setStagione(ss[ss.length - 1] ?? null) } })
+      .catch((e) => vivo && setGuasto(e.message))
+    return () => { vivo = false }
+  }, [team.id])
+
+  /* Gli impegni della stagione scelta: una lettura, non una per partita. */
+  useEffect(() => {
+    if (!stagione) return undefined
+    let vivo = true
+    setImpegni([]); setN(null); setP(null)
+    impegniDi(team.id, stagione).then((imp) => {
       if (!vivo) return
-      setDati(d)
-      const imp = impegniDi(d, team.id)
+      setImpegni(imp)
       // si apre sull'ultima giornata di campionato, non sull'ultima coppa
       const ultima = [...imp].reverse().find((x) => !x.coppa) ?? imp[imp.length - 1]
       setN(ultima?.chiave ?? null)
-    })
+    }).catch((e) => vivo && setGuasto(e.message))
     return () => { vivo = false }
   }, [stagione, team.id])
 
-  const impegni = impegniDi(dati, team.id)
+  /* La singola partita, chiesta solo quando serve. */
+  useEffect(() => {
+    if (n == null || !stagione) return undefined
+    let vivo = true
+    setP(null)
+    partitaDi(n, team.id, stagione)
+      .then((x) => vivo && setP(x))
+      .catch((e) => vivo && setGuasto(e.message))
+    return () => { vivo = false }
+  }, [n, stagione, team.id])
+
   const giornate = impegni.filter((x) => !x.coppa)
   const turniCoppa = impegni.filter((x) => x.coppa)
 
@@ -105,12 +128,13 @@ export default function Formazioni() {
     </header>
   )
 
-  if (!dati || n == null) {
+  if (guasto) {
+    return <>{testa}<p className="guasto">Non riesco a leggere l'archivio: {guasto}.</p></>
+  }
+  if (n == null) {
     return <>{testa}{scelte}<p className="vuoto">Carico la stagione…</p></>
   }
-
-  const p = partitaDi(dati, team.id, n)
-  if (!p) return <>{testa}{scelte}<p className="vuoto">Giornata non disponibile.</p></>
+  if (!p) return <>{testa}{scelte}<p className="vuoto">Carico la giornata…</p></>
 
   const avversario = getTeam(p.avversario)
   const campo = disponi(p.mia.titolari)

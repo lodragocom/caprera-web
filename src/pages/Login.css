@@ -99,3 +99,58 @@
   cursor: not-allowed;
   transform: none;
 }
+
+/* ------------------------------------------------ Tessera del Tifoso */
+.login-testo {
+  font-size: 0.86rem;
+  line-height: 1.62;
+  color: var(--text-muted);
+  margin: 0 0 16px;
+}
+
+.login-testo strong { color: var(--text); font-weight: 600; }
+
+.login-errore,
+.login-avviso {
+  margin: 12px 0 0;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.login-errore {
+  border-left: 3px solid var(--loss);
+  background: rgba(214, 92, 92, 0.08);
+  color: var(--text-muted);
+}
+
+.login-avviso {
+  border-left: 3px solid var(--win);
+  background: rgba(63, 174, 116, 0.08);
+  color: var(--text-muted);
+}
+
+/* Le altre due strade: presenti ma non in gara con il bottone principale. */
+.login-alt {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.login-alt button {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.login-alt button:hover { color: var(--gold-400); }

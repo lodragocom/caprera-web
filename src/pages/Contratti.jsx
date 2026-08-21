@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
 import TeamBadge from '../components/TeamBadge'
-import {
-  contracts, ACTIVE_TEAMS, CONTRACT_SEASONS, getTeam,
-} from '../lib/data'
+import { ACTIVE_TEAMS, getTeam } from '../lib/core'
+import { useArchivio, contrattiPubblici } from '../lib/archivio'
+import { Pagina, Sezione } from '../components/moto'
 import './Contratti.css'
 
 const RUOLI = ['D', 'C', 'A']
@@ -13,7 +13,19 @@ export default function Contratti() {
   const [team, setTeam] = useState('')
   const [soloUnder, setSoloUnder] = useState(false)
 
-  const stagioni = CONTRACT_SEASONS
+  const stato = useArchivio('contrattiPubblici', contrattiPubblici)
+  /* Nomi tradotti qui: sotto la pagina resta come era. */
+  const contracts = useMemo(
+    () => (stato.dati ?? []).map((c) => ({
+      team: c.societa, player: c.nome, role: c.ruolo,
+      under: c.under, from: c.dalla, to: c.alla, years: c.anni,
+    })),
+    [stato.dati]
+  )
+  const stagioni = useMemo(
+    () => [...new Set(contracts.flatMap((c) => [c.from, c.to]))].sort(),
+    [contracts]
+  )
   const righe = useMemo(() => {
     let out = contracts
     if (team) out = out.filter((c) => c.team === team)
@@ -21,10 +33,10 @@ export default function Contratti() {
     return [...out].sort(
       (a, b) => b.from.localeCompare(a.from) || a.player.localeCompare(b.player)
     )
-  }, [team, soloUnder])
+  }, [contracts, team, soloUnder])
 
   return (
-    <div className="page container wide">
+    <Pagina className="page container wide">
       <header className="page-head">
         <p className="eyebrow">Jobs Act</p>
         <h1>Contratti</h1>
@@ -64,7 +76,7 @@ export default function Contratti() {
         <p className="result-count num">{righe.length} contratti</p>
       </div>
 
-      {team && <Slot teamId={team} />}
+      {team && <Slot contratti={contracts} teamId={team} />}
 
       <p className="legenda">
         La barra mostra le stagioni coperte dal contratto: una casella per
@@ -115,7 +127,7 @@ export default function Contratti() {
           </tbody>
         </table>
       </div>
-    </div>
+    </Pagina>
   )
 }
 
@@ -141,9 +153,9 @@ function Barra({ from, to, stagioni }) {
  * presente nei dati — approssimazione onesta finche' non arriva la fonte
  * completa con le date di scadenza reali.
  */
-function Slot({ teamId }) {
-  const ultima = CONTRACT_SEASONS[CONTRACT_SEASONS.length - 1]
-  const attivi = contracts.filter((c) => c.team === teamId && c.to === ultima)
+function Slot({ teamId, contratti }) {
+  const ultima = [...new Set(contratti.map((c) => c.to))].sort().pop()
+  const attivi = contratti.filter((c) => c.team === teamId && c.to === ultima)
   const team = getTeam(teamId)
 
   return (

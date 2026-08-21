@@ -1,56 +1,31 @@
 /**
- * Formazioni giornata per giornata, dalla sezione "In campo" di Fantapazz.
+ * Le formazioni, dal database.
  *
- * Dieci stagioni di formazioni fanno ~14 MB: troppo per il pacchetto del sito.
- * Qui viaggia solo l'indice (poche righe per stagione) e il file della singola
- * stagione si scarica quando serve, con `caricaStagione`.
+ * Prima erano quindici megabyte di file, un JSON per stagione, che il sito si
+ * scaricava interi per mostrare una giornata sola. Adesso si chiede la singola
+ * partita che si sta guardando e le altre 2.474 restano dove sono.
+ *
+ * Le funzioni che dispongono i giocatori sul campo e contano i bonus non sono
+ * cambiate: quelle non hanno mai avuto niente a che fare con dove stavano i
+ * dati.
  */
-import indice from '../data/lineups-index.json'
-
-const FILE = import.meta.glob('../data/lineups/*.json')
-
-export const STAGIONI_FORMAZIONI = indice.stagioni.map((s) => s.stagione)
-export const ULTIMA_STAGIONE = STAGIONI_FORMAZIONI[STAGIONI_FORMAZIONI.length - 1]
-
-/** Righe di indice di una stagione: giornate, turni di coppa, societa'. */
-export function indiceDi(stagione) {
-  return indice.stagioni.find((s) => s.stagione === stagione) ?? null
-}
-
-/** Stagioni in cui una societa' ha giocato. */
-export function stagioniDi(teamId) {
-  return indice.stagioni.filter((s) => s.squadre.includes(teamId)).map((s) => s.stagione)
-}
-
-const cache = new Map()
-
-/** Scarica (una volta sola) le formazioni di una stagione. */
-export async function caricaStagione(stagione) {
-  if (cache.has(stagione)) return cache.get(stagione)
-  const carica = FILE[`../data/lineups/${stagione}.json`]
-  if (!carica) return null
-  const m = await carica()
-  const dati = m.default ?? m
-  cache.set(stagione, dati)
-  return dati
-}
+import { supabase } from './supabase'
+import { partiteDi, formazioniPartita, bonusTipi } from './archivio'
 
 /* Sigle per i bottoni dei turni di coppa: per esteso occupano quattro righe. */
-const SIGLA = [
-  ['Qualificazione Champions League', 'Qual. CL'],
-  ['Qualificazione Champions', 'Qual. CL'],
-  ['Champions League', 'CL'],
-  ['Europa League', 'EL'],
-  ['Conference League', 'ConfL'],
-  ['Supercoppa Italiana', 'SC Italiana'],
-  ['Supercoppa Europea', 'SC Europea'],
-  ['Coppa Italia', 'Coppa Italia'],
-]
+const SIGLA = {
+  'coppa-italia': 'Coppa Italia',
+  'qualificazione-champions': 'Qual. CL',
+  champions: 'CL',
+  'europa-league': 'EL',
+  'conference-league': 'ConfL',
+  'supercoppa-italiana': 'SC Italiana',
+  'supercoppa-europea': 'SC Europea',
+}
 
-function abbrevia(turno) {
-  const [comp, ...resto] = turno.split(' - ')
-  const sigla = SIGLA.find(([lungo]) => comp.startsWith(lungo))?.[1] ?? comp
-  const fase = resto.join(' - ')
+function abbrevia(competizione, turno) {
+  const sigla = SIGLA[competizione] ?? competizione
+  const fase = (turno ?? '')
     .replace(/^Giornata\s*/, 'G')
     .replace(/Andata/, 'A')
     .replace(/Ritorno/, 'R')
@@ -59,52 +34,83 @@ function abbrevia(turno) {
   return fase ? `${sigla} · ${fase}` : sigla
 }
 
-/**
- * Tutti gli impegni di una societa' in una stagione, campionato e coppe, in
- * ordine: prima le 36 giornate, poi i turni di coppa. Ogni voce ha una chiave
- * con cui ritrovare la partita.
- */
-export function impegniDi(dati, teamId) {
-  if (!dati) return []
-  const gioca = (p) => p.casa === teamId || p.fuori === teamId
-  const out = dati.giornate
-    .filter((g) => g.partite.some(gioca))
-    .map((g) => ({ chiave: `g${g.giornata}`, breve: `${g.giornata}ª`, titolo: `${g.giornata}ª giornata`, coppa: false }))
-  for (const t of dati.coppe ?? []) {
-    if (t.partite.some(gioca)) {
-      out.push({ chiave: `c${t.turno}`, breve: abbrevia(t.turno), titolo: t.turno, coppa: true })
-    }
-  }
-  return out
+/** Le stagioni in cui una societa' ha giocato. */
+export async function stagioniDi(teamId) {
+  const { data, error } = await supabase.from('v_gare')
+    .select('stagione').eq('societa', teamId).eq('competizione', 'campionato')
+  if (error) throw new Error(error.message)
+  return [...new Set((data ?? []).map((r) => r.stagione))].sort()
 }
 
 /**
- * La partita di una societa' in una giornata o in un turno di coppa, gia'
- * orientata: `mia` e' sempre la formazione della societa' richiesta, `sua`
- * quella dell'avversario.
+ * Tutti gli impegni di una societa' in una stagione, campionato e coppe.
+ * Ogni voce porta con se' l'id della partita: e' quello che poi si chiede.
  */
-export function partitaDi(dati, teamId, chiave) {
-  const gioca = (x) => x.casa === teamId || x.fuori === teamId
-  let p = null
-  if (String(chiave).startsWith('c')) {
-    const t = (dati?.coppe ?? []).find((x) => `c${x.turno}` === chiave)
-    p = t?.partite.find(gioca) ?? null
-  } else {
-    const n = Number(String(chiave).replace('g', ''))
-    const g = dati?.giornate.find((x) => x.giornata === n)
-    p = g?.partite.find(gioca) ?? null
+export async function impegniDi(teamId, stagione) {
+  const [gare, turni] = await Promise.all([
+    partiteDi(stagione, teamId),
+    (async () => {
+      const { data, error } = await supabase.from('turni').select('id, nome')
+      if (error) throw new Error(error.message)
+      return new Map((data ?? []).map((t) => [t.id, t.nome]))
+    })(),
+  ])
+  const out = []
+  for (const g of gare ?? []) {
+    if (g.competizione === 'campionato') {
+      out.push({
+        chiave: g.id, breve: `${g.giornata}ª`, titolo: `${g.giornata}ª giornata`,
+        coppa: false, giornata: g.giornata,
+      })
+    } else {
+      const nome = turni.get(g.turno)
+      out.push({
+        chiave: g.id, breve: abbrevia(g.competizione, nome),
+        titolo: `${g.competizione} · ${nome ?? ''}`.trim(), coppa: true,
+      })
+    }
   }
-  if (!p) return null
-  const inCasa = p.casa === teamId
+  return out.sort((a, b) =>
+    Number(a.coppa) - Number(b.coppa) || (a.giornata ?? 0) - (b.giornata ?? 0))
+}
+
+/**
+ * La partita, gia' orientata: `mia` e' sempre la formazione della societa'
+ * richiesta, `sua` quella dell'avversario.
+ */
+export async function partitaDi(partitaId, teamId, stagione) {
+  const [lati, gare, nomiBonus] = await Promise.all([
+    formazioniPartita(partitaId),
+    partiteDi(stagione, teamId),
+    bonusTipi(),
+  ])
+  const g = (gare ?? []).find((x) => x.id === partitaId)
+  if (!g) return null
+  const nomi = new Map((nomiBonus ?? []).map((b) => [b.id, b.nome]))
+  const vesti = (lato) => lato && {
+    ...lato,
+    titolari: lato.titolari.map((x) => vestiGiocatore(x, nomi)),
+    panchina: lato.panchina.map((x) => vestiGiocatore(x, nomi)),
+  }
+  const mia = vesti(lati.find((l) => l.societa === teamId))
+  const sua = vesti(lati.find((l) => l.societa !== teamId))
+  if (!mia) return null
   return {
-    inCasa,
-    avversario: inCasa ? p.fuori : p.casa,
-    gol: inCasa ? p.golCasa : p.golFuori,
-    golSubiti: inCasa ? p.golFuori : p.golCasa,
-    fp: inCasa ? p.fpCasa : p.fpFuori,
-    fpAvversario: inCasa ? p.fpFuori : p.fpCasa,
-    mia: p.lati[inCasa ? 0 : 1],
-    sua: p.lati[inCasa ? 1 : 0],
+    inCasa: g.in_casa,
+    avversario: g.avversario,
+    gol: g.gol_fatti,
+    golSubiti: g.gol_subiti,
+    fp: Number(g.fantapunti),
+    fpAvversario: Number(g.fantapunti_avversario),
+    mia, sua,
+  }
+}
+
+function vestiGiocatore(g, nomi) {
+  return {
+    ...g,
+    voto: g.voto == null ? null : Number(g.voto),
+    bonus: (g.bonus ?? []).map((b) => ({ id: b.id, nome: nomi.get(b.id) ?? b.id })),
   }
 }
 

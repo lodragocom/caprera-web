@@ -31,6 +31,7 @@ const AreaCrediti = lazy(() => AreaSezioni().then((m) => ({ default: m.Crediti }
 const AreaStoria = lazy(() => AreaSezioni().then((m) => ({ default: m.Storia })))
 const AreaCoppe = lazy(() => AreaSezioni().then((m) => ({ default: m.Coppe })))
 const AreaFormazioni = lazy(() => import('./pages/area/Formazioni'))
+const AreaTessera = lazy(() => import('./pages/area/Tessera'))
 const Statistiche = lazy(() => import('./pages/Statistiche'))
 
 /** Riporta in cima ad ogni cambio di rotta. */
@@ -87,6 +88,7 @@ export default function App() {
             <Route path="crediti" element={<AreaCrediti />} />
             <Route path="coppe" element={<AreaCoppe />} />
             <Route path="storia" element={<AreaStoria />} />
+            <Route path="tessera" element={<AreaTessera />} />
           </Route>
         </Routes>
       </Suspense>

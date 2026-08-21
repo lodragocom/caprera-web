@@ -1,23 +1,46 @@
 import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import TeamBadge from '../components/TeamBadge'
-import {
-  getTeam, logoUrl, careerOf, positionHistory, seasons, standings,
-  matchesOf, rosterOf, rosterSummary, ROSTER_SEASONS,
-} from '../lib/data'
+import { getTeam, logoUrl } from '../lib/core'
+import { siglaCoppa } from '../lib/coppe'
 import { Bacheca, PercorsoCoppe } from '../components/CoppeSocieta'
-import { trofeiDi, gareCoppaDi, siglaCoppa } from '../lib/coppe'
+import CreditiSocieta from '../components/CreditiSocieta'
+import {
+  useArchivio, classificaPerpetua, bacheca as bachecaDi, partiteDi, rosa as rosaDi,
+} from '../lib/archivio'
+import { Pagina, Sezione, Numero } from '../components/moto'
 import './SquadraDetail.css'
 
 export default function SquadraDetail() {
   const { id } = useParams()
   const team = getTeam(id)
 
-  const rosterSeasons = useMemo(
-    () => ROSTER_SEASONS.filter((s) => rosterOf(s, id).length > 0).reverse(),
-    [id]
-  )
-  const [season, setSeason] = useState(rosterSeasons[0])
+  const cl = useArchivio('perpetua', classificaPerpetua)
+  const ba = useArchivio(['bacheca', id], () => bachecaDi(id), [id])
+
+  /* Carriera e andamento: si contano dalle cento righe di classifica. */
+  const { career, history } = useMemo(() => {
+    const sue = (cl.dati ?? []).filter((r) => r.societa === id)
+      .sort((a, b) => a.stagione.localeCompare(b.stagione))
+    const c = {
+      seasons: sue.length, played: 0, won: 0, points: 0,
+      goalsFor: 0, goalsAgainst: 0, titles: [], best: null,
+    }
+    for (const r of sue) {
+      c.played += r.giocate; c.won += r.vinte; c.points += r.punti
+      c.goalsFor += r.gol_fatti; c.goalsAgainst += r.gol_subiti
+      if (c.best === null || r.posizione < c.best) c.best = r.posizione
+      if (r.posizione === 1) c.titles.push(r.stagione)
+    }
+    c.goalDiff = c.goalsFor - c.goalsAgainst
+    c.winRate = c.played ? Math.round((c.won / c.played) * 100) : 0
+    return {
+      career: c,
+      history: sue.map((r) => ({ season: r.stagione, position: r.posizione, points: r.punti })),
+    }
+  }, [cl.dati, id])
+
+  const coppeVinte = (ba.dati ?? []).filter((t) => t.competizione !== 'campionato').length
 
   if (!team) {
     return (
@@ -29,13 +52,8 @@ export default function SquadraDetail() {
     )
   }
 
-  const career = careerOf(id)
-  const history = positionHistory(id)
-  const roster = season ? rosterOf(season, id) : []
-  const summary = rosterSummary(roster)
-
   return (
-    <div className="page container wide">
+    <Pagina className="page container wide">
       {/* ------------------------------------------------------- header */}
       <header className="team-hero card" style={{ '--accent': team.color }}>
         <img src={logoUrl(team)} alt="" className="hero-logo" />
@@ -64,83 +82,109 @@ export default function SquadraDetail() {
         <Kpi label="Diff. reti" value={career.goalDiff > 0 ? `+${career.goalDiff}` : career.goalDiff} />
         <Kpi label="Miglior piazz." value={career.best ? `${career.best}º` : '—'} />
         <Kpi label="Titoli" value={career.titles.length} gold />
-        <Kpi label="Coppe" value={trofeiDi(id).filter((t) => t.id !== 'campionato').length} gold />
+        <Kpi label="Coppe" value={coppeVinte} gold />
       </div>
 
       {/* ------------------------------------------------------ history */}
       <section className="block">
         <h2 className="section-title">Andamento per stagione</h2>
-        <PositionChart history={history} color={team.color} />
+        <Sezione stato={cl} righe={4}>
+          <PositionChart history={history} color={team.color} />
+        </Sezione>
       </section>
 
       {/* ------------------------------------------------------- trofei */}
       <Bacheca teamId={id} />
       <PercorsoCoppe teamId={id} />
 
-      {/* -------------------------------------------------------- roster */}
-      {rosterSeasons.length > 0 && (
-        <section className="block">
-          <h2 className="section-title">Rosa</h2>
+      {/* primo pezzo del sito che legge dal database e non da un file */}
+      <CreditiSocieta teamId={id} />
 
-          <div className="controls">
-            <div className="field">
-              <label htmlFor="sd-season">Stagione</label>
-              <select
-                id="sd-season"
-                value={season}
-                onChange={(e) => setSeason(e.target.value)}
-              >
-                {rosterSeasons.map((s) => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-            </div>
-            <div className="roster-meta">
-              <span><b className="num">{summary.size}</b> calciatori</span>
-              <span><b className="num">{summary.spent}</b> crediti spesi</span>
-              {summary.avgFm && <span>FM media <b className="num">{summary.avgFm}</b></span>}
-              <span className="num roles">
-                {summary.byRole.P}P · {summary.byRole.D}D · {summary.byRole.C}C · {summary.byRole.A}A
-              </span>
-            </div>
-          </div>
-
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th className="left">R</th>
-                  <th className="left">Calciatore</th>
-                  <th className="left">Club</th>
-                  <th>Costo</th>
-                  <th>Pres.</th>
-                  <th>MV</th>
-                  <th>FM</th>
-                </tr>
-              </thead>
-              <tbody>
-                {roster.map((p, i) => (
-                  <tr key={i}>
-                    <td className="left">
-                      <span className={`badge role-${p.role}`}>{p.role}</span>
-                    </td>
-                    <td className="left strong">{p.player}</td>
-                    <td className="left muted num club">{p.club ?? '—'}</td>
-                    <td className="num">{p.cost ?? '—'}</td>
-                    <td className="num muted">{p.apps ?? '—'}</td>
-                    <td className="num muted">{p.mv?.toFixed(2) ?? '—'}</td>
-                    <td className="num">{p.fm?.toFixed(2) ?? '—'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      )}
+      <Rosa teamId={id} />
 
       {/* ------------------------------------------------------ matches */}
       <SeasonMatches teamId={id} />
-    </div>
+    </Pagina>
+  )
+}
+
+/** La rosa di una stagione, dal database. */
+function Rosa({ teamId }) {
+  const cl = useArchivio('perpetua', classificaPerpetua)
+  const stagioni = useMemo(
+    () => [...new Set((cl.dati ?? []).filter((r) => r.societa === teamId)
+      .map((r) => r.stagione))].sort().reverse(),
+    [cl.dati, teamId]
+  )
+  const [scelta, setScelta] = useState('')
+  const stagione = scelta && stagioni.includes(scelta) ? scelta : stagioni[0]
+  const stato = useArchivio(['rosa', stagione, teamId],
+    () => (stagione ? rosaDi(stagione, teamId) : Promise.resolve([])), [stagione, teamId])
+
+  const righe = stato.dati ?? []
+  const riepilogo = useMemo(() => {
+    const perRuolo = { P: 0, D: 0, C: 0, A: 0 }
+    let spesi = 0; let somma = 0; let quanti = 0
+    for (const p of righe) {
+      perRuolo[p.ruolo] = (perRuolo[p.ruolo] ?? 0) + 1
+      spesi += p.costo ?? 0
+      if (p.fm != null) { somma += Number(p.fm); quanti += 1 }
+    }
+    return { perRuolo, spesi, quanti: righe.length,
+             fmMedia: quanti ? (somma / quanti).toFixed(2) : null }
+  }, [righe])
+
+  if (!stagioni.length) return null
+
+  return (
+    <section className="block">
+      <h2 className="section-title">Rosa</h2>
+      <div className="controls">
+        <div className="field">
+          <label htmlFor="sd-stagione">Stagione</label>
+          <select id="sd-stagione" value={stagione} onChange={(e) => setScelta(e.target.value)}>
+            {stagioni.map((s) => <option key={s} value={s}>{s}</option>)}
+          </select>
+        </div>
+        <div className="roster-meta">
+          <span><b className="num">{riepilogo.quanti}</b> calciatori</span>
+          <span><b className="num">{riepilogo.spesi}</b> crediti spesi</span>
+          {riepilogo.fmMedia && <span>FM media <b className="num">{riepilogo.fmMedia}</b></span>}
+          <span className="num roles">
+            {riepilogo.perRuolo.P}P · {riepilogo.perRuolo.D}D · {riepilogo.perRuolo.C}C · {riepilogo.perRuolo.A}A
+          </span>
+        </div>
+      </div>
+
+      <Sezione stato={stato} righe={10} vuoto="Nessuna rosa registrata.">
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th className="left">R</th><th className="left">Calciatore</th>
+                <th className="left">Club</th><th>Costo</th>
+                <th>Pres.</th><th>MV</th><th>FM</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[...righe].sort((a, b) =>
+                'PDCA'.indexOf(a.ruolo) - 'PDCA'.indexOf(b.ruolo) || (b.costo ?? 0) - (a.costo ?? 0))
+                .map((p, i) => (
+                <tr key={i}>
+                  <td className="left"><span className={`badge role-${p.ruolo}`}>{p.ruolo}</span></td>
+                  <td className="left strong">{p.nome}</td>
+                  <td className="left muted num club">{p.club ?? '—'}</td>
+                  <td className="num">{p.costo ?? '—'}</td>
+                  <td className="num muted">{p.presenze ?? '—'}</td>
+                  <td className="num muted">{p.mv != null ? Number(p.mv).toFixed(2) : '—'}</td>
+                  <td className="num">{p.fm != null ? Number(p.fm).toFixed(2) : '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Sezione>
+    </section>
   )
 }
 
@@ -205,46 +249,44 @@ const AMBITI = [
 /**
  * Le partite di una stagione, campionato e coppe insieme.
  *
- * Le due fonti hanno forma diversa (il calendario e' in matches.json, le
- * coppe in cups.json) e qui vengono ridotte alla stessa riga: sigla del
- * turno, casa o trasferta, avversario, risultato.
+ * Arrivano tutte dalla stessa vista del database, `v_gare`, gia' orientata
+ * dalla parte della societa': `gol_fatti` e `gol_subiti` sono i suoi, non
+ * quelli di casa. Una lettura sola per stagione.
  */
 function SeasonMatches({ teamId }) {
+  const cl = useArchivio('perpetua', classificaPerpetua)
   // solo le stagioni in cui questa societa' ha giocato: le societa' storiche
   // non devono ritrovarsi in elenco annate che non le riguardano
-  const played = useMemo(
-    () => seasons.filter((s) => standings[s]?.length && matchesOf(s, teamId).length).reverse(),
-    [teamId]
+  const stagioni = useMemo(
+    () => [...new Set((cl.dati ?? []).filter((r) => r.societa === teamId)
+      .map((r) => r.stagione))].sort().reverse(),
+    [cl.dati, teamId]
   )
-  const [season, setSeason] = useState(played[0])
+  const [scelta, setScelta] = useState('')
+  const season = scelta && stagioni.includes(scelta) ? scelta : stagioni[0]
   const [ambito, setAmbito] = useState('tutte')
+
+  const stato = useArchivio(['partiteDi', season, teamId],
+    () => (season ? partiteDi(season, teamId) : Promise.resolve([])), [season, teamId])
 
   const righe = useMemo(() => {
     const out = []
-    if (ambito !== 'coppe') {
-      for (const m of matchesOf(season, teamId)) {
-        out.push({
-          sigla: `${m.round}ª`, coppa: false, giocata: m.played,
-          casa: m.home === teamId, avversario: m.home === teamId ? m.away : m.home,
-          gf: m.home === teamId ? m.homeGoals : m.awayGoals,
-          gs: m.home === teamId ? m.awayGoals : m.homeGoals,
-          titolo: `${m.round}ª giornata`,
-        })
-      }
+    for (const g of stato.dati ?? []) {
+      const coppa = g.competizione !== 'campionato'
+      if (ambito === 'coppe' && !coppa) continue
+      if (ambito === 'campionato' && coppa) continue
+      out.push({
+        coppa,
+        sigla: coppa ? siglaCoppa(g.competizione) : `${g.giornata}ª`,
+        giocata: g.giocata,
+        casa: g.in_casa, avversario: g.avversario,
+        gf: g.gol_fatti, gs: g.gol_subiti,
+        titolo: coppa ? g.competizione : `${g.giornata}ª giornata`,
+      })
     }
-    if (ambito !== 'campionato') {
-      for (const g of gareCoppaDi(teamId, season)) {
-        out.push({
-          sigla: siglaCoppa(g.competizioneId), coppa: true, giocata: true,
-          casa: g.casa === teamId, avversario: g.casa === teamId ? g.fuori : g.casa,
-          gf: g.casa === teamId ? g.golCasa : g.golFuori,
-          gs: g.casa === teamId ? g.golFuori : g.golCasa,
-          titolo: `${g.competizione} · ${g.turno}`,
-        })
-      }
-    }
-    return out
-  }, [teamId, season, ambito])
+    // prima il campionato in ordine di giornata, poi le coppe
+    return out.sort((a, b) => Number(a.coppa) - Number(b.coppa))
+  }, [stato.dati, ambito])
 
   const coppe = righe.filter((r) => r.coppa).length
 
@@ -254,8 +296,8 @@ function SeasonMatches({ teamId }) {
       <div className="controls">
         <div className="field">
           <label htmlFor="sm-season">Stagione</label>
-          <select id="sm-season" value={season} onChange={(e) => setSeason(e.target.value)}>
-            {played.map((s) => <option key={s} value={s}>{s}</option>)}
+          <select id="sm-season" value={season ?? ''} onChange={(e) => setScelta(e.target.value)}>
+            {stagioni.map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
         <div className="field">
@@ -270,6 +312,7 @@ function SeasonMatches({ teamId }) {
         </p>
       </div>
 
+      <Sezione stato={stato} righe={8} vuoto="Nessuna partita.">
       <div className="mini-matches">
         {righe.map((m, i) => {
           const res = !m.giocata ? null : m.gf > m.gs ? 'V' : m.gf === m.gs ? 'N' : 'P'
@@ -290,6 +333,7 @@ function SeasonMatches({ teamId }) {
           )
         })}
       </div>
+      </Sezione>
     </section>
   )
 }

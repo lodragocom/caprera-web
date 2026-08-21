@@ -84,13 +84,13 @@ for (const r of squadre) {
 console.log('\n=== AREA MISTER ===')
 pagina = '/login'
 await p.goto(BASE + '/login', { waitUntil: 'networkidle' })
-await p.locator('.scelta', { hasText: 'Prosecco' }).click()
-await p.locator('.campo input').fill('Salvo')
+await p.locator('input[type="email"]').fill('salvo@prova.it')
+await p.locator('input[type="password"]').fill('provaprova')
 await p.locator('.login-go').click()
-await p.waitForTimeout(900)
+await p.waitForTimeout(1200)
 // Dentro l'area si naviga cliccando, non con goto: la sessione sta in memoria
 // e un caricamento da zero riporterebbe al login (scelta voluta, vedi auth.jsx).
-const VOCI_AREA = ['Panoramica', 'La mia rosa', 'Formazioni', 'Contratti', 'Crediti', 'Coppe', 'Storia e racconto']
+const VOCI_AREA = ['Panoramica', 'La mia rosa', 'Formazioni', 'Contratti', 'Crediti', 'Coppe', 'Storia e racconto', 'La mia tessera']
 for (const voce of VOCI_AREA) {
   pagina = `/area · ${voce}`
   await p.locator('.dash-nav a', { hasText: voce }).click()

@@ -1,10 +1,24 @@
 import { useMemo } from 'react'
 import TeamBadge from '../components/TeamBadge'
-import { matches, rosters, seasons, standings } from '../lib/data'
+import { useArchivio, tuttePartite, tutteLeRose, classificaPerpetua } from '../lib/archivio'
+import { Pagina, Sezione } from '../components/moto'
 import './Stats.css'
 
 /** Tutti i record calcolati dai risultati e dalle rose. */
-function calcola() {
+function calcola(partite, rose) {
+  // I nomi delle colonne arrivano dal database: si traducono una volta sola
+  // qui, cosi' tutto il resto della pagina resta come era.
+  const matches = (partite ?? []).map((p) => ({
+    season: p.stagione, round: p.giornata, home: p.casa, away: p.fuori,
+    homeGoals: p.gol_casa, awayGoals: p.gol_fuori,
+    homeFp: Number(p.fp_casa), awayFp: Number(p.fp_fuori), played: p.giocata,
+  }))
+  const rosters = (rose ?? []).map((r) => ({
+    season: r.stagione, team: r.societa, player: r.nome, role: r.ruolo,
+    club: r.club, cost: r.costo, apps: r.presenze,
+    mv: r.mv == null ? null : Number(r.mv), fm: r.fm == null ? null : Number(r.fm),
+  }))
+  const seasons = [...new Set(matches.map((m) => m.season))].sort()
   const giocate = matches.filter((m) => m.played)
 
   let piuLarga = null
@@ -73,11 +87,29 @@ function calcola() {
 }
 
 export default function Stats() {
-  const r = useMemo(calcola, [])
-  const maxMedia = Math.max(...r.golStagione.map((g) => g.media))
+  const pa = useArchivio('tuttePartite', tuttePartite)
+  const ro = useArchivio('tutteLeRose', tutteLeRose)
+  const cl = useArchivio('perpetua', classificaPerpetua)
+
+  const r = useMemo(() => calcola(pa.dati, ro.dati), [pa.dati, ro.dati])
+  const maxMedia = Math.max(1, ...r.golStagione.map((g) => g.media))
+  const pronto = pa.dati && ro.dati && r.piuLarga
+
+  const stato = pa.errore ? pa : ro.errore ? ro : { ...pa, caricamento: !pronto }
+  if (!pronto) {
+    return (
+      <Pagina className="page container wide">
+        <header className="page-head">
+          <p className="eyebrow">Archivio</p>
+          <h1>Record e statistiche</h1>
+        </header>
+        <Sezione stato={stato} righe={8}><span /></Sezione>
+      </Pagina>
+    )
+  }
 
   return (
-    <div className="page container wide">
+    <Pagina className="page container wide">
       <header className="page-head">
         <p className="eyebrow">Archivio</p>
         <h1>Record e statistiche</h1>
@@ -171,7 +203,7 @@ export default function Stats() {
               </tr>
             </thead>
             <tbody>
-              {migliori().map((m) => (
+              {migliori(cl.dati).map((m) => (
                 <tr key={m.team}>
                   <td className="left"><TeamBadge id={m.team} size="sm" /></td>
                   <td className="left num season-cell">{m.season}</td>
@@ -185,17 +217,18 @@ export default function Stats() {
           </table>
         </div>
       </section>
-    </div>
+    </Pagina>
   )
 }
 
-function migliori() {
+function migliori(classifica) {
   const best = new Map()
-  for (const s of seasons) {
-    for (const row of standings[s] ?? []) {
-      const cur = best.get(row.team)
-      if (!cur || row.points > cur.points) best.set(row.team, { ...row, season: s })
-    }
+  for (const r of classifica ?? []) {
+    const row = { team: r.societa, points: r.punti, position: r.posizione,
+                  played: r.giocate, goalsFor: r.gol_fatti, goalsAgainst: r.gol_subiti,
+                  season: r.stagione }
+    const cur = best.get(row.team)
+    if (!cur || row.points > cur.points) best.set(row.team, row)
   }
   return [...best.values()].sort((a, b) => b.points - a.points)
 }

@@ -1,40 +1,134 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../lib/auth'
+import { getTeam, LAST_PLAYED_SEASON } from '../../lib/core'
+import { percorsoFra } from '../../lib/coppe'
 import {
-  getTeam, careerOf, positionHistory, standings,
-  LAST_PLAYED_SEASON, rosterOf, rosterSummary, ROSTER_SEASONS,
-  financesOf, FINANCE_SEASONS, contracts, CONTRACT_SEASONS, formOf,
-} from '../../lib/data'
-import { bachecaTrofei, percorsoDi, STAGIONE_COPPE } from '../../lib/coppe'
+  useArchivio, classificaPerpetua, roseStagione, forma as formaDi,
+  bacheca as bachecaDi, coppeStagione, stagioni as stagioniDb,
+  mieiContratti, mieFinanze,
+} from '../../lib/archivio'
 import { Bacheca, PercorsoCoppe } from '../../components/CoppeSocieta'
 import './sezioni.css'
+
+/** La stagione dei trofei in corso: l'ultima con risultati. */
+const STAGIONE_COPPE = LAST_PLAYED_SEASON
 
 const TETTO = { D: 3, C: 3, A: 2 }
 const RUOLI = ['P', 'D', 'C', 'A']
 
-/** Dati della societa' in sessione, calcolati una volta per sezione. */
+/**
+ * Dati della societa' in sessione.
+ *
+ * Tutto dal database, contratti e crediti compresi. Quelli il database li da'
+ * solo a chi ha diritto: dopo la Tessera del Tifoso il sito si presenta con
+ * l'identita' del mister, e le regole di riga fanno il resto. Se un giorno
+ * questa pagina venisse scritta male, il peggio che puo' capitare e' che non
+ * mostri qualcosa - non che mostri i contratti di un altro.
+ */
 function useSocieta() {
-  const { sessione, anteprima } = useAuth()
+  const { sessione, presidenza } = useAuth()
   const team = getTeam(sessione.team)
-  const stagioneRosa = ROSTER_SEASONS[ROSTER_SEASONS.length - 1]
-  const stagioneContratti = CONTRACT_SEASONS[CONTRACT_SEASONS.length - 1]
+
+  const cl = useArchivio('perpetua', classificaPerpetua)
+  const anni = useArchivio('stagioni', stagioniDb)
+  const ba = useArchivio(['bacheca', team.id], () => bachecaDi(team.id), [team.id])
+  const fo = useArchivio(['forma', LAST_PLAYED_SEASON], () => formaDi(LAST_PLAYED_SEASON))
+
+  const stagioneRosa = (anni.dati ?? [])[0]?.id ?? LAST_PLAYED_SEASON
+  const ro = useArchivio(['rosa', stagioneRosa, team.id],
+    () => roseStagione(stagioneRosa), [stagioneRosa])
+
+  const sue = useMemo(
+    () => (cl.dati ?? []).filter((r) => r.societa === team.id)
+      .sort((a, b) => a.stagione.localeCompare(b.stagione)),
+    [cl.dati, team.id]
+  )
+
+  const career = useMemo(() => {
+    const c = { seasons: sue.length, played: 0, won: 0, points: 0,
+                goalsFor: 0, goalsAgainst: 0, titles: [], best: null }
+    for (const r of sue) {
+      c.played += r.giocate; c.won += r.vinte; c.points += r.punti
+      c.goalsFor += r.gol_fatti; c.goalsAgainst += r.gol_subiti
+      if (c.best === null || r.posizione < c.best) c.best = r.posizione
+      if (r.posizione === 1) c.titles.push(r.stagione)
+    }
+    c.goalDiff = c.goalsFor - c.goalsAgainst
+    c.winRate = c.played ? Math.round((c.won / c.played) * 100) : 0
+    return c
+  }, [sue])
+
+  const rosa = useMemo(
+    () => (ro.dati ?? []).filter((r) => r.societa === team.id)
+      .map((r) => ({ player: r.nome, role: r.ruolo, club: r.club, cost: r.costo,
+                     apps: r.presenze, mv: r.mv == null ? null : Number(r.mv),
+                     fm: r.fm == null ? null : Number(r.fm) }))
+      .sort((a, b) => 'PDCA'.indexOf(a.role) - 'PDCA'.indexOf(b.role)
+                      || (b.cost ?? 0) - (a.cost ?? 0)),
+    [ro.dati, team.id]
+  )
+
+  const coppe = useMemo(() => {
+    const conta = new Map()
+    for (const t of ba.dati ?? []) {
+      if (t.competizione === 'campionato') continue
+      const c = conta.get(t.competizione)
+        ?? { id: t.competizione, nome: t.competizione_nome, n: 0, stagioni: [] }
+      c.n += 1
+      c.stagioni.push(t.stagione)
+      conta.set(t.competizione, c)
+    }
+    return [...conta.values()].sort((a, b) => b.n - a.n)
+  }, [ba.dati])
+
+  /* Contratti e crediti: adesso dal database, e il database li da' solo ai
+     loro. La riservatezza non la fa piu' questa pagina. */
+  const co = useArchivio(['mieiContratti', team.id], () => mieiContratti(team.id), [team.id])
+  const fi = useArchivio(['mieFinanze', team.id], () => mieFinanze(team.id), [team.id])
+
+  const contracts = useMemo(
+    () => (co.dati ?? []).map((c) => ({
+      team: c.societa, player: c.nome, role: c.ruolo, under: c.under,
+      from: c.dalla, to: c.alla, years: c.anni,
+      clausola: c.clausola, ingaggio: c.ingaggio,
+    })),
+    [co.dati]
+  )
+  const stagioneContratti = [...new Set(contracts.map((c) => c.to))].sort().pop()
+  const ultimaFinanza = (fi.dati ?? []).map((f) => f.stagione).sort().pop()
+
   return {
-    anteprima,
+    presidenza,
     team,
     stagioneRosa,
-    rosa: rosterOf(stagioneRosa, team.id),
-    career: careerOf(team.id),
-    storia: positionHistory(team.id),
-    finanze: financesOf(FINANCE_SEASONS[FINANCE_SEASONS.length - 1])
-      .find((f) => f.team === team.id),
-    contrattiAttivi: contracts.filter(
-      (c) => c.team === team.id && c.to === stagioneContratti
-    ),
+    rosa,
+    career,
+    storia: sue.map((r) => ({ season: r.stagione, position: r.posizione, points: r.punti })),
+    finanze: (fi.dati ?? []).find((f) => f.stagione === ultimaFinanza
+      && f.societa === team.id)
+      ? (() => {
+          const f = (fi.dati ?? []).find((x) => x.stagione === ultimaFinanza
+            && x.societa === team.id)
+          return { team: f.societa, initial: f.iniziali, spent: f.spesi,
+                   trades: f.scambi, left: f.residui, carried: f.riportati,
+                   bonus: f.bonus, ffp: f.ffp }
+        })()
+      : null,
+    contrattiAttivi: contracts.filter((c) => c.team === team.id && c.to === stagioneContratti),
     tuttiContratti: contracts.filter((c) => c.team === team.id),
-    posizione: standings[LAST_PLAYED_SEASON]?.find((r) => r.team === team.id),
-    forma: formOf(LAST_PLAYED_SEASON, team.id, 5),
-    coppe: bachecaTrofei(team.id).filter((t) => t.id !== 'campionato'),
+    posizione: sue.find((r) => r.stagione === LAST_PLAYED_SEASON)
+      ? { position: sue.find((r) => r.stagione === LAST_PLAYED_SEASON).posizione,
+          points: sue.find((r) => r.stagione === LAST_PLAYED_SEASON).punti,
+          goalDiff: sue.find((r) => r.stagione === LAST_PLAYED_SEASON).gol_fatti
+                    - sue.find((r) => r.stagione === LAST_PLAYED_SEASON).gol_subiti }
+      : null,
+    forma: (fo.dati ?? []).filter((g) => g.societa === team.id).slice(-5)
+      .map((g) => ({ round: g.giornata, result: g.esito,
+                     score: `${g.gol_fatti}-${g.gol_subiti}`,
+                     home: g.in_casa, opponent: g.avversario })),
+    coppe,
+    caricamento: cl.caricamento || ro.caricamento,
   }
 }
 
@@ -118,7 +212,7 @@ export function Panoramica() {
 /* ========================================================= 2 · Rosa */
 export function Rosa() {
   const d = useSocieta()
-  const r = rosterSummary(d.rosa)
+  const r = riepilogoRosa(d.rosa)
 
   return (
     <>
@@ -390,8 +484,8 @@ export function Storia() {
           placeholder={`Racconta ${d.team.name}…`}
         />
         <p className="nota-salva">
-          {d.anteprima
-            ? 'In anteprima il testo non viene salvato.'
+          {true
+            ? 'Il racconto non viene ancora salvato: manca la tabella.'
             : 'Salvato automaticamente.'}
         </p>
       </section>
@@ -402,7 +496,11 @@ export function Storia() {
 /* ========================================================= 6 · Coppe */
 export function Coppe() {
   const d = useSocieta()
-  const corrente = percorsoDi(d.team.id, STAGIONE_COPPE)
+  const co = useArchivio(['coppeStagione', STAGIONE_COPPE], () => coppeStagione(STAGIONE_COPPE))
+  const corrente = useMemo(
+    () => (co.dati ? percorsoFra(d.team.id, co.dati) : []),
+    [co.dati, d.team.id]
+  )
   const vinteQuest = corrente.filter((c) => c.vinta)
 
   return (
@@ -459,6 +557,21 @@ export function Coppe() {
 }
 
 /* ===================================================== utilità */
+
+/** Il riepilogo di una rosa: quanti per ruolo, quanto spesi, che fantamedia. */
+function riepilogoRosa(rosa) {
+  const byRole = { P: 0, D: 0, C: 0, A: 0 }
+  let spent = 0; let apps = 0; let fmSum = 0; let fmCount = 0
+  for (const p of rosa) {
+    byRole[p.role] = (byRole[p.role] ?? 0) + 1
+    spent += p.cost ?? 0
+    apps += p.apps ?? 0
+    if (p.fm != null) { fmSum += p.fm; fmCount += 1 }
+  }
+  return { byRole, spent, apps, size: rosa.length,
+           avgFm: fmCount ? +(fmSum / fmCount).toFixed(2) : null }
+}
+
 function Kpi({ label, value, gold }) {
   return (
     <div className="kpi card">
@@ -493,7 +606,7 @@ function liberiTot(attivi) {
 /** Avvisi ricavati dai dati: slot pieni, contratti in scadenza, crediti bassi. */
 function avvisi(d) {
   const out = []
-  const ultima = CONTRACT_SEASONS[CONTRACT_SEASONS.length - 1]
+  const ultima = [...new Set(d.tuttiContratti.map((c) => c.to))].sort().pop()
 
   for (const r of ['D', 'C', 'A']) {
     const usati = d.contrattiAttivi.filter((c) => c.role === r).length

@@ -1,0 +1,217 @@
+/* La Tessera del Tifoso: un cartellino che non si tocca, e sotto le due
+   cose che il mister può davvero cambiare. */
+
+.tess-griglia {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  grid-template-areas:
+    'cart dati'
+    'pass dati';
+  align-items: start;
+  gap: 18px;
+}
+
+.tess-griglia > *:nth-child(1) { grid-area: cart; }
+.tess-griglia > *:nth-child(2) { grid-area: dati; }
+.tess-griglia > *:nth-child(3) { grid-area: pass; }
+
+/* ------------------------------------------------------------ cartellino */
+
+.cartellino {
+  padding: 22px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* La striscia del colore sociale: è quello che la fa somigliare a una tessera
+   e non a un altro riquadro. */
+.cartellino::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--accent, var(--gold-500));
+}
+
+.cart-testa {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.cart-testa img {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+}
+
+.cart-testa strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  letter-spacing: 0.02em;
+  color: var(--cream);
+  line-height: 1.1;
+}
+
+.cart-testa span {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.cart-dati {
+  margin: 16px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cart-dati dt {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 5px;
+}
+
+.cart-dati dd {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text);
+}
+
+.cart-dati dd.mono {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  word-break: break-all;
+}
+
+.cart-incarichi {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.targhetta {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+  color: var(--text-muted);
+}
+
+/* Chi vede oltre la propria società lo si riconosce a colpo d'occhio. */
+.targhetta.alta {
+  border-color: rgba(217, 180, 106, 0.45);
+  background: rgba(217, 180, 106, 0.1);
+  color: var(--gold-400);
+}
+
+.cart-nota {
+  margin: 18px 0 0;
+  font-size: 0.74rem;
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+/* ---------------------------------------------------------------- moduli */
+
+.tess-griglia .pannello {
+  padding: 22px;
+}
+
+.tess-griglia .campi {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.tess-griglia .campo {
+  display: block;
+}
+
+.tess-griglia .campo > span {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+
+.tess-griglia .campo input {
+  width: 100%;
+  background: var(--navy-850);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 9px 13px;
+  font: inherit;
+  font-size: 0.9rem;
+  transition: border-color 0.15s;
+}
+
+.tess-griglia .campo input:focus-visible {
+  outline: none;
+  border-color: var(--gold-500);
+}
+
+.tess-griglia .campo em {
+  display: block;
+  margin-top: 6px;
+  font-style: normal;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+
+.riga-azioni {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+.btn-oro {
+  border: 0;
+  background: var(--gold-500);
+  color: var(--navy-900);
+  font-weight: 600;
+  font-size: 0.88rem;
+  padding: 11px 22px;
+  border-radius: var(--radius);
+  transition: background 0.16s, transform 0.16s;
+}
+
+.btn-oro:hover:not(:disabled) {
+  background: var(--gold-400);
+  transform: translateY(-1px);
+}
+
+.btn-oro:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.esito {
+  margin: 0;
+  font-size: 0.82rem;
+}
+
+.esito.ok { color: var(--win); }
+.esito.no { color: var(--loss); }
+
+@media (max-width: 900px) {
+  .tess-griglia {
+    grid-template-columns: 1fr;
+    grid-template-areas: 'cart' 'dati' 'pass';
+  }
+}

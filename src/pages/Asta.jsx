@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
 import TeamBadge from '../components/TeamBadge'
-import {
-  rosters, ROSTER_SEASONS, rosterOf, financesOf, ACTIVE_TEAMS,
-} from '../lib/data'
+import { ACTIVE_TEAMS } from '../lib/core'
+import { useArchivio, roseStagione, stagioni as stagioni_ } from '../lib/archivio'
+import { Pagina, Sezione } from '../components/moto'
 import './Asta.css'
 
 const RUOLI = [
@@ -13,14 +13,23 @@ const RUOLI = [
 ]
 
 export default function Asta() {
-  const stagioni = [...ROSTER_SEASONS].reverse()
-  const [season, setSeason] = useState(stagioni[0])
+  const anni = useArchivio('stagioni', stagioni_)
+  const stagioni = (anni.dati ?? []).map((s) => s.id)
+  const [scelta, setScelta] = useState('')
+  const season = scelta && stagioni.includes(scelta) ? scelta : stagioni[0]
 
+  const stato = useArchivio(['roseStagione', season],
+    () => (season ? roseStagione(season) : Promise.resolve([])), [season])
+
+  /* Nomi tradotti una volta sola: sotto la pagina resta come era. */
   const righe = useMemo(
-    () => rosters.filter((r) => r.season === season),
-    [season]
+    () => (stato.dati ?? []).map((r) => ({
+      team: r.societa, player: r.nome, role: r.ruolo,
+      club: r.club, cost: r.costo, apps: r.presenze,
+      fm: r.fm == null ? null : Number(r.fm),
+    })),
+    [stato.dati]
   )
-  const finanze = financesOf(season)
 
   const top = useMemo(
     () => [...righe].sort((a, b) => (b.cost ?? 0) - (a.cost ?? 0)).slice(0, 15),
@@ -30,20 +39,20 @@ export default function Asta() {
   /** Spesa per ruolo di ogni società. */
   const perRuolo = useMemo(() => {
     return ACTIVE_TEAMS.map((t) => {
-      const rosa = rosterOf(season, t.id)
+      const rosa = righe.filter((r) => r.team === t.id)
       if (!rosa.length) return null
       const spesa = { P: 0, D: 0, C: 0, A: 0 }
       for (const p of rosa) spesa[p.role] += p.cost ?? 0
       const tot = Object.values(spesa).reduce((a, b) => a + b, 0)
       return { team: t.id, spesa, tot }
     }).filter(Boolean).sort((a, b) => b.tot - a.tot)
-  }, [season])
+  }, [righe])
 
   const maxTot = Math.max(1, ...perRuolo.map((p) => p.tot))
   const totale = righe.reduce((n, r) => n + (r.cost ?? 0), 0)
 
   return (
-    <div className="page container wide">
+    <Pagina className="page container wide">
       <header className="page-head">
         <p className="eyebrow">Mercato</p>
         <h1>Asta</h1>
@@ -57,7 +66,7 @@ export default function Asta() {
       <div className="controls">
         <div className="field">
           <label htmlFor="as-season">Stagione</label>
-          <select id="as-season" value={season} onChange={(e) => setSeason(e.target.value)}>
+          <select id="as-season" value={season} onChange={(e) => setScelta(e.target.value)}>
             {stagioni.map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
@@ -121,37 +130,10 @@ export default function Asta() {
         </div>
       </section>
 
-      {finanze.length > 0 && (
-        <section className="block">
-          <h2 className="section-title">Budget di partenza</h2>
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th className="left">Società</th>
-                  <th>Crediti iniziali</th>
-                  <th>Spesi</th>
-                  <th>Residui</th>
-                  <th>% usata</th>
-                </tr>
-              </thead>
-              <tbody>
-                {finanze.map((f) => (
-                  <tr key={f.team}>
-                    <td className="left"><TeamBadge id={f.team} size="sm" /></td>
-                    <td className="num muted">{f.initial ?? '—'}</td>
-                    <td className="num strong">{f.spent ?? '—'}</td>
-                    <td className="num">{f.left ?? '—'}</td>
-                    <td className="num muted">
-                      {f.initial ? `${Math.round((f.spent / f.initial) * 100)}%` : '—'}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      )}
-    </div>
+      <p className="note">
+        Il budget di partenza di ogni società — crediti iniziali, residui,
+        percentuale usata — è riservato ai mister e si vede nell'area personale.
+      </p>
+    </Pagina>
   )
 }

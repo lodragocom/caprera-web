@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import TeamBadge from '../components/TeamBadge'
-import { standings, seasons } from '../lib/data'
+import { useArchivio, classificaPerpetua } from '../lib/archivio'
+import { Pagina, Sezione } from '../components/moto'
 import './Ranking.css'
 
 /** Numero di stagioni considerate nel coefficiente. */
@@ -16,17 +17,23 @@ const FINESTRA = 5
  *
  * NON è il ranking ufficiale della Federazione: quello vive nella dashboard.
  */
-function coefficiente() {
-  const ultime = seasons.filter((s) => standings[s]?.length).slice(-FINESTRA)
+function coefficiente(righeClassifica) {
+  const perStagione = new Map()
+  for (const r of righeClassifica ?? []) {
+    if (!perStagione.has(r.stagione)) perStagione.set(r.stagione, [])
+    perStagione.get(r.stagione).push(r)
+  }
+  const stagioni = [...perStagione.keys()].sort()
+  const ultime = stagioni.slice(-FINESTRA)
   const pesi = ultime.map((_, i) => (i + 1) / ultime.length) // 0.2 … 1.0
 
   const acc = new Map()
   ultime.forEach((s, i) => {
-    for (const r of standings[s]) {
-      const cur = acc.get(r.team) ?? { team: r.team, punti: 0, dettaglio: [] }
-      cur.punti += r.points * pesi[i]
-      cur.dettaglio.push({ season: s, points: r.points, position: r.position, peso: pesi[i] })
-      acc.set(r.team, cur)
+    for (const r of perStagione.get(s) ?? []) {
+      const cur = acc.get(r.societa) ?? { team: r.societa, punti: 0, dettaglio: [] }
+      cur.punti += r.punti * pesi[i]
+      cur.dettaglio.push({ season: s, points: r.punti, position: r.posizione, peso: pesi[i] })
+      acc.set(r.societa, cur)
     }
   })
 
@@ -39,15 +46,16 @@ function coefficiente() {
 }
 
 export default function Ranking() {
-  const { ultime, righe } = useMemo(coefficiente, [])
-  const max = Math.max(...righe.map((r) => r.punti))
+  const stato = useArchivio('perpetua', classificaPerpetua)
+  const { ultime, righe } = useMemo(() => coefficiente(stato.dati), [stato.dati])
+  const max = Math.max(1, ...righe.map((r) => r.punti))
 
   // Gironi CL/EL: dispari in uno, pari nell'altro (regolamento §5.3)
   const gironeA = righe.filter((_, i) => i % 2 === 0)
   const gironeB = righe.filter((_, i) => i % 2 === 1)
 
   return (
-    <div className="page container wide">
+    <Pagina className="page container wide">
       <header className="page-head">
         <p className="eyebrow">Coefficienti</p>
         <h1>Ranking Caprera</h1>
@@ -66,6 +74,7 @@ export default function Ranking() {
         dashboard della Federazione.
       </div>
 
+      <Sezione stato={stato} righe={10}>
       <section className="block">
         <h2 className="section-title">Coefficiente</h2>
         <div className="table-wrap">
@@ -119,7 +128,8 @@ export default function Ranking() {
           <Girone titolo="Girone pari" squadre={gironeB} righe={righe} />
         </div>
       </section>
-    </div>
+      </Sezione>
+    </Pagina>
   )
 }
 

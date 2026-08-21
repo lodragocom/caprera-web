@@ -1,7 +1,11 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import cups, { cupOf, STAGIONI, stagioneCoppe, alboLeggibile, tabelloneDi } from '../lib/coppe'
+import { tabelloneDi } from '../lib/coppe'
 import { getTeam, logoUrl } from '../lib/core'
+import {
+  useArchivio, coppeStagione, stagioni, albo, classifica,
+} from '../lib/archivio'
+import { Pagina, Sezione } from '../components/moto'
 import './Coppe.css'
 
 /**
@@ -201,16 +205,38 @@ function Tabellone({ coppa }) {
 }
 
 export default function Coppe() {
-  const [stagione, setStagione] = useState(STAGIONI[0])
-  const campione = getTeam(stagioneCoppe(stagione)?.campione)
+  const anni = useArchivio('stagioni', stagioni)
+  const elenco = (anni.dati ?? []).map((s) => s.id)
+  const [scelta, setScelta] = useState('')
+  const stagione = scelta || elenco[0] || ''
 
-  const trofei = COPPE.map((c) => ({ scheda: c, dati: c.dati ? cupOf(c.dati, stagione) : null }))
+  const co = useArchivio(['coppeStagione', stagione],
+    () => (stagione ? coppeStagione(stagione) : Promise.resolve([])), [stagione])
+  const al = useArchivio('albo', albo)
+  const cl = useArchivio(['classifica', stagione],
+    () => (stagione ? classifica(stagione) : Promise.resolve([])), [stagione])
+
+  const campione = getTeam((cl.dati ?? []).find((r) => r.posizione === 1)?.societa)
+
+  /* L'albo d'oro di ogni competizione, gia' pronto da leggere. */
+  const alboPerCoppa = useMemo(() => {
+    const m = new Map()
+    for (const r of al.dati ?? []) {
+      if (!m.has(r.competizione)) m.set(r.competizione, [])
+      m.get(r.competizione).push(r)
+    }
+    for (const righe of m.values()) righe.sort((a, b) => b.stagione.localeCompare(a.stagione))
+    return m
+  }, [al.dati])
+
+  const perId = useMemo(() => new Map((co.dati ?? []).map((c) => [c.id, c])), [co.dati])
+  const trofei = COPPE.map((c) => ({ scheda: c, dati: c.dati ? perId.get(c.dati) ?? null : null }))
   const vinte = trofei.filter((t) => t.dati?.vincitore)
   const aiFantapunti = vinte.filter((t) => t.dati.aiFantapunti)
   const contese = trofei.filter((t) => t.dati?.finaleInParita)
 
   return (
-    <div className="page container wide">
+    <Pagina className="page container wide">
       <header className="page-head">
         <p className="eyebrow">Competizioni</p>
         <h1>Coppe</h1>
@@ -232,8 +258,15 @@ export default function Coppe() {
         </p>
         <div className="albo-griglia">
           {COPPE.filter((c) => c.dati && c.dati !== 'qualificazione-champions').map((c) => {
-            const { righe, edizioni, recordman } = alboLeggibile(c.dati)
+            const righe = alboPerCoppa.get(c.dati) ?? []
             if (!righe.length) return null
+            const conta = new Map()
+            for (const r of righe) conta.set(r.vincitore, (conta.get(r.vincitore) ?? 0) + 1)
+            const ordinati = [...conta.entries()].sort((a, b) => b[1] - a[1])
+            const massimo = ordinati[0]?.[1] ?? 0
+            const recordman = ordinati.filter(([, n]) => n === massimo && n > 1)
+              .map(([team, n]) => ({ team, n }))
+            const edizioni = righe.length
             return (
               <article key={c.id} className="albo-card card" style={{ '--accent': c.colore }}>
                 <header>
@@ -245,7 +278,7 @@ export default function Coppe() {
                     <li key={r.stagione} className={i === 0 ? 'in-carica' : ''}>
                       <span className="stagione num">{r.stagione}</span>
                       <Societa id={r.vincitore} vinta />
-                      {r.aiFantapunti && <span className="dettaglio">ai fantapunti</span>}
+                      {r.ai_fantapunti && <span className="dettaglio">ai fantapunti</span>}
                     </li>
                   ))}
                 </ol>
@@ -267,9 +300,9 @@ export default function Coppe() {
       </section>
 
       <div className="scelta-stagione">
-        {STAGIONI.map((s) => (
+        {elenco.map((s) => (
           <button key={s} className={s === stagione ? 'on' : ''}
-                  onClick={() => setStagione(s)}>{s}</button>
+                  onClick={() => setScelta(s)}>{s}</button>
         ))}
       </div>
 
@@ -373,6 +406,6 @@ export default function Coppe() {
           per bonifico entro il 31 luglio (DPCM Vincite 08.2026).
         </p>
       </section>
-    </div>
+    </Pagina>
   )
 }
