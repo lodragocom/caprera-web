@@ -1,12 +1,404 @@
-tr.podium .pos {
+/* ============================================================
+   Classifica — la pagina più letta della lega.
+   Su schermo largo è una tabella ordinabile; sul telefono
+   diventa un elenco di schede che si aprono.
+   ============================================================ */
+
+/* ------------------------------------------------------------- la testa */
+.cl-testa {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+}
+
+.cl-testa h1 {
+  font-size: clamp(2.6rem, 7vw, 4.2rem);
+  line-height: 0.92;
+  margin: 6px 0 0;
+  letter-spacing: 0.01em;
+}
+
+.cl-stagione span {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 7px;
+}
+
+.cl-stagione select {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  padding: 10px 14px;
+  min-width: 150px;
+}
+
+/* ------------------------------------------------------------- le schede */
+.cl-schede {
+  display: flex;
+  gap: 6px;
+  margin: 22px 0 18px;
+  border-bottom: 1px solid var(--border-soft);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.cl-schede::-webkit-scrollbar { display: none; }
+
+.cl-schede button {
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: 11px 18px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.cl-schede button:hover { color: var(--text); }
+
+.cl-schede button.on {
+  color: var(--gold-400);
+  border-bottom-color: var(--gold-500);
+}
+
+/* --------------------------------------------------- avviso di riordino */
+.cl-avviso {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 0 0 14px;
+  padding: 9px 14px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(217, 180, 106, 0.3);
+  background: rgba(217, 180, 106, 0.07);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.cl-avviso strong { color: var(--gold-400); font-weight: 600; }
+
+.cl-avviso button {
+  margin-left: auto;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 4px 11px;
+  font-size: 0.76rem;
+  color: var(--text);
+}
+
+.cl-avviso button:hover { border-color: var(--gold-500); color: var(--gold-400); }
+
+/* ------------------------------------------------------------ la tabella */
+.cl-tabella { overflow-x: auto; }
+
+.cl-tabella table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.cl-tabella th {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-weight: 400;
+  padding: 0 10px 14px;
+  text-align: right;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.cl-tabella th.c-pos,
+.cl-tabella th.c-soc { text-align: left; }
+.cl-tabella th.c-forma { text-align: left; padding-left: 18px; }
+
+/* i pulsanti di ordinamento: sembrano intestazioni finché non ci passi sopra */
+.ord {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  transition: color 0.15s;
+}
+
+.ord:hover { color: var(--text); }
+.ord.on { color: var(--gold-400); }
+.ord i { font-style: normal; margin-left: 3px; font-size: 0.8em; }
+
+.cl-tabella td {
+  padding: 13px 10px;
+  border-bottom: 1px solid var(--border-soft);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.cl-riga:hover td { background: rgba(255, 255, 255, 0.022); }
+
+.cl-tabella td.num { font-family: var(--font-mono); color: var(--text-muted); }
+.cl-tabella td.in-ordine { color: var(--text); background: rgba(217, 180, 106, 0.045); }
+.cl-tabella td.su { color: var(--win); }
+.cl-tabella td.giu { color: var(--loss); }
+
+/* posizione, con la barretta del colore sociale */
+.cl-tabella td.c-pos,
+.cl-tabella th.c-pos { text-align: left; width: 62px; padding-left: 0; }
+
+.cl-tabella td.c-pos {
+  position: relative;
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  color: var(--text);
+  padding-left: 16px;
+}
+
+.c-pos .barra {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 26px;
+  border-radius: 2px;
+}
+
+.podio td.c-pos { color: var(--gold-400); }
+
+/* la società */
+.cl-tabella td.c-soc { text-align: left; width: 40%; }
+
+.cl-soc {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.cl-soc img {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.cl-soc b {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.12rem;
+  letter-spacing: 0.02em;
+  color: var(--cream);
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.cl-soc:hover b { color: var(--gold-400); }
+
+.stelline {
+  display: block;
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
   color: var(--gold-500);
-  font-weight: 600;
+  margin-top: 1px;
 }
 
-tr.last .pos {
-  color: var(--loss);
+.stelline em { font-style: normal; color: var(--text-dim); letter-spacing: 0; }
+
+/* i punti */
+.cl-tabella td.c-pt,
+.cl-tabella th.c-pt { padding-right: 0; }
+
+.cl-tabella td.c-pt {
+  font-family: var(--font-mono);
+  font-size: 1.35rem;
+  color: var(--gold-400);
+  font-weight: 500;
 }
 
-@media (max-width: 780px) {
-  .form-col { display: none; }
+/* la barra dei fantapunti */
+.cl-fp td.c-barra, .cl-fp th.c-barra { width: 42%; text-align: left; }
+
+.misura {
+  display: block;
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  overflow: hidden;
 }
+
+.misura i {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  opacity: 0.85;
+}
+
+/* ---------------------------------------------------- le schede a mano */
+.cl-schedine { display: none; list-style: none; margin: 0; padding: 0; }
+
+.schedina {
+  border: 1px solid var(--border-soft);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--navy-850);
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.schedina.podio { border-color: rgba(217, 180, 106, 0.28); border-left-color: var(--accent); }
+
+.schedina-testa {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: none;
+  border: 0;
+  text-align: left;
+  color: inherit;
+}
+
+.s-pos {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  color: var(--text-muted);
+  width: 1.4rem;
+  flex-shrink: 0;
+}
+
+.schedina.podio .s-pos { color: var(--gold-400); }
+
+.schedina-testa img { width: 36px; height: 36px; object-fit: contain; flex-shrink: 0; }
+
+.s-nome {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  letter-spacing: 0.02em;
+  color: var(--cream);
+  line-height: 1.15;
+}
+
+.s-pt { text-align: right; }
+.s-pt b { font-family: var(--font-mono); font-size: 1.3rem; color: var(--gold-400); }
+.s-pt em {
+  display: block;
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.s-freccia {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  color: var(--text-dim);
+  width: 1rem;
+  text-align: center;
+}
+
+.schedina-corpo {
+  padding: 4px 14px 14px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.schedina-corpo dl {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px 8px;
+  margin: 14px 0;
+}
+
+.schedina-corpo dt {
+  font-family: var(--font-mono);
+  font-size: 0.53rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 3px;
+}
+
+.schedina-corpo dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.98rem;
+  color: var(--text);
+}
+
+.schedina-corpo dd.su { color: var(--win); }
+.schedina-corpo dd.giu { color: var(--loss); }
+
+.schedina-forma {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.schedina-forma > span {
+  font-family: var(--font-mono);
+  font-size: 0.53rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.schedina-vai {
+  display: block;
+  margin-top: 12px;
+  font-size: 0.8rem;
+  color: var(--gold-400);
+}
+
+/* ------------------------------------------------------------ larghezze */
+@media (max-width: 1100px) {
+  .spegni-md { display: none; }
+}
+
+@media (max-width: 820px) {
+  .spegni-sm { display: none; }
+  .cl-tabella td.c-pt { font-size: 1.15rem; }
+  .cl-soc b { font-size: 1rem; }
+}
+
+/* Sotto i 640 px la tabella sparisce e restano le schede: dieci colonne su
+   un telefono non si leggono, e stringerle le rende illeggibili tutte. */
+@media (max-width: 640px) {
+  .cl-tabella, .cl-avviso { display: none; }
+  .cl-schedine { display: block; }
+  .cl-testa { align-items: flex-start; flex-direction: column; gap: 14px; }
+  .cl-stagione select { width: 100%; }
+}
+
+@media (min-width: 641px) {
+  .cl-schedine { display: none; }
+}
+
+/* Il tema dà alle intestazioni di tabella un fondo pieno: qui no, la riga
+   dei titoli deve sparire e lasciare parlare le righe. */
+.cl-tabella thead th { background: none; }
+
+/* I nomi in maiuscolo condensato, come sullo stemma. */
+.cl-soc b, .s-nome { text-transform: uppercase; }

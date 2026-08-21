@@ -116,6 +116,37 @@ sull'`addetto-stampa` (Quagliarella), ma è tarata su brand book, manifesto, cla
 Caprera ha microcopy e regolamento, quindi va valutato cosa sopravvive all'adattamento.
 `iride-localization` non ha destinatario: Iride è fuori dal roster, e Caprera è monolingue.
 
+### Ottavo passaggio — il riallineamento sui numeri veri, e tre porte
+
+La sessione parallela ha chiuso e consegnato i numeri. **La memoria scritta poche ore prima era già
+sbagliata**, e non di poco: 23→**26** tabelle, 6→**10** funzioni, 33→**38** finestre, più **28
+regole di riga** che non erano contate. Allineati STATO, rassegna, `CAPRERA.md`, `TASK_Sito_Web`,
+`magazziniere`, `direttore-sportivo`.
+
+**Il punto #1 cambia natura, e diventa molto più economico.** Non è vero che lo schema non è
+versionato: ci sono **32 migrazioni**. Ma stanno nella cronologia di Supabase, e
+**`supabase/migrations/` non esiste in nessuno dei due repository** — verificato, non riferito. Il
+lavoro quindi non è *riscrivere* (come aveva proposto il supplente di Marotta, con `pg_dump`): è
+**esportare**. Il punto è stato riscritto di conseguenza, con la scelta del repo lasciata al
+Direttore Sportivo e la stessa prova di accettazione di prima.
+
+**`vecchio_progetto` cancellato**, non più solo spostato — e i 48 alias sono salvi in
+`FONTI/vecchio-progetto-cose-fatte-a-mano.json`. Chiuso il punto che diceva "non si droppa finché
+non recuperi gli alias": l'ordine giusto è stato rispettato.
+
+**Tre porte di sicurezza, non una.** `execute_sql` era quella che si vedeva; le altre due sono
+peggio nel merito. `attiva_tessera` era chiamabile **con l'email di un altro** — in una lega dove
+i contratti sono il gioco, farsi assegnare la squadra altrui è il danno massimo. E tessere, schede
+e telefoni comparivano nell'**elenco pubblico** di cosa esiste. Le prime due erano eredità di
+settembre; **la terza è nata questa notte**, insieme alle tessere. Promosse a sezione propria dello
+STATO, sopra la voce sicurezza esistente: non erano un dettaglio da nota a piè di pagina.
+
+**Fissata la regola dei due tavoli** in `FRAMEWORK.md`, su proposta di chi lavorava al codice:
+chi scrive codice sta in `caprera-web/src/` e `collaudo/`; chi tiene la memoria sta in
+`caprera-dati/`, `.claude/`, `.processo/` e **`theme.css`**. Consegne per invio, non per scrittura
+diretta. `theme.css` sta con la memoria perché **è il design system**, cioè territorio del
+Curatore — ed è esattamente il file su cui, poche ore prima, si erano scritte sopra due mani.
+
 ## Decisioni prese (e alternative scartate)
 
 - **ADR-002 aperto, non lasciato dentro la rassegna.** La scelta di leggere da `public` con 29 viste sottili invece di esporre lo schema `caprera` dal cruscotto ha alternative reali, un debito accettato (29 viste da mantenere) e conseguenze durature: è una sentenza, non una nota di sessione. La rassegna la racconta, l'ADR la argomenta.
@@ -166,6 +197,25 @@ I tre rilievi bloccanti erano lo stesso errore. STATO, ADR e README erano stati 
 **Regola operativa:** quando si riscrive un documento canonico, si aprono i file che cita e si guarda se raccontano lo stesso mondo. La moviola non è finita finché i rimandi non reggono.
 
 **E un corollario sul metodo:** questo si è visto solo perché il collaudo è stato fatto **da un'altra mano** e **verificando sul disco**, non rileggendo la prosa. Chi ha scritto rilegge quello che intendeva scrivere.
+
+## Terzo pattern — spostare non disarma
+
+**Togliere di mezzo non è togliere i permessi.**
+
+Il 20/08 `vecchio_progetto` era stato spostato fuori da `public` e considerato inerte. Erano state
+spostate le **tabelle**, non le **funzioni** — e una funzione `SECURITY DEFINER` esegue con i
+permessi di chi l'ha creata **ovunque la si metta**. Per un giorno intero `public.execute_sql` è
+rimasta chiamabile da chiunque avesse la chiave anon, che sta in chiaro nel JavaScript del sito per
+progetto. Sembrava messa via; era ancora carica.
+
+Vale lo stesso per la seconda porta: `attiva_tessera` era una funzione *utile*, e nessuno aveva
+chiesto **chi può chiamarla e con quali argomenti**.
+
+E la terza aggiunge la metà mancante: **una superficie nuova va guardata quando la si apre.** Le
+tessere sono nate protette dalle regole di riga — ma il loro *nome* era pubblico. Il dato era
+chiuso, l'elenco no.
+
+Insieme: **archiviare non è disarmare, e proteggere il contenuto non protegge l'indice.**
 
 ## Nota di moviola
 

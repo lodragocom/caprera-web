@@ -41,6 +41,29 @@ A fine sessione, **se la sessione ha prodotto un risultato reale**, si va al rep
 Niente rapporto a vuoto: la moviola si fa sull'azione, non sul nulla. È il meccanismo con cui
 lo staff si allena e ricorda.
 
+## La regola dei due tavoli — quando si lavora in parallelo
+
+Nata la notte fra il 20 e il 21 agosto 2026, dopo che due sessioni hanno scritto negli stessi
+file senza saperlo: per un'ora la memoria descriveva numeri che nel frattempo erano cambiati, e
+una proposta su `theme.css` è stata sovrascritta mentre veniva raccontata.
+
+Quando due sessioni lavorano insieme, **il confine è il filesystem, non la buona volontà**:
+
+| chi lavora sul codice | chi tiene la memoria |
+|---|---|
+| `caprera-web/src/` · `caprera-web/collaudo/` | `caprera-dati/` (STATO, ADR, AGGIORNAMENTI, SPIEGAZIONI, TASK, PROTOCOLLI) |
+| | `caprera-web/.claude/` · `.processo/` · `theme.css` |
+
+**Nessuno scrive nel tavolo dell'altro.** Se chi lavora sul codice deve consegnare qualcosa che
+sta di là, **lo manda** e lo copia l'altro; e viceversa.
+
+`theme.css` sta con la memoria e non col codice per un motivo preciso: **è il design system**, cioè
+il territorio del Curatore. Toccarlo di passaggio, mentre si fa altro, è come cambiare le regole
+della lega perché faceva comodo in quella partita.
+
+Chi finisce per primo **lo dice**, con i numeri veri di quello che ha cambiato: la memoria si
+riallinea una volta sola, sui fatti, invece di inseguire.
+
 ## Il vocabolario dello studio
 
 | Come lo chiamiamo | Cos'è tecnicamente | Dove sta |

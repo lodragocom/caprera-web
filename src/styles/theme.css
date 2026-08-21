@@ -413,3 +413,27 @@ tbody tr:hover td {
   color: #111;
   font-weight: 700;
 }
+
+/* ------------------------------------------------- le ultime cinque gare
+   Sta qui e non nel foglio della Classifica perche' lo usano anche le
+   Squadre e la dashboard: dentro il foglio di una pagina lazy sparirebbe
+   dalle altre, e le pastiglie tornerebbero lettere sbiadite. */
+.forma { display: inline-flex; gap: 4px; }
+
+.pastiglia {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--navy-900);
+}
+
+.p-V { background: var(--win); }
+.p-N { background: var(--draw); }
+.p-P { background: var(--loss); }

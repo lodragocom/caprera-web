@@ -9,14 +9,15 @@ Comandi in [COMANDI.md](COMANDI.md), struttura in [README.md](README.md).
 ## Dove sta l'archivio
 
 Progetto Supabase **`caprera`** (`ziggietzdtdtpsfmpthm`), eu-central-2. Schema **`caprera`**:
-23 tabelle, 10 viste, 6 funzioni, regole di riga (RLS) attive ovunque.
+26 tabelle, 10 viste, 10 funzioni, 28 regole di riga.
 
-⚠️ **Attenzione:** `01/02/03.sql` sono fermi al 20/08 e **non** contengono le finestre di `public`
-né la macchina delle tessere: quella parte vive solo nel progetto Supabase. **Il database non si
-ricrea dai file** finché il Magazziniere non l'ha sanato (punto #1 dello STATO). Non dare per
-scontato che un `.sql` del repo descriva ciò che è in produzione: verifica.
+⚠️ **Attenzione:** `01/02/03.sql` sono **lo schema iniziale del 20/08**, non lo stato di adesso.
+Lo schema vero e' in **32 migrazioni** che stanno nella cronologia di Supabase e **non nel
+repository** (`supabase/migrations/` non esiste). Chi clona non ricrea il database. Non dare mai
+per scontato che un `.sql` del repo descriva la produzione: **verifica**. Esportarle e' il punto
+#1 dello STATO.
 
-Il sito **non legge lo schema `caprera`**: legge **`public`**, dove ci sono **33 finestre sottili**
+Il sito **non legge lo schema `caprera`**: legge **`public`**, dove ci sono **38 finestre sottili**
 (`security_invoker`, quindi le regole di riga restano quelle di sotto). È una scelta messa a
 verbale — `../caprera-dati/ADR/ADR-002-Vetrina-Public-Viste-Sottili.md`: l'alternativa era
 esporre lo schema `caprera` con una **spunta nel cruscotto Supabase**, e una spunta non si
@@ -27,9 +28,10 @@ versiona.
   `../caprera-dati/SPIEGAZIONI/SPIEGAZIONE_Schema_Supabase.md`.
 - Ricaricare i dati: `sh ../caprera-dati/SUPABASE/carica.sh`. La stringa di connessione sta in
   `~/.caprera-dsn` (**Session pooler** — la connessione diretta è solo IPv6).
-- Lo schema **`vecchio_progetto`** è il tentativo di settembre 2025 spostato via da `public`:
-  4.300 righe, 48 alias di nomi scritti a mano, più 6 utenti di prova in `auth`.
-  **Non si cancella** senza decisione esplicita.
+- Lo schema **`vecchio_progetto`** (tentativo di settembre 2025) è stato **cancellato il 21/08**,
+  dopo che ci si erano trovate dentro due falle di sicurezza. Le quattro tabelle compilate a mano
+  — i 48 alias di nomi inclusi — sono salvate in
+  `../caprera-dati/FONTI/vecchio-progetto-cose-fatte-a-mano.json`. Restano 6 utenti di prova in `auth`.
 
 ## Cosa non deve mai affacciarsi in `public`
 
@@ -64,8 +66,8 @@ Direttore Sportivo e si scrive in `02-viste.sql`, mai a mano dal cruscotto.
   collegamento dopo l'accesso: se tocchi quel percorso, non toglierla.
 - `src/data/*.json` resta sul disco come **sorgente del caricamento** (`carica.py`) e riferimento
   di collaudo, non come fonte del sito. Continua a non editarsi a mano.
-- **Codice morto, da non riusare**: `src/lib/data.js` e `src/pages/AreaMister.jsx` (con il suo
-  `.css`) non sono più importati da nessuna rotta.
+- **Codice morto**: `src/lib/data.js` è stato cancellato il 21/08. Restano `src/pages/AreaMister.jsx`
+  e il suo `.css`, non più importati da nessuna rotta: **non riusarli**.
 - Prima di dire che qualcosa funziona: `npm run lint`, `npm run build` e i **tre** collaudi
   browser in `collaudo/`.
 

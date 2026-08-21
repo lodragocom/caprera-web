@@ -126,7 +126,7 @@ export function CorpoTabella({ children, passo = 0.02, tetto = 24 }) {
  * essere sbagliato. Adesso parte subito: chi lo vede lo vede salire, chi non
  * lo vede lo trova gia' giusto quando ci arriva.
  */
-export function Numero({ valore, decimali = 0, className = '' }) {
+export function Numero({ valore, decimali = 0, gruppi = true, className = '' }) {
   const fermo = useReducedMotion()
   const n = Number(valore) || 0
   const salta = fermo || Math.abs(n) < 20
@@ -147,8 +147,12 @@ export function Numero({ valore, decimali = 0, className = '' }) {
     return () => stop.stop()
   }, [n, salta])
 
+  // `gruppi = false` toglie il punto delle migliaia. Serve ai fantapunti:
+  // "2.699,5" in una colonna stretta si legge come duevirgolasei, e un numero
+  // che si puo' leggere in due modi e' un numero sbagliato.
   const testo = mostrato.toLocaleString('it-IT', {
     minimumFractionDigits: decimali, maximumFractionDigits: decimali,
+    useGrouping: gruppi,
   })
   return <span className={className}>{testo}</span>
 }
