@@ -147,6 +147,288 @@ chi scrive codice sta in `caprera-web/src/` e `collaudo/`; chi tiene la memoria 
 diretta. `theme.css` sta con la memoria perché **è il design system**, cioè territorio del
 Curatore — ed è esattamente il file su cui, poche ore prima, si erano scritte sopra due mani.
 
+### Nono passaggio — la visione, che nella memoria non c'era
+
+L0 ha dichiarato la direzione: **quello che esiste e' un prototipo**. Dieci amici che giocano da
+dieci anni sono il banco di prova, non il traguardo. L'obiettivo e' un fantacalcio **piu' vicino
+alla realta' e piu' manageriale** — contratti con durata, clausola e **ingaggio**, crediti che si
+**accumulano** fra le stagioni — accessibile a **utenti nuovi** che scaricano l'**App** e giocano
+alla **Caprera League**.
+
+**Non era scritto da nessuna parte.** Lo STATO si apriva con *"lega di fantacalcio a 10 societa'"*
+e finiva li'. Il multi-lega compariva in quattro documenti come nota tecnica di lato — mai come
+scopo. Conseguenza: **ogni decisione presa finora e' stata presa per la lega sbagliata**, e alcune
+si vedono gia'.
+
+Aggiunta allo STATO la sezione **"Dove vuole andare"**, subito sotto "Cos'e'", perche' chi legge
+il resto sappia per chi sta decidendo. Con dentro le cinque conseguenze che cambiano la lettura di
+tutto il documento — fra cui: **il prodotto e' il regolamento, non il software**, quindi le 8
+incongruenze note e le 3 regole ricostruite dall'archivio smettono di essere debito documentale e
+diventano **difetti di prodotto**.
+
+**Aperto il primo TAVOLO del Processo:** `TAVOLI/2026-08-21-da-lega-privata-a-prodotto.md`. La
+cartella esisteva dal 20/08 con il solo README. Domanda unica e chiusa — *cosa va deciso adesso e
+cosa va deliberatamente rimandato* — con sei nodi verificati sul disco, non riferiti. Le posizioni
+sono vuote: le compilano i ruoli, in una sessione aperta in `caprera-web`. **La sintesi non si
+scrive prima delle posizioni**: sarebbe un'opinione travestita.
+
+Due nodi trovati verificando, che valgono piu' della domanda da cui sono nati:
+
+- **`lega_id` deciso e mai implementato.** Zero occorrenze in `SUPABASE/*.sql` e in `src/lib/`,
+  mentre il CONCEPT lo dichiarava indispensabile *"dal primo giorno"* perche' *"costa niente
+  adesso"*. Nel frattempo: 26 tabelle, 38 finestre, 28 regole di riga costruite senza.
+- **ADR-003 poggia su una premessa mono-lega**: *"la Presidenza sa gia' chi e' chi"* e' vera
+  perche' la Presidenza e' **una**.
+
+### Decimo passaggio — il riallineamento sul contesto Cowork, e due errori miei
+
+L0 ha passato il documento di contesto della sessione Cowork. Verificato **alla fonte** con gli
+strumenti Supabase invece che sulla prosa — ed e' emerso che **due cose scritte in questa moviola
+e nello STATO erano sbagliate**.
+
+**1. Le migrazioni sono 31, non 32.** Il numero 32 veniva dalla consegna a voce e non era stato
+verificato. `list_migrations` ne conta **31**, di cui **9 di settembre 2025** (era
+`vecchio_progetto`) e 22 di Caprera. Corretto ovunque.
+
+**2. `lega_id` esisteva — cercavo il nome sbagliato nei file sbagliati.** Avevo scritto, in tre
+documenti, che *"`lega_id` non esiste in nessuna delle 26 tabelle"* e ne avevo fatto la
+raccomandazione **numero uno** del tavolo, con l'argomento che *"il costo cresce da solo"*.
+
+Interrogando il database vivo: la colonna si chiama **`lega`**, ed e' una **chiave esterna verso
+`caprera.lega`** su **`societa`, `stagioni`, `competizioni`** — le tre radici, da cui tutto il
+resto discende. Il CONCEPT era stato onorato, e con un disegno migliore di *"lega_id ovunque"*.
+
+**L'errore di metodo, che e' il pezzo che vale:** avevo fatto `grep lega_id` sui file `.sql` — che
+sono **fermi al 20/08 e lo sapevo**, l'avevo scritto io due ore prima. Ho cercato il nome esatto
+che il CONCEPT proponeva, in una fonte che avevo gia' dichiarato scaduta, e ho preso l'assenza per
+una prova. **Un'assenza in una fonte sbagliata non e' un fatto: e' una domanda.**
+
+Quello che resta vero, ed e' piu' preciso: **delle 28 regole di riga, zero filtrano per lega**
+(`pg_policies`). La struttura c'e', l'applicazione no. Il lavoro non e' una riscrittura dello
+schema — e' un predicato da aggiungere alle politiche e alle 38 finestre.
+
+**Corretta anche la raccomandazione del tavolo:** il primo non e' `lega_id` (non esiste come
+problema) ne' i voti (fermi per decisione di L0). E' **il regolamento** — l'unico nodo che *e'* il
+prodotto, e l'unico i cui tempi non dipendono da noi ma dalla Presidenza.
+
+### E una correzione su di me
+
+Il contesto Cowork dice: *"un `cp -f` ha distrutto i token del tema che un altro agente aveva
+appena scritto e mai committato"*. Erano i miei. Avevo scritto — in `curatore.md` e qui — che la
+proposta su `theme.css` era stata **ritirata perche' non passata dal Curatore**. **Falso: e' andata
+persa in un incidente.** Restano vere entrambe le lezioni, ma sono due cose diverse: **non era da
+farsi senza Baggio**, *e* **non era stata committata**. Corretto in `curatore.md` e in
+`FRAMEWORK.md`, dove la regola dei due tavoli ora nomina l'incidente e aggiunge la seconda regola:
+**committa spesso**.
+
+### Fatti nuovi registrati dal contesto Cowork
+
+Ramo di lavoro `tessera-e-incarichi` · il lavoro frontend del 21-22/08 (stemmi 2026, Classifica
+ordinabile con la posizione vera preservata, Societa', Scheda societa' a quattro sezioni,
+Risultati da 1250 a 336 px sul telefono, `TeamBadge` che non tronca) · **la dashboard `/area` non
+e' ancora rifatta** · la trappola della build che punta al Supabase vero · **DMARC mancante**.
+
+E **cinque guasti nei dati**, promossi a sezione propria nello STATO perche' con i contratti come
+prodotto pesano diversamente: le rose sono una **fotografia di fine stagione senza date** (20-74
+giocatori a stagione spariscono se ceduti a gennaio) · **2023-24 al 72% di schierati fuori rosa**
+contro il 12-21% delle altre · la rosa 2025-26 senza presenze, MV e fantamedia su tutte e 310 le
+righe · 111 righe non agganciate · 140 contratti su 358.
+
+### Controllo di sicurezza Supabase — 2 errori
+
+163 rilievi, **2 ERRORE**. `public.contratti_pubblici` e' voluto e documentato. **`caprera.v_forma`
+no**: `SECURITY DEFINER` non deciso da nessuno, comparso con `caprera_forma_con_avversario` (21/08
+00:08). Impatto probabilmente nullo — la forma si calcola da partite pubbliche — ma **una vista che
+scavalca le regole di riga per distrazione e' esattamente come e' nata la terza porta**.
+
+### Undicesimo passaggio — tre regole della lega in piu', e una che toccava il sorteggio
+
+Seconda consegna del contesto Cowork, con cinque voci di lavoro in piu'. Due non erano frontend:
+erano **scoperte sulle regole**. Verificate contro `REGOLE/regole-caprera.json` prima di scriverle.
+
+- **Il peso delle stagioni nel Ranking: cinque volte, non il doppio**, come diceva il testo del
+  sito. Non e' nel JSON ne' nella spiegazione — vive **solo nel PDF**. Nona incongruenza.
+- ⚠️ **Il pari merito nel Ranking decideva in quale girone finivi, e lo decideva l'ordine di
+  lettura del database.** Subbuteo e Roburro sono esattamente pari sulle ultime cinque stagioni.
+  **E' il difetto piu' grave trovato finora**, e per una ragione precisa: non sbagliava un numero
+  mostrato a schermo — **cambiava il sorteggio**. Un errore di visualizzazione si corregge e
+  nessuno ha perso niente; questo aveva conseguenze sportive. Decima incongruenza, e non e' un
+  refuso: e' un **buco**, e il criterio nuovo (stagione piu' recente, poi differenza reti) **va
+  ratificato dalla Presidenza** — finche' non e' nel regolamento e' una scelta di chi ha scritto
+  il codice.
+- **La scala dei gol cambia nel 2020-21, non nel 2024-25**: passo da **6 a 4** fantapunti per gol.
+  Verificato in `scala_gol`. E li' c'e' una riga che vale da sola: *«la scala 2025-26 e' quella
+  scritta nel regolamento; le altre sono state ricostruite dai dati»* — **anche il punteggio della
+  lega e' in parte reverse-engineering.**
+
+Le regole scoperte lavorando passano da **3 a 6**, le incongruenze del regolamento da **8 a 10**.
+Con la Caprera League come prodotto **non sono piu' curiosita' d'archivio: sono il prodotto
+scritto male**, e questo rafforza la raccomandazione gia' corretta al tavolo — **il primo nodo e'
+il regolamento**.
+
+**Nota di confine, e la regola che ne e' nata.** `.avviso`, `.pos` e `tr.podium` sono state
+spostate in `theme.css` dalla sessione del codice — territorio del Curatore. Il guasto era vero
+(chi arrivava dritto su Ranking le trovava vuote) e la correzione e' giusta, ma la regola dei due
+tavoli non prevedeva il caso *"bug che si ripara solo di la'"*.
+
+**L0 ha deciso il 22/08: si consegna al Curatore.** Non "si tocca dichiarandolo" — e la ragione
+tiene: **un confine con un'eccezione per urgenza non e' un confine**, perche' la volta dopo e'
+urgente anche quella.
+
+Aggiunta in `FRAMEWORK.md` con il vincolo che la rende praticabile: **la consegna e' pronta da
+applicare** — file, righe, e il perche' — non una segnalazione vaga. Chi riceve incolla e
+verifica, non indaga. Cosi' il costo del confine sono minuti, e nessun guasto resta aperto per
+rispetto della procedura.
+
+**Debito retroattivo aperto:** lo spostamento e' gia' avvenuto e resta, ma **va ratificato dal
+Curatore** — come i token del tema del 21/08. Sono due cose in coda a Baggio, non una.
+
+### Dodicesimo passaggio — le due consegne a Baggio, e un guasto trovato scrivendole
+
+L0: *"entrambe"*. Preparate **come consegne**, non eseguite: la decisione sui token e la ratifica
+sono del Curatore, e rifarle qui sarebbe ripetere l'errore del 21/08 con piu' cerimonia.
+
+Aperta **`.processo/CONSEGNE/`** — la regola scritta due ore fa diceva *"si consegna"* senza dire
+**dove**, quindi non aveva indirizzo. Ora ha formato, README e due voci nel vocabolario e nella
+tabella della memoria.
+
+Scritta `CONSEGNE/2026-08-22-a-curatore-theme-css.md`, verificata sul disco:
+
+**A · ratifica delle tre classi** — e verificandola e' venuto fuori che **la correzione e'
+incompleta**: `.avviso`, `.pos` e `tr.podium` sono state *aggiunte* a `theme.css` ma **le copie
+vecchie non sono state tolte** (`Contratti.css`, `Coppe.css`, `Home.css`). Sono chunk lazy: quale
+definizione vince dipende dal **percorso di navigazione dell'utente**. E' lo stesso genere di
+guasto che quella correzione voleva chiudere, rientrato dall'altra parte. In `Coppe.css:187` c'e'
+anche un commento che ora **dice il falso**.
+
+**B · i token mancanti** — con la misura aggiornata, che e' il dato che vale: **960 valori grezzi**
+oggi contro i **649 del 21/08**. **+311 in una giornata**, non per sciatteria ma perche' sono
+state rifatte sette pagine. E' la prova pulita che **ogni pagina nuova nasce con il suo ritmo
+privato**. Passati a Baggio i tre difetti gia' misurati (focus senza ring, `prefers-reduced-motion`
+assente, bersagli a 26-30 px) **senza ricostruire la proposta persa**: quella la rifa' lui, o
+decide di no.
+
+**Pattern:** *una regola senza indirizzo non e' una regola.* "Si consegna" e' rimasto un principio
+per due ore, finche' non ha avuto una cartella, un formato e una riga nel vocabolario.
+
+### Tredicesimo passaggio — il motore economico, e una verifica che ho sbagliato
+
+L0 ha scelto di partire dalla **prova**: far calcolare i premi dall'archivio e vedere se i `bonus`
+registrati tornano. Il risultato e' utile proprio perche' **non torna**, e si sa perche'.
+
+`v_premi_crediti` esisteva gia' e calcola **due premi su sei**. Accostando i premi del 2024-25 ai
+`bonus` del budget 2025-26 — l'allineamento giusto: si guadagna in N, si spende all'asta di N+1 —
+**gli scarti sono tutti positivi**, +1..+23. Real Monghi chiude ultima nei fantapunti e ultima nei
+marcatori (−5) e si presenta all'asta con **+18**. Le altre quattro voci non sono calcolabili, e
+per ragioni diverse: il Ranking manca dal PDF, Paratici e Zdenek non dicono a chi spettano, le
+assicurazioni dipendono da dati che non abbiamo, e **penalita' ed etica sono atti, non conseguenze
+di partite**.
+
+**Conclusione che vale piu' della prova:** `finanze.bonus` non tornera' mai, perche' e' un intero
+unico in cui finisce roba che nessun calcolo produce. Le finanze sono **un saldo, non un estratto
+conto** — e un gioco manageriale vive di *"perche' ho 12 crediti in meno?"*.
+
+**Ricavata l'identita' contabile**, vera su tutte e dieci le societa' e scritta in nessun posto:
+`iniziali = 250 + riportati + bonus + ffp` e `residui = iniziali + scambi − spesi`.
+
+### ⚠️ Una verifica sbagliata, ritirata prima di consegnarla
+
+L0 ha dato la regola *"a pari gol nessuno prende il gol vittoria"*. Ho contato i bonus
+`gol-vittoria` nelle partite finite in pareggio: **487 su 2.577**, e stavo per portarlo come
+contraddizione.
+
+**La verifica non testava quello che credevo.** `gol_casa = gol_fuori` e' il pareggio della partita
+**di Caprera**; il gol vittoria e' un bonus del calciatore nella partita **vera di Serie A**. Le due
+cose non c'entrano niente: un pareggio in fantacalcio puo' contenere benissimo chi ha deciso
+Inter-Lecce. **Il numero era corretto e non significava nulla.**
+
+**Il pattern, ed e' gemello di quello di `lega_id`:** avevo una fonte vera e una domanda mal posta.
+La prima volta ho cercato il nome giusto nel posto sbagliato; qui ho misurato la cosa sbagliata nel
+posto giusto. In entrambi i casi il dato era buono e **la domanda no**. Prima di fidarsi di una
+verifica, va verificata la domanda.
+
+### Le due regole nuove
+
+- **A pari merito il premio non si assegna, ne' in positivo ne' in negativo** (L0, 22/08). Scritta
+  in `regole-caprera.json` → `crediti.premi.parita`. **Segnata l'estensione ai premi positivi come
+  mia deduzione e non come dichiarazione di L0** — nel JSON c'e' un campo `attenzione` che lo dice.
+  Nota per il tavolo: e' un criterio **diverso** da quello del Ranking, dove a pari coefficiente si
+  spareggia. Due criteri nella stessa lega: o si motiva la differenza, o si uniforma.
+- **Risparmi riportati: meta' dei residui** — gia' nel JSON come `0.5`. Quello che mancava e'
+  l'**arrotondamento sui dispari**, e non e' teorico: **Subbuteo chiude con 7 residui** ed e' la
+  sola che ci cade, alla prossima asta.
+
+Regole della lega scoperte lavorando: da **6 a 8**. Incongruenze del regolamento: da **10 a 12**.
+Scritta la consegna `CONSEGNE/2026-08-22-a-magazziniere-premi-crediti.md` — con dentro
+l'avvertenza di **non** andare a caccia dello scarto fra calcolato e registrato: e' atteso.
+
+### Quattordicesimo passaggio — l'audit del regolamento, e la consegna della sera
+
+**Letto il PDF per intero** (42 pagine) e confrontato con JSON, motore, schema e viste:
+`SPIEGAZIONI/AUDIT_Regolamento_vs_Implementazione.md`. Il risultato ribalta quello che avevo detto
+poche ore prima: **non erano "due premi su sei", sono venti fonti di crediti**, e mancava la piu'
+grande — il **Trofeo Walter Mazzarri**, fino a **+10**, piu' del 1o posto Fantapunti (+5) e del
+Ranking (+3) messi insieme. E' la spiegazione piu' probabile del +18 di Real Monghi.
+
+**Errore di metodo, il terzo dello stesso tipo in una giornata:** avevo letto il
+`regole-caprera.json` e l'avevo scambiato per il regolamento. Poi, contando le assenze, ne ho
+dichiarate otto quando erano **cinque**: diritti TV, Indennizzo Carnevali, franchigia Rechsschuetz
+e Mondiale per Club c'erano gia', fuori da `crediti.premi`. **Cerco le cose dove mi aspetto che
+siano, non dove sono.**
+
+**Completato il file** su richiesta di L0: `crediti.premi` da 7 a 14 voci, ognuna con `fonte`,
+`calcolabile` e `perche_no`; blocco `stagione_2026_27` con le cinque riforme (**Capology**: gli
+stipendi si pagano ogni anno, +85 crediti al budget — e' il "piu' manageriale" della visione, gia'
+scritto nel regolamento e mai implementato); chiarito che **le "vincite" sono euro e non crediti**.
+
+### ⚠️ `carica.sh` cancella le tessere — trovato rispondendo a "come si rilancia"
+
+L0 ha chiesto come rilanciare `carica.sh` per allineare il database. **Controllato prima di
+rispondere**, e per fortuna: `carica.py` fa `truncate ... cascade` su una lista che contiene
+`societa` e `misteri`. **`tessere` ha una chiave esterna verso `societa` e non e' nella lista: la
+cascata se la porta via.** Chi lancia lo script oggi si toglie da solo l'accesso all'area.
+
+La lista e' del 20/08 alle 16:25; la Tessera del Tifoso e' arrivata alle 22:01. **Nessuno ha
+riletto lo script dopo.** Stesso pattern delle tre porte: una superficie nuova non guardata quando
+e' stata aperta.
+
+E la risposta giusta alla domanda era comunque un'altra: **per aggiornare le regole non serve
+`carica.sh`** — e' un campo JSONB, si aggiorna con un `update`. Svuotare e ricaricare 160.000 righe
+per cambiare una colonna e' sproporzionato, e in questo caso distruttivo.
+
+### Quindicesimo passaggio — la consegna della sessione del codice
+
+Arrivata `CONSEGNE/2026-08-22-a-segretario-momento-del-listone.md`. **Verificato tutto alla fonte
+prima di trascrivere**: 38 migrazioni ✓ (7 del 22/08), 26 tabelle ✓, 28 regole ✓, `listone.momento`
+✓. **Una correzione al loro conto: le finestre sono 39, non 38** — e il 38 l'avevo propagato io in
+sette documenti.
+
+- **Nona regola della lega:** *una quotazione senza la data e' mezza informazione* — vale quella di
+  **partenza**. Il regolamento §7.1 dice "quotazione Fantapazz di inizio campionato" dando per
+  scontato che ne esista una sola. **Non e' cosi'**, e in archivio ci sono nove stagioni di
+  quotazioni di fine e una sola di partenza.
+- **La scoperta che vale piu' della regola:** `rose.costo` **mescola rilanci d'asta e prezzi che il
+  contratto si porta dietro**. Chiunque ci calcoli "quanto ha speso una societa' quell'anno" somma
+  due cose diverse.
+- **I contratti veri sono 163, non 358** — 59 con clausola, 24 Under. In archivio 140 con **zero**
+  clausole. E **cinque nomi su 154 hanno il ruolo discordante**: non e' cosmetico, il ruolo decide
+  uno slot del Jobs Act e la soglia minima della CR (50% D, 75% C).
+
+**Due decisioni prese, che L0 aveva girato a me:**
+
+1. **Il confine non era stato passato.** `caprera-dati/SUPABASE/` **e' del Magazziniere**: due
+   nostre regole si contraddicevano (la regola dei due tavoli dice `caprera-dati/` per intero,
+   `magazziniere.md` dice di `SUPABASE/` "e' tuo"). Vale `magazziniere.md`, e ho scritto in
+   `FRAMEWORK.md` il criterio per la prossima ambiguita': **la memoria racconta, il materiale
+   esegue.**
+2. **`01-schema.sql`: rimettere `listone` com'era.** Il file e' diventato un ibrido — venti tabelle
+   al 20/08 e una a oggi — ed e' **la terza verita' che il punto #1 vieta**, nella sua forma
+   peggiore: quella che non si vede.
+
+**Nota su chi ha scritto la consegna:** ha ritirato da solo l'esempio di Yildiz *e* la correlazione
+che sembrava reggere, prima che qualcuno glielo chiedesse. E' il comportamento che questa moviola
+raccomanda da stanotte, applicato senza che fosse necessario chiederlo.
+
 ## Decisioni prese (e alternative scartate)
 
 - **ADR-002 aperto, non lasciato dentro la rassegna.** La scelta di leggere da `public` con 29 viste sottili invece di esporre lo schema `caprera` dal cruscotto ha alternative reali, un debito accettato (29 viste da mantenere) e conseguenze durature: è una sentenza, non una nota di sessione. La rassegna la racconta, l'ADR la argomenta.

@@ -16,9 +16,11 @@ a.team-badge:hover .tb-name {
   flex-shrink: 0;
 }
 
-.tb-sm { height: 20px; }
-.tb-md { height: 26px; }
-.tb-lg { height: 44px; }
+/* Gli stemmi del 2026 sono illustrazioni, non icone: a venti pixel
+   diventano una macchia. Un filo piu' grandi si riconoscono. */
+.tb-sm { height: 24px; }
+.tb-md { height: 30px; }
+.tb-lg { height: 56px; }
 
 /* segnaposto per le società storiche, che non hanno stemma */
 .tb-fallback {
@@ -34,12 +36,24 @@ a.team-badge:hover .tb-name {
   opacity: 0.85;
 }
 
+/* Il nome va a capo, non si taglia.
+   Con i puntini "Sporting Mangiapreti" diventava "Sporting Mangi…" e
+   "Aston Ville di Corsano" diventava "Aston Ville di C…": due societa'
+   diverse possono ridursi alla stessa sigla monca, e a quel punto la
+   scritta non serve piu' a niente. Una riga in piu' costa meno. */
 .tb-name {
   font-weight: 500;
   color: var(--text);
   transition: color 0.15s;
+  min-width: 0;
+  overflow-wrap: break-word;
+  line-height: 1.2;
+}
+
+/* Dove la riga DEVE restare alta uguale — l'intestazione di una tabella
+   fitta — si chiede a mano. */
+.team-badge.una-riga .tb-name {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  min-width: 0;
 }

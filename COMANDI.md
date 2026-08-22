@@ -100,6 +100,12 @@ node collaudo/finto-supabase.mjs &
 # in .env, temporaneamente: VITE_SUPABASE_URL=http://localhost:5410
 ```
 
+> ⚠️ **Trappola da conoscere.** `npm run build` legge il `.env`, che punta al **Supabase vero**:
+> una build fatta così, provata contro il finto Supabase, mostra pagine vuote e **sembra un guasto
+> del sito**. Per i collaudi la build va fatta puntando al finto:
+>
+>     VITE_SUPABASE_URL=http://localhost:5410 VITE_SUPABASE_ANON_KEY=finto npx vite build
+
 Spiegazione completa in `collaudo/README.md`.
 
 ## Per pubblicare il sito

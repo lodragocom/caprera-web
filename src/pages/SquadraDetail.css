@@ -1,89 +1,353 @@
-.team-hero {
-  display: flex;
+/* ============================================================
+   La scheda di una società.
+   In cima chi è e cosa ha fatto; sotto, quattro sezioni.
+   ============================================================ */
+
+/* ------------------------------------------------------------- identità */
+.sd-hero {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 30px;
-  padding: 30px 34px;
-  margin-bottom: 18px;
-  position: relative;
-  overflow: hidden;
+  padding: 30px 32px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-soft);
   border-left: 4px solid var(--accent);
+  background:
+    radial-gradient(120% 160% at 0% 50%,
+      color-mix(in srgb, var(--accent) 20%, transparent) 0%, transparent 62%),
+    linear-gradient(160deg, var(--navy-800), var(--navy-850));
 }
 
-.team-hero::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(100deg, color-mix(in srgb, var(--accent) 22%, transparent), transparent 58%);
-  pointer-events: none;
+.sd-stemma img {
+  width: 132px;
+  height: 132px;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 26px rgba(0, 0, 0, 0.55));
 }
 
-.hero-logo {
-  height: 116px;
-  width: auto;
-  flex-shrink: 0;
-  filter: drop-shadow(0 8px 22px rgba(0, 0, 0, 0.5));
+.sd-chi { min-width: 0; }
+
+.sd-chi h1 {
+  font-size: clamp(2.1rem, 5vw, 3.4rem);
+  line-height: 0.95;
+  margin: 6px 0 0;
+  color: var(--cream);
 }
 
-.team-hero h1 {
-  font-size: clamp(2rem, 5vw, 3.2rem);
-}
-
-.former,
-.titles {
+.sd-gia {
   margin: 8px 0 0;
-  font-size: 0.83rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-style: italic;
 }
 
-.former {
+.sd-palmares {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 14px;
+}
+
+.sd-trofeo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(217, 180, 106, 0.32);
+  background: rgba(217, 180, 106, 0.09);
+  color: var(--gold-400);
+}
+
+.sd-trofeo.grosso {
+  font-weight: 600;
+  border-color: rgba(217, 180, 106, 0.55);
+  background: rgba(217, 180, 106, 0.15);
+}
+
+.sd-trofeo.vuoto {
+  border-color: var(--border-soft);
+  background: none;
   color: var(--text-dim);
 }
 
-.titles {
+.sd-trofeo i { font-style: normal; }
+
+/* la colonna di destra: com'è andata quest'anno */
+.sd-ora { text-align: right; }
+
+.sd-pos {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 2.6rem;
+  line-height: 1;
   color: var(--gold-400);
-  font-weight: 500;
+  margin: 4px 0 12px;
 }
 
-@media (max-width: 640px) {
-  .team-hero { flex-direction: column; text-align: center; gap: 16px; padding: 24px; }
-  .hero-logo { height: 88px; }
-}
+.sd-pos em { font-style: normal; font-size: 1.1rem; color: var(--text-dim); }
 
-/* --------------------------------------------------------------- kpi */
-.kpi-row {
+/* --------------------------------------------------- i numeri di sempre */
+.sd-numeri {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
-  gap: 10px;
-  margin-bottom: 46px;
+  grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+  gap: 1px;
+  margin-top: 18px;
+  background: var(--border-soft);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  overflow: hidden;
 }
 
-.kpi {
+.sd-numero {
+  background: var(--navy-850);
   padding: 15px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
 }
 
-.kpi strong {
-  font-family: var(--font-display);
-  font-size: 1.62rem;
-  font-weight: 400;
-  color: var(--cream);
+.sd-numero strong {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--text);
   line-height: 1;
 }
 
-.kpi span {
+.sd-numero strong.oro { color: var(--gold-400); }
+.sd-numero strong.su { color: var(--win); }
+.sd-numero strong.giu { color: var(--loss); }
+
+/* `>` obbligatorio: senza, questa regola prende anche lo span che il
+   componente Numero disegna dentro <strong>, e il numero esce a 8 pixel. */
+.sd-numero > span {
+  display: block;
+  margin-top: 7px;
   font-family: var(--font-mono);
   font-size: 0.55rem;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.13em;
   text-transform: uppercase;
   color: var(--text-dim);
 }
 
-.block {
-  margin-bottom: 48px;
+.sd-numero > em {
+  display: block;
+  margin-top: 3px;
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  color: var(--text-muted);
 }
 
-/* ------------------------------------------------------------- chart */
+/* ------------------------------------------------------------- sezioni */
+.sd-schede {
+  display: flex;
+  gap: 4px;
+  margin: 30px 0 22px;
+  border-bottom: 1px solid var(--border-soft);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.sd-schede::-webkit-scrollbar { display: none; }
+
+.sd-schede button {
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: 11px 18px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.sd-schede button:hover { color: var(--text); }
+.sd-schede button.on { color: var(--gold-400); border-bottom-color: var(--gold-500); }
+
+/* ------------------------------------------------------- barra comandi */
+.sd-barra {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.sd-scelta span {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+
+.sd-scelta select { font-size: 0.9rem; padding: 9px 13px; min-width: 130px; }
+
+.sd-reparti {
+  display: inline-flex;
+  background: var(--navy-850);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 3px;
+  gap: 2px;
+}
+
+.sd-reparti button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 0;
+  border-radius: 7px;
+  padding: 7px 13px;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+
+.sd-reparti button:hover { color: var(--text); }
+
+.sd-reparti button.on {
+  background: var(--gold-500);
+  color: var(--navy-900);
+  font-weight: 600;
+}
+
+.sd-reparti button i {
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  opacity: 0.65;
+}
+
+.sd-riepilogo {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin: 0 0 0 auto;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+.sd-riepilogo b { font-family: var(--font-mono); color: var(--text); font-weight: 500; }
+.sd-riepilogo .su b { color: var(--win); }
+.sd-riepilogo .giu b { color: var(--loss); }
+
+/* --------------------------------------------------------- la rosa */
+.sd-tabella { overflow-x: auto; }
+
+.sd-tabella table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+
+.sd-tabella th {
+  background: none;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-weight: 400;
+  padding: 0 10px 12px;
+  text-align: right;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.sd-tabella th.c-r, .sd-tabella th.c-nome, .sd-tabella th.c-club { text-align: left; }
+
+.sd-tabella td {
+  padding: 10px;
+  border-bottom: 1px solid var(--border-soft);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.sd-tabella tr:hover td { background: rgba(255, 255, 255, 0.022); }
+
+.sd-tabella td.c-r, .sd-tabella td.c-nome, .sd-tabella td.c-club { text-align: left; }
+.sd-tabella td.c-nome { color: var(--cream); font-weight: 500; width: 40%; }
+.sd-tabella td.c-club {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+}
+.sd-tabella td.num { font-family: var(--font-mono); color: var(--text-muted); }
+.sd-tabella td.in-ordine { color: var(--text); background: rgba(217, 180, 106, 0.05); }
+
+/* ------------------------------------------------------------ partite */
+.sd-partite {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  gap: 8px;
+}
+
+.sd-gara {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-soft);
+  border-left: 3px solid var(--text-dim);
+  background: var(--navy-850);
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.sd-gara:hover { transform: translateX(2px); border-color: var(--gold-600); }
+
+.sd-gara.e-V { border-left-color: var(--win); }
+.sd-gara.e-N { border-left-color: var(--draw); }
+.sd-gara.e-P { border-left-color: var(--loss); }
+.sd-gara.coppa { background: rgba(217, 180, 106, 0.045); }
+
+.g-sigla {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--text-dim);
+  width: 2.6rem;
+  flex-shrink: 0;
+}
+
+.g-dove {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  width: 15px;
+  height: 15px;
+  border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-soft);
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+
+.g-dove.casa { border-color: var(--gold-600); color: var(--gold-500); }
+
+.sd-gara .team-badge { flex: 1; min-width: 0; gap: 6px; }
+
+.sd-gara .tb-name {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.g-punteggio {
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+  color: var(--text);
+  margin-left: auto;
+}
+
+/* ------------------------------------------------------------- grafico */
 .chart-wrap {
   background: var(--navy-850);
   border: 1px solid var(--border-soft);
@@ -91,11 +355,7 @@
   padding: 14px 10px 6px;
 }
 
-.chart {
-  width: 100%;
-  height: auto;
-  display: block;
-}
+.chart { width: 100%; height: auto; display: block; }
 
 .chart-label {
   font-family: var(--font-mono);
@@ -103,81 +363,59 @@
   fill: var(--text-dim);
 }
 
-/* ------------------------------------------------------------ roster */
-.roster-meta {
-  display: flex;
-  gap: 18px;
-  flex-wrap: wrap;
-  font-size: 0.82rem;
-  color: var(--text-muted);
-  align-self: flex-end;
-  padding-bottom: 9px;
+/* ------------------------------------------------------------ stretto */
+@media (max-width: 900px) {
+  .sd-hero {
+    grid-template-columns: auto 1fr;
+    gap: 20px;
+    padding: 22px;
+  }
+  .sd-stemma img { width: 96px; height: 96px; }
+  .sd-ora {
+    grid-column: 1 / -1;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-soft);
+  }
+  .sd-ora .eyebrow { margin: 0; }
+  .sd-pos { margin: 0; font-size: 1.8rem; }
+  .sd-riepilogo { margin-left: 0; width: 100%; }
 }
 
-.roster-meta b {
-  color: var(--cream);
-  font-weight: 600;
+@media (max-width: 560px) {
+  .sd-hero { grid-template-columns: 1fr; text-align: center; padding: 20px 16px; }
+  .sd-stemma img { width: 110px; height: 110px; margin-inline: auto; }
+  .sd-palmares { justify-content: center; }
+  .sd-numeri { grid-template-columns: repeat(2, 1fr); }
+  .sd-numero strong { font-size: 1.25rem; }
+  .sd-barra { gap: 12px; }
+  .sd-scelta, .sd-scelta select { width: 100%; }
+  .sd-reparti { width: 100%; overflow-x: auto; scrollbar-width: none; }
+  .sd-reparti::-webkit-scrollbar { display: none; }
+  .sd-partite { grid-template-columns: 1fr; }
+  .sd-tabella td.c-club { display: none; }
+  .sd-tabella th.c-club { display: none; }
 }
 
-.roster-meta .roles {
-  color: var(--gold-600);
-  font-size: 0.75rem;
-}
-
-.club {
-  font-size: 0.74rem;
-  letter-spacing: 0.05em;
-}
-
-/* ------------------------------------------------------ mini matches */
-.mini-matches {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(256px, 1fr));
-  gap: 8px;
-}
-
-.mini {
-  display: grid;
-  grid-template-columns: 2.2rem 1.3rem 1fr auto auto;
-  align-items: center;
-  gap: 9px;
-  padding: 9px 13px;
-  font-size: 0.83rem;
-}
-
-.mini .rnd {
-  font-size: 0.66rem;
+.sd-nota {
+  margin: 14px 0 0;
+  font-size: 0.78rem;
   color: var(--text-dim);
+  line-height: 1.6;
 }
 
-/* le gare di coppa si distinguono a colpo d'occhio da quelle di campionato */
-.mini.di-coppa {
-  border-left: 2px solid var(--gold-500);
-}
-
-.mini.di-coppa .rnd {
-  font-size: 0.58rem;
-  color: var(--gold-400);
-  letter-spacing: 0.02em;
-}
-
-.ha {
-  font-family: var(--font-mono);
-  font-size: 0.6rem;
-  color: var(--text-dim);
-  border: 1px solid var(--border-soft);
-  border-radius: 4px;
-  text-align: center;
-  padding: 1px 0;
-}
-
-.ha.is-home {
+.sd-gia button {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-style: normal;
   color: var(--gold-500);
-  border-color: var(--border);
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
 }
 
-.mini-score {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--cream);
-}
+.sd-gia button:hover { color: var(--gold-400); }

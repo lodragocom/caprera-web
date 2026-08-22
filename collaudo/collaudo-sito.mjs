@@ -11,7 +11,7 @@ import { chromium } from 'playwright'
 
 const BASE = 'http://localhost:4180'
 const PUBBLICHE = ['/', '/classifica', '/risultati', '/squadre', '/rose', '/contratti',
-  '/albo-doro', '/giocatori', '/stats', '/asta', '/ranking', '/coppe', '/regolamento',
+  '/albo-doro', '/giocatori', '/giocatori/1084', '/partita/1', '/stats', '/asta', '/ranking', '/coppe', '/regolamento',
   '/assicurazioni', '/statistiche', '/login']
 const AREA = ['/area', '/area/rosa', '/area/formazioni', '/area/contratti',
   '/area/crediti', '/area/coppe', '/area/storia']
@@ -106,19 +106,32 @@ for (const voce of VOCI_AREA) {
 }
 
 console.log('\n=== LINK SEGUITI DAVVERO ===')
+// `apri` e' la scheda da cliccare prima: le sezioni della scheda societa'
+// non sono tutte in pagina insieme, e cercarle senza aprirle e' un falso
+// allarme garantito.
 const CLIC = [
   ['/coppe', ".albo-lista a[href^='/squadre/']", 'albo d\'oro → società'],
   ['/coppe', ".match a[href^='/squadre/']", 'tabellone → società'],
   ['/coppe', ".trofeo a[href^='/squadre/']", 'albo stagione → società'],
   ['/squadre/prosecco', ".trofeo-card", 'bacheca → coppe'],
   ['/squadre/prosecco', ".tappa a[href^='/squadre/']", 'percorso → società'],
-  ['/squadre/prosecco', ".mini a[href^='/squadre/']", 'partite → società'],
+  ['/squadre/prosecco', "a.sd-gara[href^='/squadre/']", 'partite → società', 'Partite'],
   ['/albo-doro', "a[href^='/squadre/']", 'albo d\'oro pagina → società'],
+  ['/giocatori', "a.gi-nome", 'giocatori → scheda calciatore'],
+  ['/giocatori/1084', ".sg-maglia[href^='/squadre/']", 'scheda calciatore → società'],
+  ['/risultati', "a.ri-partita", 'calendario → tabellino'],
+  ['/partita/1', ".pt-lato[href^='/squadre/']", 'tabellino → società'],
+  ['/partita/1', "a.pt-nome[href^='/giocatori/']", 'tabellino → scheda calciatore'],
 ]
-for (const [dove, sel, nome] of CLIC) {
+for (const [dove, sel, nome, apri] of CLIC) {
   pagina = dove
   await p.goto(BASE + dove, { waitUntil: 'networkidle' })
   await p.waitForTimeout(900)
+  if (apri) {
+    await p.locator('.sd-schede button', { hasText: apri }).click().catch(() =>
+      problemi.push(`[${dove}] non trovo la scheda "${apri}"`))
+    await p.waitForTimeout(1200)
+  }
   const n = await p.locator(sel).count()
   if (!n) { problemi.push(`[${dove}] nessun link per "${nome}" (${sel})`); console.log(`${nome}: NESSUN LINK`); continue }
   const href = await p.locator(sel).first().getAttribute('href')

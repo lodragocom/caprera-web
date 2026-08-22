@@ -118,8 +118,47 @@ const testoPan = await p.evaluate(() => document.querySelector('.dash-main')?.in
 if (!testoPan.includes(ora)) problemi.push('[visita] la panoramica non parla della societa\' guardata')
 
 // le "ultime cinque" devono dire contro CHI, non solo "in casa di"
-const avversari = await p.locator('.ultime .avversario').allInnerTexts()
+const avversari = await p.locator('.pan-gare .pan-avv').allInnerTexts()
+if (!avversari.length) problemi.push('[ultime 5] non trovo nessuna riga: il selettore non guarda piu\' niente')
 console.log('ultime 5 · avversari:', avversari.map((t) => t.replace(/\s+/g, ' ').trim()).join(' | ') || '(nessuno)')
+// la rosa deve portare alle schede dei calciatori, e dire cosa hanno fatto qui
+await p.goto(BASE + '/area/rosa', { waitUntil: 'networkidle' })
+await p.waitForTimeout(1200)
+const versoSchede = await p.locator('.ro-tabella a[href^="/giocatori/"]').count()
+if (!versoSchede) problemi.push('[rosa] nessun calciatore porta alla sua scheda')
+const conNoi = await p.locator('.ro-anni').count()
+if (!conNoi) problemi.push('[rosa] nessuna riga dice da quante stagioni e\' in societa\'')
+const storico = await p.locator('.ro-storico .ro-classifica li').count()
+console.log(`rosa · schede ${versoSchede} · righe con la carriera ${conNoi} · storico ${storico}`)
+
+/*
+ * La quotazione deve dire di che giorno e'.
+ *
+ * Il 2025-26 ha il listone di partenza: si puo' mettere accanto al costo
+ * d'asta, e verde e rosso hanno senso. Le stagioni prima hanno solo la
+ * quotazione di fine anno: mostrarla va bene, colorarla come «affare» no —
+ * sarebbe un giudizio dato con la moviola su una scommessa fatta prima.
+ */
+for (const [anno, diPartenza] of [['2025-26', true], ['2019-20', false], ['2016-17', false]]) {
+  pagina = `/area/rosa · ${anno}`
+  await p.goto(BASE + '/area/rosa', { waitUntil: 'networkidle' })
+  await p.selectOption('.ro-stagione select', anno).catch(() => {})
+  await p.waitForTimeout(1500)
+  const quotate = await p.locator('.ro-quota').count()
+  const colorate = await p.locator('.ro-quota.affare, .ro-quota.caro').count()
+  const colonna = await p.locator('.ro-tabella th').filter({ hasText: /^Quot/ })
+    .first().innerText().catch(() => '(nessuna)')
+  console.log(`quotazioni ${anno} · colonna «${colonna}» · celle ${quotate} · colorate ${colorate}`)
+  if (!quotate) problemi.push(`[rosa ${anno}] nessuna quotazione mostrata`)
+  if (diPartenza && !colorate) problemi.push(`[rosa ${anno}] listone di partenza ma nessun affare colorato`)
+  if (!diPartenza && colorate) problemi.push(`[rosa ${anno}] colora affari su una quotazione di fine stagione`)
+}
+await p.goto(BASE + '/area', { waitUntil: 'networkidle' })
+await p.waitForTimeout(1200)
+
+const versoTabellino = await p.locator('.pan-gare a[href^="/partita/"]').count()
+if (!versoTabellino) problemi.push('[ultime 5] nessuna partita porta al suo tabellino')
+console.log('ultime 5 · portano al tabellino:', versoTabellino)
 for (const a of avversari) {
   if (/^\s*in casa (con|di)\s*$/i.test(a)) problemi.push(`[ultime 5] avversario mancante: "${a.trim()}"`)
 }

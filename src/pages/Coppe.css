@@ -286,7 +286,7 @@
 }
 
 .match .sq:last-child { justify-content: flex-end; }
-.match .sq span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.match .sq span { overflow-wrap: break-word; line-height: 1.2; }
 .match .sq img { width: 20px; height: 20px; object-fit: contain; flex: none; }
 .match .sq:hover span { color: var(--text); }
 .match .sq.vinta span { color: var(--text); font-weight: 600; }
@@ -392,7 +392,7 @@
 }
 
 .albo-lista .sq img { width: 22px; height: 22px; object-fit: contain; flex: none; }
-.albo-lista .sq span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.albo-lista .sq span { overflow-wrap: break-word; line-height: 1.2; }
 .albo-lista .sq:hover span { color: var(--gold-400); }
 
 .albo-lista .dettaglio {
@@ -438,7 +438,7 @@
 
 /* senza misura esplicita lo stemma esce a grandezza naturale */
 .riga-fp .sq img { width: 20px; height: 20px; object-fit: contain; flex: none; }
-.riga-fp .sq span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.riga-fp .sq span { overflow-wrap: break-word; line-height: 1.2; }
 .riga-fp .sq.vinta span { color: var(--text); font-weight: 600; }
 .riga-fp .sq:hover span { color: var(--text); }
 

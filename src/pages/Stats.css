@@ -1,3 +1,38 @@
+/* ============================================================
+   Record e statistiche — tutto calcolato, niente scritto a mano.
+   ============================================================ */
+
+.st-testa {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.st-testa h1 {
+  font-size: clamp(2.2rem, 5.5vw, 3.5rem);
+  line-height: 0.95;
+  margin: 6px 0 0;
+}
+
+.st .lede { margin: 16px 0 0; }
+
+.st-quando > span {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 7px;
+}
+
+.st-quando select { font-size: 0.9rem; padding: 9px 13px; min-width: 140px; }
+
+/* ------------------------------------------------------------- i record */
 .record-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
@@ -10,7 +45,10 @@
   flex-direction: column;
   gap: 6px;
   border-top: 2px solid var(--gold-600);
+  height: 100%;
 }
+
+.record.vuoto { border-top-color: var(--border); }
 
 .r-tit {
   font-family: var(--font-mono);
@@ -37,6 +75,17 @@
   color: var(--text-muted);
 }
 
+.r-det em { font-style: normal; color: var(--text-dim); }
+
+/* Quando il record non esiste per il periodo scelto: si dice cosa manca,
+   non si mostra uno zero. Uno zero è una risposta; qui non c'è risposta. */
+.r-manca {
+  margin: 4px 0 0;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--text-dim);
+}
+
 .nome-rec {
   font-weight: 600;
   color: var(--cream);
@@ -45,24 +94,49 @@
 .r-nota {
   font-size: 0.63rem;
   color: var(--text-dim);
+  margin-top: auto;
+  padding-top: 4px;
 }
 
-/* ------------------------------------------------------------- barre */
+/* ------------------------------------------------------------- le barre */
 .barre {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 5px;
 }
 
 .barra-riga {
   display: grid;
-  grid-template-columns: 4.6rem 1fr 3rem 4.5rem;
+  grid-template-columns: 4.6rem 1fr 3rem 3.6rem 4.4rem;
   align-items: center;
   gap: 12px;
+  padding: 3px 8px;
+  margin-inline: -8px;
+  border-radius: var(--radius);
   font-size: 0.82rem;
+  transition: background 0.15s;
 }
 
-.s-lab { color: var(--gold-600); font-size: 0.74rem; }
+.barra-riga:hover { background: rgba(255, 255, 255, 0.025); }
+
+.barra-riga.segnata {
+  background: rgba(217, 180, 106, 0.1);
+  box-shadow: inset 3px 0 0 var(--gold-500);
+}
+
+.s-lab {
+  background: none;
+  border: 0;
+  padding: 0;
+  text-align: left;
+  font-family: var(--font-mono);
+  color: var(--gold-600);
+  font-size: 0.74rem;
+  transition: color 0.15s;
+}
+
+.s-lab:hover { color: var(--gold-400); }
+.barra-riga.segnata .s-lab { color: var(--gold-400); font-weight: 600; }
 
 .barra {
   height: 9px;
@@ -79,11 +153,54 @@
 }
 
 .s-val { text-align: right; font-weight: 600; color: var(--cream); }
+.s-fp { text-align: right; font-size: 0.7rem; color: var(--text-muted); }
 .s-tot { text-align: right; font-size: 0.7rem; }
 
+.st-nota {
+  margin: 14px 0 0;
+  font-size: 0.76rem;
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+/* ------------------------------------------------------------ la tabella */
 .season-cell { color: var(--gold-500); font-size: 0.8rem; }
+
+/* Differenza reti: il segno si legge dal colore prima che dal numero. */
+.st td.su { color: var(--win); }
+.st td.giu { color: var(--loss); }
+
+/* -------------------------------------------------------------- stretto */
+@media (max-width: 760px) {
+  .st-testa { flex-direction: column; align-items: flex-start; }
+  .st-quando { width: 100%; }
+  .st-quando select { width: 100%; }
+}
 
 @media (max-width: 640px) {
   .barra-riga { grid-template-columns: 4rem 1fr 2.6rem; }
-  .s-tot { display: none; }
+  .s-tot, .s-fp { display: none; }
+  .r-val { font-size: 2rem; }
+}
+
+/* -------------------------------------------- la tabella sul telefono
+   Sette colonne su trecentonovanta pixel schiacciavano l'unica colonna
+   elastica, quella dei nomi, e ne uscivano «Sangue / misto» e «Disperat / a».
+   Un nome spezzato a metà parola è il troncamento con un altro vestito.
+   La tabella tiene la sua misura e scorre; il nome resta agganciato a
+   sinistra e intero. */
+@media (max-width: 700px) {
+  .st table { min-width: 520px; }
+
+  .st tbody td:first-child,
+  .st thead th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    background: var(--navy-850);
+    box-shadow: 6px 0 8px -6px rgba(0, 0, 0, 0.65);
+  }
+
+  .st thead th:first-child { z-index: 4; background: var(--navy-800); }
+  .st .tb-name { white-space: nowrap; }
 }

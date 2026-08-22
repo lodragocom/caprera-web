@@ -12,12 +12,12 @@ Progetto Supabase **`caprera`** (`ziggietzdtdtpsfmpthm`), eu-central-2. Schema *
 26 tabelle, 10 viste, 10 funzioni, 28 regole di riga.
 
 ⚠️ **Attenzione:** `01/02/03.sql` sono **lo schema iniziale del 20/08**, non lo stato di adesso.
-Lo schema vero e' in **32 migrazioni** che stanno nella cronologia di Supabase e **non nel
+Lo schema vero e' in **38 migrazioni** che stanno nella cronologia di Supabase e **non nel
 repository** (`supabase/migrations/` non esiste). Chi clona non ricrea il database. Non dare mai
 per scontato che un `.sql` del repo descriva la produzione: **verifica**. Esportarle e' il punto
 #1 dello STATO.
 
-Il sito **non legge lo schema `caprera`**: legge **`public`**, dove ci sono **38 finestre sottili**
+Il sito **non legge lo schema `caprera`**: legge **`public`**, dove ci sono **39 finestre sottili**
 (`security_invoker`, quindi le regole di riga restano quelle di sotto). È una scelta messa a
 verbale — `../caprera-dati/ADR/ADR-002-Vetrina-Public-Viste-Sottili.md`: l'alternativa era
 esporre lo schema `caprera` con una **spunta nel cruscotto Supabase**, e una spunta non si

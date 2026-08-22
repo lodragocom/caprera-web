@@ -1,4 +1,5 @@
 import { useMemo, useState, useDeferredValue } from 'react'
+import { Link } from 'react-router-dom'
 import TeamBadge from '../components/TeamBadge'
 import { teamName } from '../lib/core'
 import { useArchivio, tutteLeRose } from '../lib/archivio'
@@ -22,9 +23,13 @@ function costruisciIndice(righe) {
   const acc = new Map()
   for (const r of righe ?? []) {
     const cur = acc.get(r.nome) ?? {
-      player: r.nome, roles: new Set(), teams: new Set(),
+      player: r.nome, id: null, roles: new Set(), teams: new Set(),
       seasons: [], spent: 0, apps: 0, fmSum: 0, fmN: 0, best: null, club: null,
     }
+    /* L'id serve per la scheda. Sessantatre nomi su 1.136 non sono mai stati
+       agganciati a un calciatore dell'archivio: quelli restano righe senza
+       scheda, e sotto la tabella c'e' scritto quanti sono. */
+    if (cur.id === null && r.calciatore != null) cur.id = r.calciatore
     cur.roles.add(r.ruolo)
     cur.teams.add(r.societa)
     cur.seasons.push(r.stagione)
@@ -45,6 +50,10 @@ function costruisciIndice(righe) {
   }))
 }
 
+/* Oltre questo non si disegna: quattromila righe in una tabella sola non le
+   legge nessuno, e il browser le disegna lo stesso. */
+const TETTO = 400
+
 const ORDINAMENTI = {
   spent: (a, b) => b.spent - a.spent,
   best: (a, b) => b.best - a.best,
@@ -52,6 +61,31 @@ const ORDINAMENTI = {
   fm: (a, b) => (b.fm ?? -1) - (a.fm ?? -1),
   apps: (a, b) => b.apps - a.apps,
   player: (a, b) => a.player.localeCompare(b.player),
+}
+
+/**
+ * Il calciatore o il suo club.
+ *
+ * I club in archivio sono sigle di tre lettere — JUV, INT, ROM — perché così
+ * arrivano da Fantapazz. Chi cerca però scrive "juve" o "inter", e con il solo
+ * `includes` non trovava niente: la sigla è più corta della parola cercata.
+ * Qui si guarda anche il contrario, se la sigla è l'inizio di quello che hai
+ * scritto. "juve" trova JUV, "inter" trova INT, "roma" trova ROM.
+ */
+function combacia(p, cercato) {
+  if (p.player.toLowerCase().includes(cercato)) return true
+  const club = (p.club ?? '').toLowerCase()
+  if (!club) return false
+  return club.includes(cercato) || cercato.startsWith(club)
+}
+
+/** Un'intestazione che ordina. Stessa cosa del menu a tendina, a portata di dito. */
+function Ord({ k, ora, vai, children }) {
+  return (
+    <button type="button" className={`ord ${ora === k ? 'on' : ''}`} onClick={() => vai(k)}>
+      {children}{ora === k && <i>▾</i>}
+    </button>
+  )
 }
 
 export default function Giocatori() {
@@ -63,22 +97,30 @@ export default function Giocatori() {
   const stato = useArchivio('tutteLeRose', tutteLeRose)
   const indice = useMemo(() => costruisciIndice(stato.dati), [stato.dati])
 
-  const righe = useMemo(() => {
+  /*
+   * `trovati` e' quanti ne ha trovati; `righe` sono i primi quattrocento che
+   * si mostrano. Prima si contava dopo il taglio, e la pagina diceva sempre
+   * "primi 400 di 400" anche quando i calciatori erano milleocentotrentasei:
+   * un conteggio che non conta niente.
+   */
+  const { righe, trovati } = useMemo(() => {
     const norm = query.trim().toLowerCase()
-    return indice
+    const filtrati = indice
       .filter(
         (p) =>
           (!role || p.roles.includes(role)) &&
-          (!norm ||
-            p.player.toLowerCase().includes(norm) ||
-            (p.club ?? '').toLowerCase().includes(norm))
+          (!norm || combacia(p, norm))
       )
       .sort(ORDINAMENTI[sort])
-      .slice(0, 400)
+    return { righe: filtrati.slice(0, TETTO), trovati: filtrati.length }
   }, [indice, query, role, sort])
 
+  const senzaScheda = useMemo(
+    () => indice.filter((p) => p.id == null).length, [indice]
+  )
+
   return (
-    <Pagina className="page container wide">
+    <Pagina className="page container wide gi">
       <header className="page-head">
         <p className="eyebrow">Archivio</p>
         <h1>Giocatori</h1>
@@ -86,6 +128,8 @@ export default function Giocatori() {
           Tutti i {indice.length.toLocaleString('it-IT')} calciatori passati per una
           rosa Caprera dal 2016. Per ognuno: quante stagioni, per quali società,
           quanto è costato in totale e quanto al massimo in una sola asta.
+          Il nome porta alla scheda, con gol, assist e carriera stagione per
+          stagione.
         </p>
       </header>
 
@@ -120,22 +164,31 @@ export default function Giocatori() {
       </div>
 
       <p className="result-count num">
-        {righe.length === 400 ? 'primi 400 di ' : ''}
-        {righe.length} calciatori
+        {trovati > TETTO
+          ? `primi ${TETTO} di ${trovati.toLocaleString('it-IT')} calciatori`
+          : `${trovati.toLocaleString('it-IT')} ${trovati === 1 ? 'calciatore' : 'calciatori'}`}
       </p>
+
+      {senzaScheda > 0 && (
+        <p className="gi-avviso">
+          {senzaScheda} {senzaScheda === 1 ? 'nome non è agganciato' : 'nomi non sono agganciati'}
+          {' '}a un calciatore dell'archivio e {senzaScheda === 1 ? 'non ha' : 'non hanno'} la
+          scheda: {senzaScheda === 1 ? 'compare' : 'compaiono'} in tabella senza il collegamento.
+        </p>
+      )}
 
       <div className="table-wrap tall">
         <table>
           <thead>
             <tr>
               <th className="left">R</th>
-              <th className="left">Calciatore</th>
-              <th>St.</th>
+              <th className="left"><Ord k="player" ora={sort} vai={setSort}>Calciatore</Ord></th>
+              <th><Ord k="seasons" ora={sort} vai={setSort}>St.</Ord></th>
               <th className="left">Società</th>
-              <th>Speso</th>
-              <th>Max</th>
-              <th>Pres.</th>
-              <th>FM</th>
+              <th><Ord k="spent" ora={sort} vai={setSort}>Speso</Ord></th>
+              <th><Ord k="best" ora={sort} vai={setSort}>Max</Ord></th>
+              <th><Ord k="apps" ora={sort} vai={setSort}>Pres.</Ord></th>
+              <th><Ord k="fm" ora={sort} vai={setSort}>FM</Ord></th>
             </tr>
           </thead>
           <tbody>
@@ -144,7 +197,13 @@ export default function Giocatori() {
                 <td className="left">
                   <span className={`badge role-${p.role}`}>{p.roles.join('')}</span>
                 </td>
-                <td className="left strong">{p.player}</td>
+                <td className="left strong">
+                  {p.id != null
+                    ? <Link to={`/giocatori/${p.id}`} className="gi-nome">{p.player}</Link>
+                    : <span title="Nome non agganciato a un calciatore dell'archivio">
+                        {p.player}
+                      </span>}
+                </td>
                 <td className="num muted" title={p.seasons.join(', ')}>
                   {p.seasons.length}
                 </td>

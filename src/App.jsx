@@ -15,6 +15,8 @@ const Rose = lazy(() => import('./pages/Rose'))
 const Contratti = lazy(() => import('./pages/Contratti'))
 const AlboOro = lazy(() => import('./pages/AlboOro'))
 const Giocatori = lazy(() => import('./pages/Giocatori'))
+const SchedaGiocatore = lazy(() => import('./pages/SchedaGiocatore'))
+const Partita = lazy(() => import('./pages/Partita'))
 const Stats = lazy(() => import('./pages/Stats'))
 const Asta = lazy(() => import('./pages/Asta'))
 const Ranking = lazy(() => import('./pages/Ranking'))
@@ -68,6 +70,8 @@ export default function App() {
             <Route path="contratti" element={<Contratti />} />
             <Route path="albo-doro" element={<AlboOro />} />
             <Route path="giocatori" element={<Giocatori />} />
+            <Route path="giocatori/:id" element={<SchedaGiocatore />} />
+            <Route path="partita/:id" element={<Partita />} />
             <Route path="stats" element={<Stats />} />
             <Route path="asta" element={<Asta />} />
             <Route path="ranking" element={<Ranking />} />

@@ -19,3 +19,10 @@ Formato: `AAAA-MM-GG-<tema>.md`
 Chi perde il tavolo non discute la sentenza: riapre il dibattito solo con un dato nuovo.
 
 Versione leggera dei `cells/` di Parnaso: niente Quadrumvirato, niente sigilli.
+
+## Tavoli
+
+- [`2026-08-21-da-lega-privata-a-prodotto.md`](2026-08-21-da-lega-privata-a-prodotto.md) —
+  **aperto**, posizioni da raccogliere. Caprera deve diventare un gioco per utenti nuovi:
+  cosa si decide adesso e cosa si rimanda. Sei nodi verificati, fra cui `lega_id` mai
+  implementato e la fonte dei voti. Sentenza attesa: **ADR-005**.

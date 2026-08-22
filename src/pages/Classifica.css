@@ -128,22 +128,6 @@
 .cl-tabella th.c-soc { text-align: left; }
 .cl-tabella th.c-forma { text-align: left; padding-left: 18px; }
 
-/* i pulsanti di ordinamento: sembrano intestazioni finché non ci passi sopra */
-.ord {
-  background: none;
-  border: 0;
-  padding: 0;
-  font: inherit;
-  color: inherit;
-  letter-spacing: inherit;
-  text-transform: inherit;
-  transition: color 0.15s;
-}
-
-.ord:hover { color: var(--text); }
-.ord.on { color: var(--gold-400); }
-.ord i { font-style: normal; margin-left: 3px; font-size: 0.8em; }
-
 .cl-tabella td {
   padding: 13px 10px;
   border-bottom: 1px solid var(--border-soft);

@@ -66,8 +66,10 @@ per consegnare.
    > caratteri, ma **nessuna scala di spaziatura, nessuna scala tipografica, nessun token di
    > movimento**: margini e corpi sono decisi a mano in ognuno dei 19 fogli (**649 valori
    > grezzi**). È il motivo tecnico per cui il sito è "quasi coerente" e non lo diventa mai.
-   > Costruirle è lavoro tuo e nessuno l'ha ancora fatto: una proposta è stata abbozzata e
-   > ritirata perché non era passata da te.
+   > Costruirle è lavoro tuo e nessuno l'ha ancora fatto. Una proposta era stata abbozzata la
+   > notte del 21/08 — e **distrutta da un `cp -f` di un'altra sessione**, prima di qualunque
+   > commit. Non era stata respinta: è andata persa. Due lezioni, e valgono per te: **non era da
+   > farsi senza di te**, e **quello che vive solo sul disco si perde**. Committa presto.
 3. **Architettura dell'informazione.** Gerarchia esplicita: titolo → supporto → azione. **Una sola
    decisione visiva per livello.** Spazio bianco prima dei bordi.
 4. **Prototipo**, in un file `.html` fuori da `src/` (usa e getta, non entra nel sito). HTML

@@ -114,7 +114,8 @@ export const partiteDi = (stagione, teamId) =>
 /** Le ultime giornate di tutte le societa' di una stagione, per la forma. */
 export const forma = (stagione) =>
   unaVolta(['forma', stagione].join('·'), () => db().from('v_forma')
-    .select('societa, giornata, esito, gol_fatti, gol_subiti, avversario, in_casa')
+    // `id` serve per aprire il tabellino da una pallina V/N/P
+    .select('id, societa, giornata, esito, gol_fatti, gol_subiti, avversario, in_casa')
     .eq('stagione', stagione).order('giornata'))
 
 /** La classifica perpetua: cento righe, si sommano qui. */
@@ -172,7 +173,8 @@ export async function tabellone(stagione, competizione) {
     const ids = ed.turni.map((t) => t.id)
     if (!ids.length) return { ...ed, turni: [] }
     const { data: pa, error: e2 } = await db().from('partite')
-      .select('turno, casa, fuori, gol_casa, gol_fuori, fp_casa, fp_fuori')
+      // `id` serve al tabellino: senza, le partite di coppa non si aprono
+      .select('id, turno, casa, fuori, gol_casa, gol_fuori, fp_casa, fp_fuori')
       .in('turno', ids)
     if (e2) throw new Error(e2.message)
     const perTurno = new Map()
@@ -209,7 +211,8 @@ export async function coppeStagione(stagione) {
       competizioni(),
       edizioni(stagione),
       unaVolta(['partiteCoppa', stagione].join('·'), () => db().from('partite')
-        .select('turno, casa, fuori, gol_casa, gol_fuori, fp_casa, fp_fuori')
+        // `id` serve al tabellino: senza, le partite di coppa non si aprono
+      .select('id, turno, casa, fuori, gol_casa, gol_fuori, fp_casa, fp_fuori')
         .eq('stagione', stagione).not('turno', 'is', null)),
       classificaFantapunti(stagione),
     ])
@@ -268,8 +271,53 @@ export const stagioniCoppeDi = (teamId) =>
 /** Tutte le rose di una stagione: circa trecento righe, una lettura sola. */
 export const roseStagione = (stagione) =>
   unaVolta(['roseStagione', stagione].join('·'), () => db().from('rose')
-    .select('societa, nome, ruolo, club, costo, presenze, mv, fm')
+    // `calciatore` serve per portare dal nome in rosa alla sua scheda
+    .select('calciatore, societa, nome, ruolo, club, costo, presenze, mv, fm')
     .eq('stagione', stagione))
+
+/**
+ * Il listone di Fantapazz: quanto vale ogni calciatore secondo loro.
+ *
+ * E' un'altra cosa dal costo in `rose`: quello e' quanto l'hai pagato tu
+ * all'asta della Caprera, in crediti nostri.
+ *
+ * **Ma non tutte le quotazioni sono dello stesso momento.** Fantapazz le
+ * muove durante l'anno: chi si fa male scende, chi segna sale. Quella che
+ * conta per l'asta e' la quotazione **di partenza**, prima della prima
+ * giornata, perche' e' quella che i mister avevano davanti quando hanno
+ * rilanciato. Il 2025-26 e' cosi'. Le nove stagioni prima, no: sono state
+ * scaricate a stagione finita, e dicono quanto vale un giocatore *adesso*.
+ *
+ * Nel 2025-26 la differenza si tocca: Simeone sul listone di partenza vale
+ * 10 e all'asta e' costato esattamente 10; su quello scaricato dopo vale 30.
+ * Il 30 non racconta un affare mancato: racconta una data diversa.
+ *
+ * Torna `{ momento, righe }`. Se una stagione avesse tutti e due i momenti
+ * \u2014 succedera' quando arrivano i dati di Guido \u2014 vince la partenza.
+ */
+export const listone = (stagione) =>
+  unaVolta(['listone', stagione].join('\u00b7'), () => db().from('listone')
+    .select('momento, nome, ruolo, club, prezzo').eq('stagione', stagione))
+    .then((righe) => {
+      const partenza = (righe ?? []).filter((r) => r.momento === 'partenza')
+      const scelte = partenza.length ? partenza : (righe ?? [])
+      return { momento: partenza.length ? 'partenza' : 'fine', righe: scelte }
+    })
+
+/**
+ * Tutti quelli che hanno giocato per una societa', stagione per stagione.
+ *
+ * Sono fra le 350 e le 375 righe per societa' su dieci stagioni: si chiede
+ * la propria e basta, non l'intera vista da 3.428. E' quello che permette a
+ * «la mia rosa» di dire da quanto uno e' qui e cosa ha fatto negli anni,
+ * invece del solo costo di quest'anno.
+ */
+export const carrieraSocieta = (teamId) =>
+  unaVolta(['carrieraSocieta', teamId].join('\u00b7'), () => db().from('v_carriera')
+    .select(`calciatore, nome, ruolo, stagione, club, costo, fm,
+             convocato, titolare, con_voto, mv,
+             gol, rigori, assist, gialli, rossi, imbattuto, gol_subiti`)
+    .eq('societa', teamId).order('stagione'))
 
 /** Le stagioni per cui esiste una rosa registrata. */
 export const stagioniRose = () =>
@@ -297,7 +345,38 @@ export const impieghi = (calciatoreId) =>
 /** Tutte le rose di tutte le stagioni: tremila righe, per le statistiche. */
 export const tutteLeRose = () =>
   unaVolta('tutteLeRose', () => db().from('rose')
-    .select('stagione, societa, nome, ruolo, club, costo, presenze, mv, fm'))
+    .select('calciatore, stagione, societa, nome, ruolo, club, costo, presenze, mv, fm'))
+
+/**
+ * La carriera di un calciatore in Caprera: una riga per stagione.
+ *
+ * Si chiede un calciatore alla volta. La vista intera sono 3.428 righe e
+ * mezzo mega di JSON: scaricarla per mostrarne nove sarebbe la stessa cosa
+ * che facevano i sedici mega di file che abbiamo tolto.
+ */
+export const carriera = (calciatoreId) =>
+  unaVolta(['carriera', calciatoreId].join('\u00b7'), () => db().from('v_carriera')
+    .select(`calciatore, nome, ruolo, stagione, societa, club, costo, fm,
+             convocato, titolare, subentrato, con_voto, mv,
+             gol, rigori, rigori_sbagliati, rigori_parati, assist,
+             gialli, rossi, autogol, imbattuto, gol_subiti, gol_vittoria`)
+    .eq('calciatore', calciatoreId).order('stagione'))
+
+/**
+ * Una partita sola, per il tabellino.
+ *
+ * `maybeSingle` e non `single`: un id inventato nell'indirizzo deve dare una
+ * pagina che dice «questa partita non esiste», non un errore di rete.
+ */
+export const partita = (id) =>
+  unaVolta(['partita', id].join('\u00b7'), () => db().from('partite')
+    .select('id, stagione, competizione, turno, giornata, casa, fuori,'
+            + ' gol_casa, gol_fuori, fp_casa, fp_fuori, giocata')
+    .eq('id', id).maybeSingle())
+
+/** I nomi dei turni di coppa: «Semifinali», «Finale», una lettura sola. */
+export const turni = () =>
+  unaVolta('turni', () => db().from('turni').select('id, nome'))
 
 /** Tutte le partite di campionato di sempre: 1.795 righe. */
 export const tuttePartite = () =>

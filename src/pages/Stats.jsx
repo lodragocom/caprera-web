@@ -1,24 +1,44 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import TeamBadge from '../components/TeamBadge'
 import { useArchivio, tuttePartite, tutteLeRose, classificaPerpetua } from '../lib/archivio'
-import { Pagina, Sezione } from '../components/moto'
+import { Pagina, Sezione, CorpoTabella, Riga, Cascata, Voce } from '../components/moto'
 import './Stats.css'
 
-/** Tutti i record calcolati dai risultati e dalle rose. */
-function calcola(partite, rose) {
-  // I nomi delle colonne arrivano dal database: si traducono una volta sola
-  // qui, cosi' tutto il resto della pagina resta come era.
-  const matches = (partite ?? []).map((p) => ({
-    season: p.stagione, round: p.giornata, home: p.casa, away: p.fuori,
-    homeGoals: p.gol_casa, awayGoals: p.gol_fuori,
-    homeFp: Number(p.fp_casa), awayFp: Number(p.fp_fuori), played: p.giocata,
-  }))
-  const rosters = (rose ?? []).map((r) => ({
-    season: r.stagione, team: r.societa, player: r.nome, role: r.ruolo,
-    club: r.club, cost: r.costo, apps: r.presenze,
-    mv: r.mv == null ? null : Number(r.mv), fm: r.fm == null ? null : Number(r.fm),
-  }))
-  const seasons = [...new Set(matches.map((m) => m.season))].sort()
+/** Presenze minime perché una fantamedia voglia dire qualcosa. */
+const PRESENZE_MINIME = 20
+
+/** Le rose portano la lettera; una scheda-record ha spazio per la parola. */
+const RUOLO = { P: 'portiere', D: 'difensore', C: 'centrocampista', A: 'attaccante' }
+
+/**
+ * Tutti i record, calcolati dai risultati e dalle rose.
+ *
+ * `soloStagione` restringe il calcolo a un anno: i record diventano i record
+ * di quella stagione. Sono gli stessi dati già in memoria, filtrati — non una
+ * seconda lettura dal database.
+ *
+ * Ogni record può non esistere: una stagione senza fantamedie registrate non
+ * ha un miglior marcatore, e la pagina deve dirlo invece di inventarne uno.
+ * Per questo si torna `null` e non uno zero.
+ */
+function calcola(partite, rose, soloStagione) {
+  const dentro = (s) => !soloStagione || s === soloStagione
+
+  const matches = (partite ?? [])
+    .filter((p) => dentro(p.stagione))
+    .map((p) => ({
+      season: p.stagione, round: p.giornata, home: p.casa, away: p.fuori,
+      homeGoals: p.gol_casa, awayGoals: p.gol_fuori,
+      homeFp: Number(p.fp_casa), awayFp: Number(p.fp_fuori), played: p.giocata,
+    }))
+  const rosters = (rose ?? [])
+    .filter((r) => dentro(r.stagione))
+    .map((r) => ({
+      season: r.stagione, team: r.societa, player: r.nome, role: r.ruolo,
+      club: r.club, cost: r.costo, apps: r.presenze,
+      mv: r.mv == null ? null : Number(r.mv), fm: r.fm == null ? null : Number(r.fm),
+    }))
+
   const giocate = matches.filter((m) => m.played)
 
   let piuLarga = null
@@ -33,14 +53,15 @@ function calcola(partite, rose) {
     if (!piuGol || tot > piuGol.tot) piuGol = { ...m, tot }
     for (const lato of ['home', 'away']) {
       const fp = m[`${lato}Fp`]
-      if (fp == null) continue
+      if (fp == null || Number.isNaN(fp)) continue
       const rec = { season: m.season, round: m.round, team: m[lato], fp }
       if (!miglioreFp || fp > miglioreFp.fp) miglioreFp = rec
       if (!peggioreFp || fp < peggioreFp.fp) peggioreFp = rec
     }
   }
 
-  // striscia di vittorie più lunga
+  /* Striscia di vittorie più lunga. Dentro una stagione sola è la striscia di
+     quell'anno; su tutte, attraversa le stagioni come è giusto che faccia. */
   const perSquadra = new Map()
   for (const m of giocate) {
     for (const [lato, opp] of [['home', 'away'], ['away', 'home']]) {
@@ -53,52 +74,68 @@ function calcola(partite, rose) {
       })
     }
   }
-  let striscia = { team: null, n: 0 }
+  let striscia = null
   for (const [id, lista] of perSquadra) {
     lista.sort((a, b) => a.season.localeCompare(b.season) || a.round - b.round)
     let cur = 0
     for (const p of lista) {
       cur = p.vinta ? cur + 1 : 0
-      if (cur > striscia.n) striscia = { team: id, n: cur, season: p.season }
+      if (cur > (striscia?.n ?? 0)) striscia = { team: id, n: cur, season: p.season }
     }
   }
 
-  // acquisto più caro di sempre
-  const caro = rosters.reduce(
-    (max, r) => ((r.cost ?? 0) > (max?.cost ?? 0) ? r : max), null
-  )
+  const conCosto = rosters.filter((r) => r.cost != null)
+  const caro = conCosto.length
+    ? conCosto.reduce((max, r) => (r.cost > max.cost ? r : max))
+    : null
 
-  // miglior fantamedia con almeno 20 presenze
   const fm = rosters
-    .filter((r) => r.fm != null && (r.apps ?? 0) >= 20)
-    .sort((a, b) => b.fm - a.fm)[0]
+    .filter((r) => r.fm != null && (r.apps ?? 0) >= PRESENZE_MINIME)
+    .sort((a, b) => b.fm - a.fm)[0] ?? null
 
-  // gol per stagione
-  const golStagione = seasons
-    .map((s) => {
-      const ms = matches.filter((m) => m.season === s && m.played)
-      if (!ms.length) return null
-      const gol = ms.reduce((n, m) => n + m.homeGoals + m.awayGoals, 0)
-      return { season: s, gol, media: +(gol / ms.length).toFixed(2) }
-    })
-    .filter(Boolean)
+  /* Il grafico: media gol a partita e fantapunti medi di squadra, che sono
+     la stessa storia vista dai due lati. Sempre su tutte le stagioni: è una
+     serie storica, restringerla a un anno la annullerebbe. */
+  const tutte = (partite ?? []).filter((p) => p.giocata)
+  const anni = [...new Set(tutte.map((p) => p.stagione))].sort()
+  const golStagione = anni.map((s) => {
+    const ms = tutte.filter((p) => p.stagione === s)
+    const gol = ms.reduce((n, p) => n + p.gol_casa + p.gol_fuori, 0)
+    const fp = ms.reduce((n, p) => n + Number(p.fp_casa) + Number(p.fp_fuori), 0)
+    return {
+      season: s,
+      gol,
+      media: +(gol / ms.length).toFixed(2),
+      fp: +(fp / (ms.length * 2)).toFixed(1),
+    }
+  })
 
-  return { piuLarga, piuGol, miglioreFp, peggioreFp, striscia, caro, fm, golStagione, giocate: giocate.length }
+  return { piuLarga, piuGol, miglioreFp, peggioreFp, striscia, caro, fm,
+           golStagione, giocate: giocate.length }
 }
 
 export default function Stats() {
+  const [quando, setQuando] = useState('')      // '' = di sempre
+  const [ordine, setOrdine] = useState({ k: 'points', giu: true })
+
   const pa = useArchivio('tuttePartite', tuttePartite)
   const ro = useArchivio('tutteLeRose', tutteLeRose)
   const cl = useArchivio('perpetua', classificaPerpetua)
 
-  const r = useMemo(() => calcola(pa.dati, ro.dati), [pa.dati, ro.dati])
-  const maxMedia = Math.max(1, ...r.golStagione.map((g) => g.media))
-  const pronto = pa.dati && ro.dati && r.piuLarga
+  const anni = useMemo(
+    () => [...new Set((pa.dati ?? []).map((p) => p.stagione))].sort().reverse(),
+    [pa.dati]
+  )
+  const r = useMemo(() => calcola(pa.dati, ro.dati, quando), [pa.dati, ro.dati, quando])
 
+  const pronto = pa.dati && ro.dati
   const stato = pa.errore ? pa : ro.errore ? ro : { ...pa, caricamento: !pronto }
+
+  const periodo = quando || 'di sempre'
+
   if (!pronto) {
     return (
-      <Pagina className="page container wide">
+      <Pagina className="page container wide st">
         <header className="page-head">
           <p className="eyebrow">Archivio</p>
           <h1>Record e statistiche</h1>
@@ -108,84 +145,140 @@ export default function Stats() {
     )
   }
 
+  const gap = r.golStagione.length
+    ? { min: Math.min(...r.golStagione.map((g) => g.media)),
+        max: Math.max(...r.golStagione.map((g) => g.media)) }
+    : { min: 0, max: 1 }
+  /* La barra parte da chi ne ha fatti meno: da zero, 2,65 e 3,53 sarebbero
+     due barre lunghe uguali e il grafico non direbbe niente. */
+  const largo = (v) => 6 + (gap.max === gap.min ? 94
+    : ((v - gap.min) / (gap.max - gap.min)) * 94)
+
   return (
-    <Pagina className="page container wide">
-      <header className="page-head">
-        <p className="eyebrow">Archivio</p>
-        <h1>Record e statistiche</h1>
-        <p className="lede">
-          Dieci stagioni, {r.giocate.toLocaleString('it-IT')} partite giocate.
-          Tutto quello che segue è calcolato dai risultati, non inserito a mano.
-        </p>
+    <Pagina className="page container wide st">
+      <header className="st-testa">
+        <div>
+          <p className="eyebrow">Archivio</p>
+          <h1>Record e statistiche</h1>
+        </div>
+        <label className="st-quando">
+          <span>Periodo</span>
+          <select value={quando} onChange={(e) => setQuando(e.target.value)}>
+            <option value="">Di sempre</option>
+            {anni.map((s) => <option key={s} value={s}>{s}</option>)}
+          </select>
+        </label>
       </header>
 
+      <p className="lede">
+        {quando
+          ? <>Stagione {quando}, {r.giocate} partite giocate. </>
+          : <>Dieci stagioni, {r.giocate.toLocaleString('it-IT')} partite giocate. </>}
+        Tutto quello che segue è calcolato dai risultati, non inserito a mano.
+      </p>
+
       <section className="block">
-        <h2 className="section-title">I record</h2>
-        <div className="record-grid">
-          <Record
+        <h2 className="section-title">I record {periodo}</h2>
+        <Cascata className="record-grid" tetto={8}>
+          <Voce><Record
             titolo="Vittoria più larga"
-            valore={`${r.piuLarga.homeGoals}–${r.piuLarga.awayGoals}`}
-            dettaglio={<><TeamBadge id={r.piuLarga.home} size="sm" label="short" /> contro <TeamBadge id={r.piuLarga.away} size="sm" label="short" /></>}
-            nota={`${r.piuLarga.season} · ${r.piuLarga.round}ª giornata`}
-          />
-          <Record
+            r={r.piuLarga}
+            valore={(m) => `${m.homeGoals}–${m.awayGoals}`}
+            dettaglio={(m) => (
+              <><TeamBadge id={m.home} size="sm" label="short" />
+                <em>contro</em>
+                <TeamBadge id={m.away} size="sm" label="short" /></>
+            )}
+            nota={(m) => `${m.season} · ${m.round}ª giornata`}
+          /></Voce>
+          <Voce><Record
             titolo="Partita con più gol"
-            valore={`${r.piuGol.homeGoals}–${r.piuGol.awayGoals}`}
-            dettaglio={<><TeamBadge id={r.piuGol.home} size="sm" label="short" /> contro <TeamBadge id={r.piuGol.away} size="sm" label="short" /></>}
-            nota={`${r.piuGol.season} · ${r.piuGol.round}ª giornata`}
-          />
-          <Record
+            r={r.piuGol}
+            valore={(m) => `${m.homeGoals}–${m.awayGoals}`}
+            dettaglio={(m) => (
+              <><TeamBadge id={m.home} size="sm" label="short" />
+                <em>contro</em>
+                <TeamBadge id={m.away} size="sm" label="short" /></>
+            )}
+            nota={(m) => `${m.season} · ${m.round}ª giornata`}
+          /></Voce>
+          <Voce><Record
             titolo="Miglior punteggio"
-            valore={r.miglioreFp.fp.toFixed(1)}
-            dettaglio={<TeamBadge id={r.miglioreFp.team} size="sm" />}
-            nota={`${r.miglioreFp.season} · ${r.miglioreFp.round}ª giornata`}
-          />
-          <Record
+            r={r.miglioreFp}
+            valore={(m) => m.fp.toFixed(1)}
+            dettaglio={(m) => <TeamBadge id={m.team} size="sm" />}
+            nota={(m) => `${m.season} · ${m.round}ª giornata`}
+          /></Voce>
+          <Voce><Record
             titolo="Peggior punteggio"
-            valore={r.peggioreFp.fp.toFixed(1)}
-            dettaglio={<TeamBadge id={r.peggioreFp.team} size="sm" />}
-            nota={`${r.peggioreFp.season} · ${r.peggioreFp.round}ª giornata`}
-          />
-          <Record
+            r={r.peggioreFp}
+            valore={(m) => m.fp.toFixed(1)}
+            dettaglio={(m) => <TeamBadge id={m.team} size="sm" />}
+            nota={(m) => `${m.season} · ${m.round}ª giornata`}
+          /></Voce>
+          <Voce><Record
             titolo="Striscia di vittorie"
-            valore={r.striscia.n}
-            dettaglio={<TeamBadge id={r.striscia.team} size="sm" />}
-            nota={`conclusa nel ${r.striscia.season}`}
-          />
-          <Record
+            r={r.striscia}
+            valore={(m) => m.n}
+            dettaglio={(m) => <TeamBadge id={m.team} size="sm" />}
+            nota={(m) => `conclusa nel ${m.season}`}
+          /></Voce>
+          <Voce><Record
             titolo="Acquisto più caro"
-            valore={r.caro.cost}
-            dettaglio={<span className="nome-rec">{r.caro.player}</span>}
-            nota={`${r.caro.season} · ${r.caro.team ? '' : ''}`}
-            badge={<TeamBadge id={r.caro.team} size="sm" label="short" />}
-          />
-          <Record
+            r={r.caro}
+            valore={(m) => m.cost}
+            dettaglio={(m) => (
+              <><span className="nome-rec">{m.player}</span>
+                <TeamBadge id={m.team} size="sm" label="short" /></>
+            )}
+            nota={(m) => [m.season, RUOLO[m.role]].filter(Boolean).join(' · ')}
+            manca="Le rose di questa stagione non hanno i costi."
+          /></Voce>
+          <Voce><Record
             titolo="Miglior fantamedia"
-            valore={r.fm.fm.toFixed(2)}
-            dettaglio={<span className="nome-rec">{r.fm.player}</span>}
-            nota={`${r.fm.season} · ${r.fm.apps} presenze`}
-          />
-        </div>
+            r={r.fm}
+            valore={(m) => m.fm.toFixed(2)}
+            dettaglio={(m) => (
+              <><span className="nome-rec">{m.player}</span>
+                <TeamBadge id={m.team} size="sm" label="short" /></>
+            )}
+            nota={(m) => `${m.season} · ${m.apps} presenze`}
+            manca={`Nessun calciatore con almeno ${PRESENZE_MINIME} presenze e una fantamedia registrata.`}
+          /></Voce>
+        </Cascata>
       </section>
 
       <section className="block">
         <h2 className="section-title">Gol per stagione</h2>
         <p className="lede">
-          Media gol a partita. Il salto del 2024-25 riflette il cambio della scala
-          punti-gol introdotto quell'anno dal regolamento.
+          Media gol a partita, e accanto i fantapunti medi di una squadra in una
+          giornata. Il gradino del 2020-21 è il cambio della scala: da quell'anno
+          un gol in più costa quattro fantapunti invece di sei, e gli stessi
+          punteggi si traducono in più gol. I fantapunti, intanto, sono saliti
+          appena.
         </p>
         <div className="barre">
           {r.golStagione.map((g) => (
-            <div key={g.season} className="barra-riga">
-              <span className="num s-lab">{g.season}</span>
+            <div key={g.season}
+                 className={`barra-riga ${g.season === quando ? 'segnata' : ''}`}>
+              <button type="button" className="s-lab num"
+                      onClick={() => setQuando(quando === g.season ? '' : g.season)}>
+                {g.season}
+              </button>
               <span className="barra">
-                <i style={{ width: `${(g.media / maxMedia) * 100}%` }} />
+                <i style={{ width: `${largo(g.media)}%` }} />
               </span>
-              <span className="num s-val">{g.media}</span>
+              <span className="num s-val">{g.media.toFixed(2)}</span>
+              <span className="num s-fp">{g.fp} fp</span>
               <span className="num s-tot muted">{g.gol} gol</span>
             </div>
           ))}
         </div>
+        <p className="st-nota">
+          La scala è cambiata tre volte in dieci anni; le versioni prima del
+          2025-26 sono ricostruite dai risultati, non lette dal regolamento.
+          Tocca una stagione per portare i record qui sopra su quell'anno.
+        </p>
       </section>
 
       <section className="block">
@@ -196,24 +289,28 @@ export default function Stats() {
               <tr>
                 <th className="left">Società</th>
                 <th className="left">Stagione</th>
-                <th>Pos.</th>
-                <th>Punti</th>
-                <th>GF</th>
-                <th>DR</th>
+                <Col k="position" o={ordine} v={setOrdine}>Pos.</Col>
+                <Col k="points" o={ordine} v={setOrdine}>Punti</Col>
+                <Col k="goalsFor" o={ordine} v={setOrdine}>GF</Col>
+                <Col k="goalsAgainst" o={ordine} v={setOrdine}>GS</Col>
+                <Col k="goalDiff" o={ordine} v={setOrdine}>DR</Col>
               </tr>
             </thead>
-            <tbody>
-              {migliori(cl.dati).map((m) => (
-                <tr key={m.team}>
+            <CorpoTabella>
+              {ordina(migliori(cl.dati), ordine).map((m) => (
+                <Riga key={m.team}>
                   <td className="left"><TeamBadge id={m.team} size="sm" /></td>
                   <td className="left num season-cell">{m.season}</td>
                   <td className="num">{m.position}º</td>
                   <td className="num strong">{m.points}</td>
                   <td className="num muted">{m.goalsFor}</td>
-                  <td className="num">{m.goalDiff > 0 ? `+${m.goalDiff}` : m.goalDiff}</td>
-                </tr>
+                  <td className="num muted">{m.goalsAgainst}</td>
+                  <td className={`num ${m.goalDiff > 0 ? 'su' : m.goalDiff < 0 ? 'giu' : ''}`}>
+                    {m.goalDiff > 0 ? `+${m.goalDiff}` : m.goalDiff}
+                  </td>
+                </Riga>
               ))}
-            </tbody>
+            </CorpoTabella>
           </table>
         </div>
       </section>
@@ -221,25 +318,66 @@ export default function Stats() {
   )
 }
 
+/**
+ * La miglior stagione di ogni società.
+ *
+ * `goalDiff` prima non veniva calcolata mai: la tabella aveva una colonna DR
+ * che leggeva un campo inesistente e mostrava una cella vuota su ogni riga.
+ */
 function migliori(classifica) {
   const best = new Map()
   for (const r of classifica ?? []) {
-    const row = { team: r.societa, points: r.punti, position: r.posizione,
-                  played: r.giocate, goalsFor: r.gol_fatti, goalsAgainst: r.gol_subiti,
-                  season: r.stagione }
+    const row = {
+      team: r.societa, points: r.punti, position: r.posizione,
+      played: r.giocate, goalsFor: r.gol_fatti, goalsAgainst: r.gol_subiti,
+      goalDiff: (r.gol_fatti ?? 0) - (r.gol_subiti ?? 0),
+      season: r.stagione,
+    }
     const cur = best.get(row.team)
     if (!cur || row.points > cur.points) best.set(row.team, row)
   }
-  return [...best.values()].sort((a, b) => b.points - a.points)
+  return [...best.values()]
 }
 
-function Record({ titolo, valore, dettaglio, nota, badge }) {
+function ordina(righe, { k, giu }) {
+  return [...righe].sort((a, b) => (giu ? b[k] - a[k] : a[k] - b[k]))
+}
+
+function Col({ k, o, v, children }) {
+  const attiva = o.k === k
+  return (
+    <th>
+      <button type="button" className={`ord ${attiva ? 'on' : ''}`}
+              onClick={() => v({ k, giu: attiva ? !o.giu : true })}>
+        {children}{attiva && <i>{o.giu ? '▾' : '▴'}</i>}
+      </button>
+    </th>
+  )
+}
+
+/**
+ * Una scheda-record.
+ *
+ * `r` può essere `null`: succede scegliendo una stagione che quel record non
+ * ce l'ha — le rose 2025-26, per esempio, hanno i costi ma non le fantamedie.
+ * In quel caso la scheda dice cosa manca. Non mostra uno zero: uno zero è una
+ * risposta, e qui la risposta non c'è.
+ */
+function Record({ titolo, r, valore, dettaglio, nota, manca }) {
+  if (!r) {
+    return (
+      <div className="record card vuoto">
+        <span className="r-tit">{titolo}</span>
+        <p className="r-manca">{manca ?? 'Non ci sono dati per questo periodo.'}</p>
+      </div>
+    )
+  }
   return (
     <div className="record card">
       <span className="r-tit">{titolo}</span>
-      <strong className="r-val num">{valore}</strong>
-      <div className="r-det">{dettaglio}{badge}</div>
-      <span className="r-nota num">{nota}</span>
+      <strong className="r-val num">{valore(r)}</strong>
+      <div className="r-det">{dettaglio(r)}</div>
+      <span className="r-nota num">{nota(r)}</span>
     </div>
   )
 }

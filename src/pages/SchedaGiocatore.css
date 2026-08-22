@@ -1,0 +1,268 @@
+/* ============================================================
+   La scheda di un calciatore: la carriera in Caprera.
+   ============================================================ */
+
+.sg-torna { margin: 0 0 18px; font-size: 0.82rem; }
+.sg-torna a { color: var(--text-dim); }
+.sg-torna a:hover { color: var(--gold-400); }
+
+/* ------------------------------------------------------------- in cima */
+.sg-testa {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 30px;
+  padding: 26px 30px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-soft);
+  border-left: 4px solid var(--gold-500);
+  background: linear-gradient(160deg, var(--navy-800), var(--navy-850));
+}
+
+.sg-chi { min-width: 0; }
+
+.sg-chi h1 {
+  font-size: clamp(1.9rem, 4.6vw, 3rem);
+  line-height: 1;
+  margin: 10px 0 0;
+  color: var(--cream);
+  overflow-wrap: break-word;
+}
+
+.sg-sotto {
+  margin: 8px 0 0;
+  font-size: 0.86rem;
+  color: var(--text-muted);
+}
+
+.sg-arco {
+  margin: 4px 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-dim);
+}
+
+.sg-maglie {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.sg-maglia {
+  display: inline-flex;
+  padding: 4px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--navy-850);
+  transition: border-color 0.15s;
+}
+
+.sg-maglia:hover { border-color: var(--gold-600); }
+
+/* ----------------------------------------------------- i numeri in alto */
+.sg-totali {
+  display: flex;
+  gap: 1px;
+  background: var(--border-soft);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.sg-totale {
+  background: var(--navy-850);
+  padding: 14px 18px;
+  min-width: 96px;
+  text-align: right;
+}
+
+.sg-totale strong {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 1.6rem;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1;
+}
+
+.sg-totale strong.oro { color: var(--gold-400); }
+
+/* `>` obbligatorio: senza, questa regola prende anche lo span che il
+   componente Numero disegna dentro <strong>. */
+.sg-totale > span {
+  display: block;
+  margin-top: 7px;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.sg-totale > em {
+  display: block;
+  margin-top: 3px;
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--text-muted);
+}
+
+/* ------------------------------------------------------------ la tabella */
+.sg-tabella th.tenue { color: var(--text-dim); opacity: 0.75; }
+
+.sg-anno { color: var(--gold-500); font-size: 0.82rem; }
+
+/* Le volte in cui era in formazione e il voto non e' arrivato. Piccolo di
+   proposito: e' un contorno alla presenza, non una seconda presenza. */
+.sg-panca {
+  font-style: normal;
+  font-size: 0.78em;
+  color: var(--text-dim);
+}
+
+/* Il numero dei gol con la sua barra dietro: la stagione buona si vede
+   prima di leggerla. */
+.sg-gol {
+  position: relative;
+  display: inline-flex;
+  justify-content: flex-end;
+  align-items: center;
+  min-width: 3.4rem;
+  padding: 3px 7px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.sg-gol i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--gold-500) 26%, transparent),
+    color-mix(in srgb, var(--gold-500) 12%, transparent));
+  border-radius: 4px;
+}
+
+.sg-gol b { position: relative; font-weight: 600; color: var(--cream); }
+
+.sg-nota {
+  margin: 14px 0 0;
+  font-size: 0.78rem;
+  line-height: 1.65;
+  color: var(--text-dim);
+}
+
+.sg-nota b { color: var(--text-muted); font-weight: 500; }
+
+/* ------------------------------------------------------------ contratti */
+.sg-contratti {
+  list-style: none;
+  margin: 0 0 18px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  gap: 8px;
+}
+
+/* «Sanguemi / sto» dentro una scheda di contratto e' lo stesso troncamento
+   con un a capo al posto dei puntini: il nome non si spezza. */
+.sg-contratti .tb-name { white-space: nowrap; }
+
+.sg-contratti li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-soft);
+  background: var(--navy-850);
+}
+
+.sg-durata { font-size: 0.78rem; color: var(--text-muted); margin-left: auto; }
+.sg-anni { font-size: 0.7rem; color: var(--text-dim); }
+
+.sg-under {
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid rgba(217, 180, 106, 0.35);
+  color: var(--gold-500);
+}
+
+.sg .avviso b { color: var(--text-muted); font-weight: 600; }
+
+/* --------------------------------------------------------- cosa non c'è */
+.sg-mancano {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.sg-mancano > div {
+  padding: 16px 18px;
+  border-radius: var(--radius);
+  border: 1px dashed var(--border);
+  background: rgba(255, 255, 255, 0.012);
+}
+
+.sg-mancano strong {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.sg-mancano p {
+  margin: 9px 0 0;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+.sg-mancano b { color: var(--cream); font-weight: 500; }
+
+/* -------------------------------------------------------------- stretto */
+@media (max-width: 860px) {
+  .sg-testa { grid-template-columns: 1fr; padding: 22px; }
+  .sg-totali { flex-wrap: wrap; }
+  .sg-totale { flex: 1; min-width: 88px; text-align: left; }
+}
+
+@media (max-width: 700px) {
+  /* La tabella tiene la sua misura e scorre: la stagione resta agganciata a
+     sinistra perche' e' l'identita' della riga. Il nome della societa' non
+     si spezza — «Sangue / misto» e «Smit Gaspach / o» sono il troncamento
+     travestito da a capo. */
+  .sg-tabella { min-width: 780px; }
+  .sg-tabella .tb-name { white-space: nowrap; }
+
+  .sg-tabella tbody td:first-child,
+  .sg-tabella thead th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    background: var(--navy-850);
+    box-shadow: 6px 0 8px -6px rgba(0, 0, 0, 0.65);
+  }
+
+  .sg-tabella thead th:first-child { z-index: 4; background: var(--navy-800); }
+  .sg-totale strong { font-size: 1.3rem; }
+}
+
+/* Uno zero c'e' e si scrive, ma non compete con i numeri che contano. */
+.sg-tabella .zero { color: var(--text-dim); opacity: 0.5; }
+
+/* La stagione giocata con due maglie. */
+.sg-mezza {
+  font-style: normal;
+  margin-left: 5px;
+  font-size: 0.9em;
+  color: var(--text-dim);
+}

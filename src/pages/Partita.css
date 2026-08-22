@@ -1,0 +1,429 @@
+/* ============================================================
+   Il tabellino di una partita: le due formazioni a confronto.
+   ============================================================ */
+
+.pt-torna { margin: 0 0 18px; font-size: 0.82rem; }
+.pt-torna a { color: var(--text-dim); }
+.pt-torna a:hover { color: var(--gold-400); }
+
+/* ------------------------------------------------------------- il risultato */
+.pt-testa {
+  padding: 24px 28px 26px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-soft);
+  background: linear-gradient(160deg, var(--navy-800), var(--navy-850));
+  text-align: center;
+}
+
+.pt-testa .eyebrow { margin: 0 0 18px; }
+
+.pt-punteggio {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 24px;
+}
+
+.pt-lato {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  min-width: 0;
+}
+
+.pt-lato.ospite { flex-direction: row-reverse; justify-content: flex-end; }
+
+.pt-lato img {
+  width: 62px;
+  height: 62px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.5));
+}
+
+/* Il nome per intero: una pagina che si chiama tabellino non nasconde chi ha
+   giocato. Se lo spazio manca va a capo, non si taglia. */
+.pt-lato span {
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: var(--cream);
+  line-height: 1.2;
+  overflow-wrap: break-word;
+  min-width: 0;
+}
+
+.pt-lato:hover span { color: var(--gold-400); }
+
+.pt-numeri { min-width: 120px; }
+
+.pt-numeri strong {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 2.8rem;
+  font-weight: 500;
+  color: var(--cream);
+  line-height: 1;
+}
+
+.pt-numeri strong i { font-style: normal; color: var(--text-dim); margin: 0 6px; }
+.pt-numeri strong.pt-vs { font-size: 1.4rem; color: var(--text-dim); }
+
+.pt-numeri span {
+  display: block;
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.86rem;
+  color: var(--gold-500);
+  white-space: nowrap;
+}
+
+.pt-numeri em {
+  display: block;
+  margin-top: 2px;
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 0.52rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.pt-scarto { margin-top: 22px; border-left-color: var(--loss); }
+.pt-scarto b { color: var(--cream); font-weight: 600; }
+
+/* ---------------------------------------------------------- le formazioni */
+.pt-lati {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.pt-form { padding: 20px 22px; }
+
+.pt-form-testa {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.pt-modulo {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--gold-500);
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(217, 180, 106, 0.3);
+  flex-shrink: 0;
+}
+
+.pt-mister {
+  margin: 10px 0 0;
+  font-size: 0.74rem;
+  color: var(--text-dim);
+}
+
+/* ------------------------------------------------------------- i reparti */
+.pt-campo { margin-top: 14px; }
+
+.pt-reparto + .pt-reparto { margin-top: 14px; }
+
+.pt-reparto h3 {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin: 0 0 6px;
+}
+
+.pt-g {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  margin-inline: -8px;
+  border-radius: var(--radius);
+  font-size: 0.88rem;
+  transition: background 0.15s;
+}
+
+.pt-g:hover { background: rgba(255, 255, 255, 0.025); }
+
+.pt-nome {
+  color: var(--text);
+  min-width: 0;
+  overflow-wrap: break-word;
+  line-height: 1.2;
+}
+
+a.pt-nome:hover { color: var(--gold-400); }
+
+.pt-fascia {
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 0.52rem;
+  letter-spacing: 0.06em;
+  padding: 2px 5px;
+  border-radius: 3px;
+  border: 1px solid rgba(217, 180, 106, 0.4);
+  color: var(--gold-500);
+  flex-shrink: 0;
+}
+
+/* Chi è entrato, e al posto di chi. */
+.pt-g.entrato { background: rgba(217, 180, 106, 0.045); }
+
+.pt-entrato {
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--gold-600);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Il buco: un titolare senza voto e senza nessuno che potesse sostituirlo. */
+.pt-g.assente .pt-nome { color: var(--text-dim); text-decoration: line-through; }
+
+.pt-nessuno {
+  font-style: normal;
+  font-size: 0.68rem;
+  color: var(--loss);
+  margin-left: auto;
+}
+
+.pt-bonus {
+  display: inline-flex;
+  gap: 3px;
+  margin-left: auto;
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  line-height: 1;
+}
+
+.pt-bonus i { font-style: normal; }
+
+/* Il colore aiuta, ma non decide: ogni simbolo si distingue anche in bianco
+   e nero. Vedi il commento su SIMBOLO in Partita.jsx. */
+.b-giallo { color: #d8b93c; }
+.b-rosso,
+.b-autogol,
+.b-rigore-sbagliato { color: var(--loss); }
+.b-gol-subito { color: var(--text-dim); }
+.b-gol-vittoria { color: var(--gold-400); }
+
+.pt-voto {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: var(--text-dim);
+  flex-shrink: 0;
+  min-width: 2.1rem;
+  text-align: right;
+}
+
+.pt-fv {
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--text);
+  flex-shrink: 0;
+  min-width: 2.6rem;
+  text-align: right;
+}
+
+.pt-fv.alto { color: var(--win); }
+.pt-fv.basso { color: var(--loss); }
+
+/* --------------------------------------------------------------- i conti */
+.pt-conti {
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.pt-riga {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 4px 0;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.pt-riga b { font-family: var(--font-mono); color: var(--text); font-weight: 500; }
+.pt-riga.modificatore { color: var(--text-dim); font-size: 0.78rem; }
+.pt-riga.modificatore b { color: var(--gold-500); }
+
+.pt-riga.totale {
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-soft);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.pt-riga.totale b { font-size: 1.5rem; color: var(--gold-400); }
+.pt-riga.totale.storto b { color: var(--loss); }
+
+/* ------------------------------------------------------------ la panchina */
+.pt-panchina { margin-top: 16px; }
+
+.pt-panchina summary {
+  cursor: pointer;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: 8px 0;
+}
+
+.pt-panchina summary:hover { color: var(--gold-500); }
+
+.pt-panchina summary em {
+  font-style: normal;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  font-size: 0.66rem;
+  color: var(--text-dim);
+  margin-left: auto;
+}
+
+.pt-panchina ul { list-style: none; margin: 6px 0 0; padding: 0; }
+
+.pt-panchina li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  margin-inline: -8px;
+  border-radius: var(--radius);
+  font-size: 0.82rem;
+}
+
+.pt-panchina li.dentro { background: rgba(217, 180, 106, 0.06); }
+
+.pt-esito {
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.pt-esito.dentro { color: var(--gold-500); }
+.pt-esito.niente { opacity: 0.55; }
+
+.pt-panchina .pt-fv { font-size: 0.8rem; color: var(--text-muted); }
+
+/* ------------------------------------------------------------- la legenda */
+.pt-legenda {
+  margin-top: 20px;
+  padding: 16px 18px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-soft);
+  background: rgba(255, 255, 255, 0.012);
+}
+
+.pt-legenda h3 {
+  margin: 0 0 12px;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 400;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.pt-legenda ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+}
+
+.pt-legenda li {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+  background: var(--navy-850);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.pt-legenda li i { font-style: normal; font-size: 0.88rem; }
+
+.pt-legenda li b {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: var(--gold-500);
+}
+
+.pt-legenda p {
+  margin: 12px 0 0;
+  font-size: 0.8rem;
+  line-height: 1.65;
+  color: var(--text-dim);
+}
+
+.pt-legenda p b { color: var(--gold-400); font-weight: 400; }
+
+.pt-nota {
+  margin: 20px 0 0;
+  font-size: 0.78rem;
+  line-height: 1.7;
+  color: var(--text-dim);
+}
+
+/* -------------------------------------------------------------- stretto */
+@media (max-width: 700px) {
+  .pt-testa { padding: 20px 16px; }
+
+  .pt-punteggio { gap: 10px; }
+  .pt-lato { flex-direction: column; gap: 8px; text-align: center; }
+  .pt-lato.ospite { flex-direction: column; }
+  .pt-lato img { width: 46px; height: 46px; }
+  .pt-lato span { font-size: 0.86rem; }
+
+  .pt-numeri { min-width: 84px; }
+  .pt-numeri strong { font-size: 2rem; }
+  .pt-numeri span { font-size: 0.72rem; }
+
+  .pt-lati { grid-template-columns: 1fr; }
+  .pt-form { padding: 18px 16px; }
+  .pt-g { font-size: 0.82rem; gap: 6px; }
+  .pt-entrato { font-size: 0.55rem; }
+}
+
+/* Perché il modificatore difesa c'è o non c'è. Sta sotto i modificatori e
+   non fra di loro: spiega un numero, non è un numero che si somma. */
+.pt-difesa {
+  margin: 8px 0 0;
+  padding-left: 10px;
+  border-left: 2px solid var(--border-soft);
+  font-size: 0.72rem;
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+.pt-difesa b { color: var(--text-muted); font-weight: 500; font-family: var(--font-mono); }

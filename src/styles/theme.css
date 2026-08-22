@@ -292,6 +292,12 @@ tbody td {
   white-space: nowrap;
 }
 
+/* La cella che contiene uno stemma e un nome fa eccezione: i numeri stanno
+   bene su una riga, i nomi delle societa' no. "Aston Ville di Corsano" su
+   un telefono, tenuto su una riga sola, esce dalla cella e si accavalla
+   alla successiva. Meglio una riga in piu'. */
+tbody td:has(.team-badge) { white-space: normal; }
+
 tbody td:first-child,
 tbody td.left {
   text-align: left;
@@ -437,3 +443,70 @@ tbody tr:hover td {
 .p-V { background: var(--win); }
 .p-N { background: var(--draw); }
 .p-P { background: var(--loss); }
+
+/* ------------------------------------------- intestazioni che ordinano
+   Stanno qui e non nel foglio della Classifica perche' le usano anche
+   Giocatori e la scheda di una societa': dentro una pagina lazy
+   sparirebbero dalle altre, come era gia' successo alle pastiglie. */
+.ord {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  transition: color 0.15s;
+}
+
+.ord:hover { color: var(--text); }
+.ord.on { color: var(--gold-400); }
+.ord i { font-style: normal; margin-left: 3px; font-size: 0.8em; }
+
+/* ------------------------------------------------- comandi sul telefono
+   Impilati verticalmente facevano seicento pixel di menu prima del primo
+   dato. Su schermo stretto diventano una riga che scorre di lato: si
+   vedono lo stesso, ma non si mettono davanti al contenuto. */
+@media (max-width: 700px) {
+  .controls {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    /* deve combaciare col padding di `.container` a questa misura (16 px):
+       con -18 la riga sporge di due pixel e la pagina scorre di lato */
+    margin-inline: -16px;
+    padding: 0 16px 4px;
+    align-items: flex-end;
+  }
+  .controls::-webkit-scrollbar { display: none; }
+  .controls > * { flex-shrink: 0; }
+  .controls select,
+  .controls input[type='search'] { min-width: 130px; font-size: 0.86rem; }
+}
+
+/* ------------------------------------------------ classi di più pagine
+   `.avviso`, `.pos` e `tr.podium` erano definite dentro CSS di pagina che
+   il sito carica solo quando serve quella pagina: Contratti, Coppe, Home.
+   Chi arrivava dritto su Ranking le trovava vuote, e l'avviso si vedeva
+   senza il suo bordo e senza il suo colore. Le classi che usa più di una
+   pagina stanno qui, dove ci sono sempre. */
+.avviso {
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  border-left: 3px solid var(--draw);
+  line-height: 1.6;
+}
+
+.avviso strong { color: var(--gold-400); }
+
+.pos {
+  color: var(--text-dim);
+  width: 2.2rem;
+}
+
+tr.podium .pos {
+  color: var(--gold-500);
+  font-weight: 600;
+}
