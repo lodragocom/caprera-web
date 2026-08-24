@@ -429,6 +429,178 @@ sette documenti.
 che sembrava reggere, prima che qualcuno glielo chiedesse. E' il comportamento che questa moviola
 raccomanda da stanotte, applicato senza che fosse necessario chiederlo.
 
+### Sedicesimo passaggio — i file ritrovati, e tre regole nuove sui soldi
+
+L0 ha recuperato da Google Drive cinque cartelle di stagione. La sessione del codice le ha aperte
+tutte e consegnato; **verificato quello che si poteva verificare** prima di trascrivere.
+
+**Le quotazioni di partenza sono TRE, non una.** Stamattina avevo scritto nello STATO e nel JSON
+*"nove stagioni di fine e una sola di partenza"*: era vero dodici ore fa, non lo e' piu'. Sono
+**2020-21, 2024-25, 2025-26**. Controllato di persona il 24-25: **715 righe, zero a zero, e i club
+sono quelli veri di quella stagione** — Como, Parma, Venezia. La colonna `Squadra` nei listoni di
+partenza **si puo' caricare**, al contrario di quelli di fine che guardano al presente.
+
+*Due precisazioni al conto della consegna:* i club distinti sono **20 piu' una casella vuota** (il
+conteggio da' 21, come gia' nel 2025-26), e il file di Mr Champions **non esiste al nome citato**:
+ha **due spazi**, `Mr Champions -Serie A -  25-26.xlsx`. E' esattamente l'inciampo che la consegna
+segnalava, e il nome esatto ora e' a verbale.
+
+**Tre regole sui soldi, dal `Riscatti_Contratti.xlsx`:**
+
+- **Gli attaccanti non hanno sconto sui rinnovi: pagano il 100% del Valore FP.** Il §7.1 nomina
+  solo D 50% e C 25%, e da' per implicito il resto. Otto casi, nessuna eccezione.
+- **I rinnovi si arrotondano per ECCESSO.** Quindici casi, sempre verso l'alto.
+- **La regola della meta' e' confermata sui dati:** `Rinnovo CR` e' esattamente meta' di `CR`.
+  E quel foglio **e' la fonte che mancava** per riempire `contratti.clausola`, vuota su tutte e 140
+  le righe.
+
+⚠️ **Una precisione che la consegna ha avuto e che valeva la pena:** l'arrotondamento trovato e'
+quello **dei rinnovi**, e **non** risponde alla lacuna #12, che riguarda la meta' dei risparmi
+riportati. Due arrotondamenti diversi. Segnato in entrambi i posti perche' nessuno li confonda.
+
+**Corretto l'audit del regolamento — di nuovo io.** Avevo scritto che Grigliata Serie A e Mr
+Champions *"vivono fuori dall'archivio"*. **Vivono in cinque fogli Excel**, che ora hanno un nome e
+un percorso. La frase "non calcolabile" era sbagliata: **il dato c'e', e' solo fuori dal database.**
+Restano davvero non calcolabili Serie A Awards, Fair Play, Indennizzo Carnevali e il Trofeo
+Mazzarri (criterio non definito). Le assicurazioni 25-26 sono **un'immagine PNG**.
+
+**⭐ E il difetto peggiore dell'archivio ha un rimedio.** Le rose sono una fotografia di fine
+stagione, e chi veniva ceduto a gennaio spariva: 20-74 giocatori a stagione. Sono saltate fuori le
+**rose d'asta di settembre** per 2020-21, 2022-23 e 2024-25. Con la rosa di settembre *e* quella di
+fine, **il mercato di gennaio si ricostruisce invece di inventarlo**. Ma la consegna ha ragione a
+fermarsi: **e' una tabella nuova, non una colonna in piu' — cambia cosa vuol dire "rosa", quindi e'
+scope, e non e' del Magazziniere da solo.**
+
+**Regole della lega scoperte lavorando: da 9 a 11.** Incongruenze del regolamento: da 12 a 14.
+
+### `regole-ferme-al-20` chiusa — e cosa non ha chiuso
+
+Applicata dalla sessione del codice su richiesta esplicita di L0, **dichiarata come scavalcamento e
+non come prassi**. Verifica di identita' per impronta md5 fra file e database: identici. Non
+regressione su `v_premi_crediti`: invariata.
+
+**Ma l'esito dice anche la cosa giusta:** la regola del pari merito adesso e' **nel dato**
+(`crediti.premi.parita`) e **la vista non la legge** — il `CASE` su ultimo/penultimo e' scritto
+dentro il SQL. Armata Rossa e Roburro continuano a prendere −1 ciascuna. **Aggiornare il dato non
+ha applicato la regola**, ed e' esattamente il genere di cosa che un esito onesto deve dire.
+
+### Diciassettesimo passaggio — il registro di Guido, e il metodo che cambia
+
+Arrivata la consegna sulle sette regole ricavate da **`Pagamenti Vincite Crediti 1.xlsx`**: otto
+fogli, sei stagioni, **quello che Guido ha davvero assegnato**.
+
+**Non e' una fonte in piu': e' LA fonte sui crediti**, e cambia il metodo. La nota che chiude quella
+consegna vale piu' delle sette regole messe insieme:
+
+> *"Per tutta la giornata ho provato a dedurre regole dai dati — e mi sono sbagliato tre volte
+> (Yildiz, lega_id, i listoni dati per mancanti). L0 ha indicato la strada in una riga: «i crediti
+> finali di Guido sono fissi». **Dove esiste un registro di cio' che e' stato deciso, la regola si
+> legge da li'. La deduzione serve solo dove il registro non arriva.**"*
+
+E' lo stesso pattern che questa moviola ha registrato tre volte oggi da parte mia — `lega_id`
+cercato nel file sbagliato, il gol vittoria misurato sulla partita sbagliata, l'audit fatto sul JSON
+invece che sul PDF. **In tutti e sei i casi il dato era buono e la domanda no.** La differenza fra
+noi e il registro non e' la bravura: e' che il registro non deduce.
+
+**✅ Lacuna #12 chiusa.** L'arrotondamento dei risparmi riportati e' **per eccesso** — cinque casi
+dispari senza eccezioni. E' lo **stesso verso** dell'arrotondamento dei rinnovi trovato stamattina:
+a Caprera, quando un credito si spezza, va verso l'alto. Due regole diverse, un principio solo, e
+scritto come principio.
+
+**La Grigliata, ricavata e non scelta.** Conta il **totale completo** (posizioni + Coppa Italia +
+capocannoniere) e i crediti escono dalla **griglia Serie A**, non da quella sulla Caprera. Nel
+2025-26 la differenza **ribalta il vincitore**. ⚠️ Dal 2026-27 cambia: *"il capocannoniere conta
+troppo"*.
+
+**La trappola dei nomi, ed e' successa davvero:** una classifica rimandata corretta ha spostato il
+primo posto da Sanguemisto ad Armata Rossa, perche' *"Juve" non e' "Juventus"*. Se la Grigliata
+entra nel sito, **serve la tabella degli alias prima del punteggio, non dopo**.
+
+**Corretto l'audit, per la terza volta.** Serie A Awards, Fair Play, Trofeo Mazzarri, Ranking,
+Zdenek e Paratici **sono tutti registrati**. Li davo per non calcolabili: **erano scritti altrove.**
+La distinzione giusta non e' *calcolabile / non calcolabile* — e' **si ricava dal nostro archivio ·
+e' registrato altrove · non esiste**. Tenerle insieme faceva sembrare perso cio' che era solo in un
+altro file. E il Carnevali non e' irraggiungibile: e' **dormiente**, mai assegnato in sei stagioni.
+
+Sul **Trofeo Mazzarri** la correzione va al contrario: **l'esito e' registrato, il criterio no.** Il
+premio piu' grande della lega non e' riproducibile da nessuno che non sia Guido.
+
+**⚠️ Capology bocciato al referendum.** L'avevo scritto in tre posti come riforma del 2026-27.
+E' **approvato nel meccanismo, bocciato, rinviato**: resta come modello — indicazione esplicita di
+L0 di non toglierlo — con la conseguenza pratica che **i crediti iniziali 2026-27 non hanno gli 85
+in piu'**.
+
+**Due discrepanze col registro, una verificata da me:** `finanze.residui` non combacia su nessuna
+delle dieci societa', e il numero di Guido e' quello buono perche' genera il riporto dell'anno dopo.
+E a **Smit manca una penalita'**: la nostra catena da' `250 + 0 + 5 + 2 = 257`, che e' **esattamente
+il numero di Guido prima del Caprera Etica da −5** con cui lui scende a 252. Nove su dieci
+combaciano: la divergenza e' localizzata a un passo solo.
+
+**Aperta e non deducibile:** la griglia sulla classifica Caprera non ha mai dato crediti in sei
+stagioni, ma L0 dice che dovrebbe. **Da chiarire fra L0 e Guido** — ed e' giusto che la consegna si
+sia fermata li' invece di scegliere.
+
+**Regole della lega: da 11 a 13.** Incongruenze del regolamento: 16, **una chiusa**.
+
+### Diciottesimo passaggio — il regolamento, affrontato per intero (23-24/08)
+
+L0: *"dobbiamo affrontare il tema regolamento Caprera"*. Il tema non era uno, erano **cinque**, e
+tenerli insieme era il motivo per cui sembrava ingestibile.
+
+**Prima la riproduzione fedele** — `REGOLE/Regolamento-Caprera.md`, 42 pagine, **zero parole perse**
+(verificato parola per parola). Cambiate solo cose di composizione: 9 sillabazioni ricomposte, 6
+legature sciolte, 35 tabelle su 37 diventate tabelle vere. **I refusi lasciati di proposito**:
+correggerli in silenzio significherebbe perdere il diff, ed erano l'oggetto del gruppo A.
+
+Perche' conta: **un regolamento in PDF non si versiona**, e in `06_caprera_project` ce ne sono
+sette copie che nessuno puo' confrontare. Da oggi una modifica alle regole e' **un diff**. Stesso
+principio applicato quattro volte in quattro giorni — schema, vetrina, token, adesso il prodotto.
+
+**Poi la classificazione**, e li' e' venuto fuori il valore: le tre liste che tenevamo separate si
+sovrapponevano, e deduplicate danno **27 voci in cinque gruppi**. Il gruppo A e' il piu' numeroso e
+il meno importante (refusi). Il gruppo **B e' il prodotto**: undici regole che la lega gioca e che
+non stanno scritte da nessuna parte — *un mister le ha imparate giocando, un utente nuovo non puo'
+impararle affatto*. Il gruppo **C sono due sole voci ed e' il rischio**: il regolamento promette una
+regola che non esiste, e una delle due decide i gironi di Champions.
+
+**Scritti B e A** col testo pronto da incollare e la riga esatta. Verificando sono emerse due cose
+che le liste vecchie non dicevano: **A2 e' doppio, non singolo**, e i refusi minori includono
+`-1\` `-2\` `-3\` — **residui di backslash Markdown**, che confermano che il regolamento nasce da
+un sorgente Markdown. Se quel sorgente esiste ancora, e' **lui** il documento da correggere.
+
+### Il caso Orsolini — dove ho sbagliato di nuovo, e cosa ne e' uscito
+
+Nell'errata avevo scritto che **la clausola di Sucic era sotto il minimo**. Falso: quotazione 10,
+CR 30, minimo 7,5 o 10. Avevo dedotto senza il dato. L0 ha dato il numero vero in una riga.
+
+Poi L0: *"Orsolini e' centrocampista"*. In archivio risulta A — e **hanno ragione tutti e due**:
+Fantapazz gli ha cambiato ruolo. C nel 22-23, 23-24, 24-25; **A nel 25-26**. Il contratto e' del
+24-25.
+
+**Da un mio errore e' uscita una lacuna vera che nessuno aveva visto:** la soglia della clausola
+dipende dal ruolo, **il ruolo cambia negli anni**, e il regolamento non dice quale conta. Dice
+quale vale per il *rinnovo*, non per la *soglia*. Non si vedeva nei dati — nei dati Orsolini e' `A`
+e basta. Si e' vista solo perche' L0 sapeva una cosa che il database non sa.
+
+**Misurato invece di argomentato:** sulle 46 clausole confrontabili **le due letture danno lo stesso
+verdetto su tutte**. Sotto soglia sono **due**, per **6 crediti in tutto**. Una decisione che
+sembrava dirimente si e' rivelata a basso impatto — e questo si sapeva solo contando.
+
+**L0 ha deciso la direzione e sospeso il passato:** *"in futuro dovra' essere come nella regola"*.
+E' la forma giusta, e ne discende una cosa che tocca a noi: **le due sviste sono successe perche' la
+clausola si dichiara per email e il conto non lo fa nessuno.** Finche' resta cosi', ne succederanno
+altre.
+
+### E ho riordinato un disordine che avevo creato io
+
+Le 27 voci erano finite in **quattro documenti sovrapposti**, con `TASK_Regolamento_Correzioni.md`
+citato da sei posti e ormai superato. **E' lo stesso pattern che questo progetto paga da quattro
+giorni**, prodotto da me mentre lo documentavo. Convertito in **indice**: tiene il nome (i link
+reggono) e rimanda ai tre documenti veri.
+
+**Pattern, ed e' il quinto della serie:** *scrivere di piu' non e' documentare meglio.* Quattro
+documenti che dicono la stessa cosa in modi diversi sono quattro posti dove sbagliarla.
+
 ## Decisioni prese (e alternative scartate)
 
 - **ADR-002 aperto, non lasciato dentro la rassegna.** La scelta di leggere da `public` con 29 viste sottili invece di esporre lo schema `caprera` dal cruscotto ha alternative reali, un debito accettato (29 viste da mantenere) e conseguenze durature: è una sentenza, non una nota di sessione. La rassegna la racconta, l'ADR la argomenta.

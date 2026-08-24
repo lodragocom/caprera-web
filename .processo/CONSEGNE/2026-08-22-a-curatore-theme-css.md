@@ -108,3 +108,90 @@ Tre cose vere che erano emerse allora, e che restano vere adesso — le puoi usa
   18→16). Il sito non resterebbe identico a com'è oggi, ed è il punto.
 
 **Prima di toccare `theme.css`: committa.** È il file che si è già perso una volta.
+
+---
+
+## Esito — Curatore, 22/08/2026
+
+**Stato: ITERA → APPROVA.** Ratificate tutte e tre, ma **una l'ho corretta prima di
+ratificarla**: così com'era spediva una regressione viva.
+
+### Il giudizio, classe per classe
+
+**`.avviso` + `.avviso strong` — APPROVA senza modifiche.**
+Nome italiano, bare, senza prefisso: è esattamente la convenzione che `theme.css` già tiene
+(`.card`, `.note`, `.empty`, `.badge`, `.forma`, `.pastiglia`). Appartiene al design system per
+merito, non per comodità: la usano **otto pagine** (Coppe, Ranking, Assicurazioni, Partita,
+Contratti, Regolamento, Formazioni, più le contestuali). Il posto giusto era qui dall'inizio.
+
+**`tr.podium .pos` — APPROVA senza modifiche.**
+`podium` è inglese in mezzo a nomi italiani, e me ne sono accorto; ma `theme.css` è già bilingue
+di suo (`.num`, `.strong`, `.muted`, `.dot`, `.form`) e rinominarla costerebbe due `.jsx` per zero
+guadagno. Passa. È una regola contestuale corretta: qualifica, non impone.
+
+**`.pos` — CORRETTA, poi approvata.** Il difetto:
+
+```css
+.pos { color: var(--text-dim); width: 2.2rem; }   /* com'era */
+```
+
+Promuovendola globale, `width: 2.2rem` (35,2 px) è finita addosso a **tutti** i `.pos`, non solo
+alle celle di tabella. Ma `.pos` non è sempre un `<td>`:
+
+| dove | elemento | traccia che lo contiene |
+|---|---|---|
+| Home, Ranking | `<td class="num pos">` | colonna di tabella — **la vuole, la larghezza** |
+| Asta `.top-card` | `<span class="pos num">` | griglia `1.6rem 1fr auto` = **25,6 px** |
+| Coppe `.riga-fp` | `<b class="num pos">` | griglia `22px 1fr auto` = **22 px** |
+| area `.pan-cl li` | `<span class="num pos">` | griglia `1.6rem 1fr auto` = **25,6 px** |
+
+Nei tre casi sotto, un elemento da 35,2 px in una traccia da 22-25,6 px **sfonda di 10-13 px
+dentro la colonna del nome squadra**. Non è teoria: è nel codice adesso, in tre punti, uno dei
+quali è la classifica del pannello dell'area mister.
+
+**Il principio, perché non ricapiti.** `width` non è identità, è layout. Una classe del design
+system porta **cosa è una cosa** (qui: il colore della posizione), non **quanto spazio occupa** in
+un contenitore che non conosce. Chi promuove una classe da CSS di pagina a `theme.css` deve
+separare le due cose, non spostare il blocco intero. Correzione applicata:
+
+```css
+.pos { color: var(--text-dim); }
+td.pos { width: 2.2rem; }
+```
+
+L'identità vale ovunque; la larghezza resta dov'era davvero destinata — la cella di tabella.
+Commento tracciabile lasciato in `theme.css` sopra la regola.
+
+### Doppioni tolti — il lavoro che la ratifica sblocca
+
+- `src/pages/Contratti.css` — tolte `.avviso` e `.avviso strong` (righe 1-12).
+- `src/pages/Coppe.css` — tolte `.avviso` e `.avviso strong` **e il commento che ora diceva il
+  falso** («è definita in Contratti.css»). Diceva anche di una duplicazione in `AreaMister.css`:
+  quel file è codice morto non più importato da nessuna rotta, non l'ho toccato.
+- `src/pages/Home.css` — tolte `.pos` e `tr.podium .pos`.
+
+Verificato: `^\.avviso`, `^\.pos`, `^tr\.podium` non esistono più fuori da `theme.css`.
+Restano intatte le **contestuali**, che non erano doppioni e infatti non lo sono:
+`Regolamento.css:59`, `SchedaGiocatore.css:197` (file di un'altra mano — **non toccato**),
+`Asta.css:27`, `Coppe.css:428`, `area/sezioni.css:622-623`.
+
+`npm run lint` e `npm run build` passano (i warning sono preesistenti e su altri file).
+
+**Resta da fare a chi verifica:** aprire **direttamente** `/ranking` e `/stats` (non dalla Home) e
+controllare bordo sinistro `--draw` sull'avviso e podio oro — e, in più rispetto alla consegna,
+**Asta**, **Coppe → Classifica Fantapunti** e la **classifica del pannello area mister**, dove la
+larghezza era andata a sbattere.
+
+**Ripulitura minore lasciata lì di proposito:** ora che `.pos` è globale,
+`.top-card .pos`, `.riga-fp .pos` e `.pan-cl .pos` ridichiarano `color: var(--text-dim)` a vuoto.
+Sono innocue (stesso valore) e toccano tre file in più, uno dei quali in area mister: non le tolgo
+in una sessione di ratifica.
+
+### Punto B — non fatto, e va detto perché
+
+L0 ha chiesto la ratifica, non le scale. **Resta aperto**, e resta la cosa più costosa del file:
+960 valori grezzi, +311 in un giorno. Il materiale della consegna è buono e me lo tengo — in
+particolare i tre punti passati (focus nascosto su `select`/`input`, nessun
+`prefers-reduced-motion`, bersagli a 26-30 px). Le decisioni ancora mie: **prima o dopo `/area`**
+— e propendo per **prima**, perché la dashboard è l'unica pagina grossa non ancora nata, e farla
+nascere già sulla scala costa una volta sola invece di due.
