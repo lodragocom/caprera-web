@@ -1,38 +1,55 @@
-.avviso {
-  padding: 14px 18px;
-  margin-bottom: 24px;
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  border-left: 3px solid var(--draw);
-  line-height: 1.6;
-}
-
-.avviso strong {
-  color: var(--gold-400);
-}
-
 .under {
   color: var(--gold-500);
   margin-left: 5px;
   font-size: 0.7rem;
 }
 
-/* --------------------------------------------------- barra stagioni */
-.gantt {
-  display: inline-flex;
-  gap: 4px;
-}
+/* ------------------------------------------- la barra delle stagioni
+   Le caselle da sole erano decorazione: nessun anno scritto sopra, e
+   nessun modo di sapere dove cade l'oggi. Adesso c'e' un righello con
+   le due cifre dell'anno, l'anno in corso e' segnato in tutte e due, e
+   il colore della barra dice lo stato invece di essere sempre oro. */
 
-.gantt i {
+.ct-righello,
+.ct-barra { display: inline-flex; gap: 4px; }
+
+.ct-righello i {
+  width: 18px;
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  text-align: center;
+  color: var(--text-dim);
+}
+.ct-righello i.ora { color: var(--gold-400); }
+
+.ct-barra i {
   width: 18px;
   height: 9px;
   border-radius: 2px;
   background: rgba(255, 255, 255, 0.06);
 }
+.ct-barra i.ora { box-shadow: inset 0 0 0 1px var(--text-dim); }
 
-.gantt i.on {
-  background: var(--gold-600);
+.ct-barra.b-corso  i.on { background: var(--win); }
+.ct-barra.b-scade  i.on { background: var(--gold-500); }
+.ct-barra.b-finito i.on { background: var(--navy-700); }
+
+/* Lo stesso codice colore accanto alla scadenza, perche' la barra sul
+   telefono sparisce e la colonna deve reggersi da sola. */
+.ct-stato {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  padding: 2px 7px;
+  border-radius: 3px;
+  white-space: nowrap;
 }
+.s-corso  { background: color-mix(in srgb, var(--win) 16%, transparent); color: var(--win); }
+.s-scade  { background: color-mix(in srgb, var(--gold-500) 18%, transparent); color: var(--gold-400); }
+.s-finito { color: var(--text-dim); }
+
+.ct-tabella { overflow-x: auto; }
+.ct-tabella table { width: 100%; border-collapse: collapse; }
 
 /* ------------------------------------------------------------ slot */
 .slot-row {
@@ -121,13 +138,6 @@
   white-space: nowrap;
 }
 
-.legenda {
-  font-size: 0.78rem;
-  color: var(--text-dim);
-  margin: 0 0 12px;
-  max-width: 70ch;
-}
-
 @media (max-width: 900px) {
-  .cov-head, .gantt { display: none; }
+  .ct-cov, .ct-barra { display: none; }
 }

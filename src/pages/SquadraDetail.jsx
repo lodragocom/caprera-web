@@ -6,10 +6,11 @@ import { siglaCoppa } from '../lib/coppe'
 import { Bacheca, PercorsoCoppe } from '../components/CoppeSocieta'
 import CreditiSocieta from '../components/CreditiSocieta'
 import {
-  useArchivio, classificaPerpetua, bacheca as bachecaDi, partiteDi, rosa as rosaDi,
+  useArchivio, classificaPerpetua, bacheca as bachecaDi, partiteDi,
   classifica, forma,
 } from '../lib/archivio'
 import { Pagina, Sezione, Numero, Scheletro } from '../components/moto'
+import RosaSocieta from '../components/RosaSocieta'
 import './SquadraDetail.css'
 
 /**
@@ -230,17 +231,7 @@ function Numeretto({ etichetta, valore, sotto, oro, tinta }) {
 
 /* ------------------------------------------------------------------ rosa */
 
-const RUOLI = [
-  ['tutti', 'Tutti'], ['P', 'Portieri'], ['D', 'Difensori'],
-  ['C', 'Centrocampisti'], ['A', 'Attaccanti'],
-]
 
-const COLONNE_ROSA = [
-  { k: 'costo', t: 'Costo', lungo: 'i costi' },
-  { k: 'presenze', t: 'Pres.', lungo: 'le presenze' },
-  { k: 'mv', t: 'MV', dec: 2, lungo: 'la media voto' },
-  { k: 'fm', t: 'FM', dec: 2, lungo: 'la fantamedia' },
-]
 
 /**
  * La rosa di una stagione.
@@ -250,6 +241,15 @@ const COLONNE_ROSA = [
  * portiere" o "chi è costato di più", e senza filtro e ordinamento quelle due
  * domande costano una scorsa a occhio ogni volta.
  */
+/**
+ * La rosa, con lo stesso disegno dell'area personale.
+ *
+ * Prima questa pagina mostrava solo la rosa di maggio, e l'area del mister
+ * anche quella di settembre: due schermate per la stessa domanda, e solo una
+ * delle due diceva la verita' intera. Adesso il blocco e' uno e vale per
+ * tutte e dieci le societa'; qui dentro restano soltanto le stagioni in cui
+ * questa societa' ha davvero giocato.
+ */
 function Rosa({ teamId }) {
   const cl = useArchivio('perpetua', classificaPerpetua)
   const stagioni = useMemo(
@@ -257,139 +257,15 @@ function Rosa({ teamId }) {
       .map((r) => r.stagione))].sort().reverse(),
     [cl.dati, teamId]
   )
-  const [scelta, setScelta] = useState('')
-  const [ruolo, setRuolo] = useState('tutti')
-  const [ordine, setOrdine] = useState(null)
-  const stagione = scelta && stagioni.includes(scelta) ? scelta : stagioni[0]
-
-  const stato = useArchivio(['rosa', stagione, teamId],
-    () => (stagione ? rosaDi(stagione, teamId) : Promise.resolve([])), [stagione, teamId])
-
-  const tutte = stato.dati ?? []
-  const righe = useMemo(() => {
-    const f = ruolo === 'tutti' ? tutte : tutte.filter((p) => p.ruolo === ruolo)
-    if (!ordine) {
-      return [...f].sort((a, b) =>
-        'PDCA'.indexOf(a.ruolo) - 'PDCA'.indexOf(b.ruolo) || (b.costo ?? 0) - (a.costo ?? 0))
-    }
-    const { k, giu } = ordine
-    return [...f].sort((a, b) => {
-      const x = a[k] == null ? -Infinity : Number(a[k])
-      const y = b[k] == null ? -Infinity : Number(b[k])
-      return giu ? y - x : x - y
-    })
-  }, [tutte, ruolo, ordine])
-
-  const riepilogo = useMemo(() => {
-    const perRuolo = { P: 0, D: 0, C: 0, A: 0 }
-    let spesi = 0; let somma = 0; let quanti = 0
-    for (const p of tutte) {
-      perRuolo[p.ruolo] = (perRuolo[p.ruolo] ?? 0) + 1
-      spesi += p.costo ?? 0
-      if (p.fm != null) { somma += Number(p.fm); quanti += 1 }
-    }
-    return { perRuolo, spesi, quanti: tutte.length,
-             fmMedia: quanti ? (somma / quanti).toFixed(2) : null }
-  }, [tutte])
-
-  /*
-   * Le colonne che per questa stagione hanno almeno un valore.
-   *
-   * Nel 2025-26 l'archivio ha costi e club ma non ancora presenze, media voto
-   * e fantamedia: tre colonne intere di trattini, con l'ordinamento che ci
-   * lavora sopra senza combinare niente. Una colonna vuota non e' una colonna:
-   * si toglie, e si dice perche'.
-   */
-  const colonne = useMemo(
-    () => COLONNE_ROSA.filter((c) => tutte.some((p) => p[c.k] != null)),
-    [tutte]
-  )
-  const mancanti = COLONNE_ROSA.filter((c) => !colonne.includes(c))
-
-  const cambia = (k) => setOrdine((o) =>
-    o?.k !== k ? { k, giu: true } : o.giu ? { k, giu: false } : null)
-
   if (!stagioni.length) return null
-
   return (
     <section className="block">
-      <div className="sd-barra">
-        <label className="sd-scelta">
-          <span>Stagione</span>
-          <select value={stagione} onChange={(e) => setScelta(e.target.value)}>
-            {stagioni.map((s) => <option key={s} value={s}>{s}</option>)}
-          </select>
-        </label>
-
-        <div className="sd-reparti">
-          {RUOLI.map(([v, l]) => (
-            <button key={v} type="button" className={ruolo === v ? 'on' : ''}
-                    onClick={() => setRuolo(v)}>
-              {l}
-              {v !== 'tutti' && <i>{riepilogo.perRuolo[v] ?? 0}</i>}
-            </button>
-          ))}
-        </div>
-
-        <p className="sd-riepilogo">
-          <span><b>{riepilogo.quanti}</b> calciatori</span>
-          <span><b>{riepilogo.spesi}</b> crediti</span>
-          {riepilogo.fmMedia && <span>FM media <b>{riepilogo.fmMedia}</b></span>}
-        </p>
-      </div>
-
-      <Sezione stato={stato} righe={10} vuoto="Nessuna rosa registrata.">
-        <div className="sd-tabella">
-          <table>
-            <thead>
-              <tr>
-                <th className="c-r">R</th>
-                <th className="c-nome">Calciatore</th>
-                <th className="c-club">Club</th>
-                {colonne.map((c) => (
-                  <th key={c.k} className="num">
-                    <button type="button" className={`ord ${ordine?.k === c.k ? 'on' : ''}`}
-                            onClick={() => cambia(c.k)}>
-                      {c.t}{ordine?.k === c.k && <i>{ordine.giu ? '▾' : '▴'}</i>}
-                    </button>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {righe.map((p, i) => (
-                <tr key={i}>
-                  <td className="c-r"><span className={`badge role-${p.ruolo}`}>{p.ruolo}</span></td>
-                  <td className="c-nome">{p.nome}</td>
-                  <td className="c-club">{p.club ?? '—'}</td>
-                  {colonne.map((c) => (
-                    <td key={c.k} className={`num ${ordine?.k === c.k ? 'in-ordine' : ''}`}>
-                      {p[c.k] == null ? '—'
-                        : c.dec ? Number(p[c.k]).toFixed(c.dec) : p[c.k]}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        {mancanti.length > 0 && (
-          <p className="sd-nota">
-            Per il {stagione} l'archivio non ha ancora
-            {' '}{elenco(mancanti.map((c) => c.lungo ?? c.t.toLowerCase()))}:
-            {' '}le colonne compaiono quando arrivano i dati di fine stagione.
-          </p>
-        )}
-      </Sezione>
+      <RosaSocieta teamId={teamId} stagioni={stagioni} />
     </section>
   )
 }
 
-/** "a, b e c" — perche' "a, b, c" in una frase italiana suona un elenco della spesa. */
-function elenco(voci) {
-  if (voci.length <= 1) return voci[0] ?? ''
-  return `${voci.slice(0, -1).join(', ')} e ${voci[voci.length - 1]}`
-}
+
 
 /* -------------------------------------------------------------- il grafico */
 

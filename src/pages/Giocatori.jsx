@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom'
 import TeamBadge from '../components/TeamBadge'
 import { teamName } from '../lib/core'
 import { useArchivio, tutteLeRose } from '../lib/archivio'
-import { Pagina, Sezione } from '../components/moto'
+import { Pagina } from '../components/moto'
+import { Barra, Campo, Cerca, Gruppo, Schede, Scheda, Conto, Avviso } from '../components/Filtri'
 import './Giocatori.css'
 
 const ROLE_ORDER = { P: 0, D: 1, C: 2, A: 3 }
@@ -119,6 +120,21 @@ export default function Giocatori() {
     () => indice.filter((p) => p.id == null).length, [indice]
   )
 
+  /* I numeri in testa. Si contano sull'indice intero, non sui filtri: dicono
+     quant'e' grande l'archivio, non quanto e' grande la ricerca di adesso -
+     quello lo dice gia' la riga del conto. */
+  const { perRuolo, totaleSpeso, ilPiuCaro, ilPiuFedele } = useMemo(() => {
+    const perRuolo = { P: 0, D: 0, C: 0, A: 0 }
+    let totaleSpeso = 0; let caro = null; let fedele = null
+    for (const p of indice) {
+      if (perRuolo[p.role] != null) perRuolo[p.role] += 1
+      totaleSpeso += p.spent
+      if (caro === null || p.best > caro.best) caro = p
+      if (fedele === null || p.seasons.length > fedele.seasons.length) fedele = p
+    }
+    return { perRuolo, totaleSpeso, ilPiuCaro: caro, ilPiuFedele: fedele }
+  }, [indice])
+
   return (
     <Pagina className="page container wide gi">
       <header className="page-head">
@@ -133,20 +149,10 @@ export default function Giocatori() {
         </p>
       </header>
 
-      <div className="controls">
-        <div className="field">
-          <label htmlFor="gi-q">Cerca</label>
-          <input
-            id="gi-q"
-            type="search"
-            placeholder="Calciatore o club…"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-          />
-        </div>
-        <div className="field">
-          <label htmlFor="gi-sort">Ordina per</label>
-          <select id="gi-sort" value={sort} onChange={(e) => setSort(e.target.value)}>
+      <Barra>
+        <Cerca valore={q} cambia={setQ} />
+        <Campo etichetta="Ordina per">
+          <select value={sort} onChange={(e) => setSort(e.target.value)}>
             <option value="spent">Costo totale</option>
             <option value="best">Acquisto più caro</option>
             <option value="seasons">Stagioni</option>
@@ -154,27 +160,37 @@ export default function Giocatori() {
             <option value="apps">Presenze</option>
             <option value="player">Nome</option>
           </select>
-        </div>
-        <div className="seg">
-          <button aria-pressed={role === ''} onClick={() => setRole('')}>Tutti</button>
-          {['P', 'D', 'C', 'A'].map((r) => (
-            <button key={r} aria-pressed={role === r} onClick={() => setRole(r)}>{r}</button>
-          ))}
-        </div>
-      </div>
+        </Campo>
+        <Gruppo etichetta="Ruolo" ora={role} scegli={setRole}
+                voci={[['', 'Tutti'], ...['P', 'D', 'C', 'A'].map((r) => [r, r, perRuolo[r] ?? 0])]} />
+      </Barra>
 
-      <p className="result-count num">
+      {/* Il riassunto prima del dettaglio, come nelle rose: quattromila righe
+          senza una cifra in testa non dicono di che dimensione e' la cosa che
+          stai guardando. */}
+      <Schede>
+        <Scheda etichetta="Calciatori" valore={indice.length.toLocaleString('it-IT')}
+                sotto={`${perRuolo.P}-${perRuolo.D}-${perRuolo.C}-${perRuolo.A}`} />
+        <Scheda etichetta="Crediti spesi" valore={totaleSpeso.toLocaleString('it-IT')}
+                sotto="in dieci stagioni" />
+        <Scheda etichetta="Il più caro" valore={ilPiuCaro?.best ?? '—'}
+                sotto={ilPiuCaro?.player} />
+        <Scheda etichetta="Con più stagioni" valore={ilPiuFedele?.seasons.length ?? '—'}
+                sotto={ilPiuFedele?.player} />
+      </Schede>
+
+      <Conto>
         {trovati > TETTO
           ? `primi ${TETTO} di ${trovati.toLocaleString('it-IT')} calciatori`
           : `${trovati.toLocaleString('it-IT')} ${trovati === 1 ? 'calciatore' : 'calciatori'}`}
-      </p>
+      </Conto>
 
       {senzaScheda > 0 && (
-        <p className="gi-avviso">
-          {senzaScheda} {senzaScheda === 1 ? 'nome non è agganciato' : 'nomi non sono agganciati'}
+        <Avviso>
+          <b>{senzaScheda}</b> {senzaScheda === 1 ? 'nome non è agganciato' : 'nomi non sono agganciati'}
           {' '}a un calciatore dell'archivio e {senzaScheda === 1 ? 'non ha' : 'non hanno'} la
           scheda: {senzaScheda === 1 ? 'compare' : 'compaiono'} in tabella senza il collegamento.
-        </p>
+        </Avviso>
       )}
 
       <div className="table-wrap tall">

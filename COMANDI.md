@@ -33,6 +33,23 @@ sh ~/dev/caprera/caprera-dati/SUPABASE/carica.sh
 
 La stringa di connessione la prende da `~/.caprera-dsn`, che deve contenere il
 **Session pooler** e non la connessione diretta (quella risponde solo su IPv6).
+
+**Cosa non tocca** (dal 22/08): tessere, misteri, incarichi e assegnazioni —
+l'identità non è archivio — le quotazioni di **fine** stagione del listone e la
+tabella `movimenti`, che hanno un caricatore loro. Vengono messe da parte e
+rimesse al loro posto. E il `truncate` non ha più `cascade`: se nasce una
+tabella che si appoggia all'archivio e nessuno l'ha dichiarata, il caricamento
+**si ferma e la nomina** invece di portarsela via.
+
+### Caricare il registro dei crediti di Guido
+
+```
+cd ~/dev/caprera/caprera-dati/SUPABASE
+python3 carica-movimenti.py --registro "../../06_caprera_project/Pagamenti - Vincite - Crediti (1).xlsx"
+```
+
+Senza `--carica` non tocca il database: legge, controlla e stampa. È il
+dettaglio di `finanze.bonus` — da dove viene ogni credito.
 È lo stesso comando che servirà quando arriveranno i dati di Guido.
 
 Dettagli, e come provare tutto su un Postgres locale senza toccare Supabase:

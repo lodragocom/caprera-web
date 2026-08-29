@@ -91,3 +91,47 @@ produce. Serve un registro di movimenti — ma quella è una decisione di scope,
 
 **Da fare qui:** solo il pari merito (punto A). Il resto è contesto perché tu sappia che uno scarto
 fra calcolato e registrato **è atteso**, e non vada a caccia di un bug che non c'è.
+
+---
+
+## Esito — chiusa il 24/08/2026 (magazziniere)
+
+**A · il pari merito: fatto, e il controllo passa.** `caprera.v_premi_crediti` ha oggi, sia sui
+fantapunti sia sui marcatori, `case when count(*) over (partition by stagione, posizione) > 1 then 0`.
+Letto con `pg_get_viewdef` sul database vivo. Il controllo chiesto dalla consegna, 2025-26:
+
+```
+smit 1 → +2 · prosecco 2 → +1 · sanguemisto 7 e disperata 7 → 0
+roburro 9 e armata-rossa 9 → 0 · nessuna riga a −2
+```
+
+Armata Rossa e Roburro non prendono ne' −1 ne' −2. Nessuno paga il −2, ed e' voluto.
+
+⚠️ **Ma il punto 1 delle due avvertenze e' stato applicato senza che nessuno rispondesse.**
+Il Segretario aveva scritto: *«l'estensione ai premi positivi e' una mia deduzione, non una
+dichiarazione di L0 — chiedi prima di darla per buona»*. Nella vista **e' data per buona**: due
+prime a pari merito non prendono il +5. Sui dati di oggi non cambia un credito (i pari merito in
+archivio sono tutti in fondo), quindi non e' urgente — **ma e' una regola in esercizio che nessuno
+ha ratificato**, e va detto a L0 invece di lasciarla passare in silenzio. Non l'ho tolta: toglierla
+sarebbe decidere al contrario.
+
+Il punto 2 — criterio diverso da quello del Ranking, dove a pari coefficiente si spareggia — resta
+com'era: **non l'ho uniformato**, e' del Direttore Sportivo.
+
+**B · il contesto:** letto, niente da fare. Confermo che lo scarto fra calcolato e registrato e'
+atteso.
+
+## In piu' — `v_diritti_tv`, l'handoff del 24/08
+
+Il rapporto `RAPPORTI/2026-08-24-segretario-diritti-tv-calcolabili.md` chiedeva di far atterrare qui
+la vista dei diritti TV. **Scritta, non applicata:**
+`caprera-dati/SUPABASE/10-diritti-tv.sql`.
+
+Legge gli importi da `lega.regole → competizioni[].diritti_tv_finalista` (niente numeri nel codice) e
+li da' a entrambi i finalisti presi da `v_albo`. Riprodotto io stesso il confronto col registro di
+Guido sul database vivo, e da' la stessa tabella del rapporto: **8=8 · 8≠14 · 8≠14 · 16=16 · 16=16**.
+Lo scarto e' 6 crediti in due stagioni, ed e' SCE 4 + SCI 2. Si chiude con
+`09-supercoppe-ricostruite.sql`.
+
+**Non apre nessuna finestra in `public`**: e' una decisione del Direttore Sportivo, e quando arriva
+la riga va in `02-viste.sql`.

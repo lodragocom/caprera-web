@@ -92,3 +92,27 @@ chi non ha comprato nessuno. Sono due fatti diversi con due cardinalità diverse
 **Il caricatore va scritto**: `carica.py` non le conosce, e `carica.sh` oggi non si può lanciare
 comunque (le due consegne aperte). Se vuoi, il lettore `xls` con la trappola della corruzione
 già risolta te lo passo io — sono venti righe.
+
+---
+
+## Stato al 24/08/2026 (magazziniere) — **resta aperta, e non la tocco**
+
+La tabella `caprera.statistiche_serie_a` **esiste** con la forma proposta qui: chiave per stagione e
+nome, `calciatore` agganciato dove aggancia, **niente `club` di oggi** (c'e' un `squadra_oggi`
+dichiarato per quello che e'), `fantapazz_id` tenuto ma non usato come chiave, e le **quattro**
+fantamedie invece di una (`fm`, `fm_gazzetta`, `fm_corriere`, `fm_statistico`). Le tre trappole sono
+state rispettate. C'e' anche il materiale: `SUPABASE/statistiche-serie-a.sql`.
+
+**Non la chiudo perche' il caricamento e' in corso mentre scrivo.** Due interrogazioni fatte a
+pochi minuti di distanza il 24/08 danno **1.814** righe la prima e **3.202** la seconda, e le
+stagioni presenti sono 2016-17 (928), 2017-18 (**460**, cioe' a meta'), 2024-25 (975), 2025-26 (839)
+— quattro su undici, una troncata. **Un'altra sessione sta scrivendo adesso.** Chiudere una consegna
+guardando un numero che si muove sotto le mani sarebbe dichiarare finita una cosa che non lo e'.
+
+**Chi la sta caricando la chiuda lui**, quando le undici stagioni ci sono. Restano da decidere le
+due cose che questa consegna gia' segnalava e che il caricamento non risolve da solo:
+
+1. **la fantamedia dei portieri** — `rose.fm` e `FM FP` non coincidono (Svilar 5,78 contro 5,36) e
+   la fantamedia dei portieri entra nel modificatore di difesa. Prima di far leggere al motore
+   queste colonne, bisogna sapere quale delle due usa la lega;
+2. il **2015-16**, che la lega non ha giocato.

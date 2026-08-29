@@ -32,6 +32,11 @@ import pg from 'pg'
  * sistema di autenticazione: e' un manichino che risponde come risponderebbe
  * Supabase, cosi' si puo' vedere davvero cosa succede dopo l'ingresso.
  */
+/* Quante righe risponde Supabase al massimo, `db-max-rows`. Non e' una scelta
+   di questo finto: e' il numero che ha il vero, e il banco di prova serve solo
+   se si comporta come quello che deve imitare. */
+const TETTO = 1000
+
 const UTENTI = new Map()   // email -> { id, email }
 
 function finto_jwt(u) {
@@ -134,12 +139,16 @@ function condizione(colonna, valore, valori) {
 }
 
 createServer(async (req, res) => {
-  const rispondi = (codice, corpo) => {
+  const rispondi = (codice, corpo, extra = {}) => {
     res.writeHead(codice, {
       'content-type': 'application/json',
       'access-control-allow-origin': '*',
       'access-control-allow-headers': '*',
       'access-control-allow-methods': 'GET,POST,PUT,PATCH,OPTIONS',
+      // Senza questa, il browser vede l'intestazione ma non la lascia leggere
+      // a chi l'ha chiesta: e' la regola CORS. Il vero Supabase la espone.
+      'access-control-expose-headers': 'content-range, content-profile',
+      ...extra,
     })
     res.end(JSON.stringify(corpo))
   }
@@ -212,6 +221,8 @@ createServer(async (req, res) => {
     const dove = []
     let ordine = ''
     let limite = ''
+    let chiesto = null
+    let salta = 0
 
     for (const [k, v] of u.searchParams) {
       if (k === 'select') continue
@@ -223,10 +234,31 @@ createServer(async (req, res) => {
         }).join(', ')
         continue
       }
-      if (k === 'limit') { limite = ` limit ${Number(v) || 100}`; continue }
-      if (k === 'offset') continue
+      if (k === 'limit') { chiesto = Number(v) || 100; continue }
+      if (k === 'offset') { salta = Number(v) || 0; continue }
       dove.push(condizione(k, v, valori))
     }
+
+    /*
+     * Il tetto delle mille righe.
+     *
+     * Supabase risponde al massimo con `db-max-rows` righe — mille — e non lo
+     * dice: la risposta e' un elenco valido, solo piu' corto della verita'.
+     * Questo finto le restituiva tutte, e cosi' un difetto vero passava il
+     * collaudo: il listone 2025-26 ha 1519 righe, il sito ne riceveva mille,
+     * e le quotazioni di settembre sparivano da nove giocatori su dieci senza
+     * che niente si rompesse.
+     *
+     * **Un banco di prova piu' permissivo della produzione non e' un banco di
+     * prova.** Da qui in avanti il tetto c'e' anche qui.
+     */
+    const intervallo = /^(\d+)-(\d+)$/.exec(req.headers.range ?? '')
+    if (intervallo) {
+      salta = Number(intervallo[1])
+      chiesto = Number(intervallo[2]) - salta + 1
+    }
+    const quante = Math.min(chiesto ?? TETTO, TETTO)
+    limite = ` limit ${quante} offset ${salta}`
 
     /* La tessera dipende da chi e' collegato: qui la si cerca per email. */
     if (tabella === 'la_mia_tessera') {
@@ -265,6 +297,21 @@ createServer(async (req, res) => {
       + (dove.length ? ' where ' + dove.join(' and ') : '') + ordine + limite
     const { rows } = await pool.query(sql, valori)
 
+    /* PostgREST dice sempre da dove a dove sta rispondendo, e su quante righe
+       in tutto quando gliela si chiede. E' l'unico modo che ha il sito per
+       accorgersi di aver ricevuto meta' archivio. */
+    let totale = '*'
+    if ((req.headers.prefer ?? '').includes('count=exact')) {
+      const { rows: [c] } = await pool.query(
+        `select count(*)::int n from public."${tabella}"`
+        + (dove.length ? ' where ' + dove.join(' and ') : ''), valori)
+      totale = String(c.n)
+    }
+    const fino = salta + rows.length - 1
+    const intestazioni = {
+      'content-range': rows.length ? `${salta}-${fino}/${totale}` : `*/${totale}`,
+    }
+
     // le tabelle annidate: una lettura in piu' per ciascuna, con la chiave
     // che PostgREST ricava dalle foreign key. Qui la sappiamo: e' `edizione`.
     for (const a of annidate) {
@@ -281,7 +328,10 @@ createServer(async (req, res) => {
     }
 
     const unaSola = (req.headers.accept ?? '').includes('pgrst.object')
-    rispondi(200, unaSola ? (rows[0] ?? null) : rows)
+    // 206 quando la risposta e' un pezzo, come il vero: e' il segnale che
+    // esiste un seguito. Chi legge senza guardarlo si prende meta' archivio.
+    const parziale = !unaSola && totale !== '*' && rows.length < Number(totale)
+    rispondi(parziale ? 206 : 200, unaSola ? (rows[0] ?? null) : rows, intestazioni)
   } catch (e) {
     rispondi(400, { message: String(e.message ?? e) })
   }

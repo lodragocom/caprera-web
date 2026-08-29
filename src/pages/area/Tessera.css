@@ -3,7 +3,7 @@
 
 .tess-griglia {
   display: grid;
-  grid-template-columns: 340px 1fr;
+  grid-template-columns: 380px 1fr;
   grid-template-areas:
     'cart dati'
     'pass dati';
@@ -15,88 +15,200 @@
 .tess-griglia > *:nth-child(2) { grid-area: dati; }
 .tess-griglia > *:nth-child(3) { grid-area: pass; }
 
-/* ------------------------------------------------------------ cartellino */
+/* --------------------------------------------------------------- la tessera */
 
-.cartellino {
-  padding: 22px;
+/* Non un riquadro con una striscia: una tessera. La banda della Federazione
+   in alto, la trama fine sul fondo, il colore sociale come taglio, e in
+   fondo la riga in mono con l'email — che su una tessera vera sarebbe la
+   banda magnetica. */
+
+.tessera {
+  --accent: var(--gold-500);
   position: relative;
+  isolation: isolate;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-lg);
+  background:
+    radial-gradient(118% 88% at 100% 0%,
+      color-mix(in srgb, var(--accent) 20%, transparent), transparent 62%),
+    linear-gradient(158deg, var(--navy-700), var(--navy-900) 64%);
+  /* Le proporzioni di una tessera vera (85,6 × 54 mm) sulla larghezza della
+     colonna. E' un minimo, non una gabbia: se il contenuto chiede piu' spazio
+     la carta si allunga invece di tagliarlo — `aspect-ratio` invece taglia. */
+  min-height: 240px;
 }
 
-/* La striscia del colore sociale: è quello che la fa somigliare a una tessera
-   e non a un altro riquadro. */
-.cartellino::before {
+/* La trama: righe finissime in diagonale, come sulle tessere stampate. */
+.tessera::before {
   content: '';
   position: absolute;
-  inset: 0 auto 0 0;
-  width: 4px;
-  background: var(--accent, var(--gold-500));
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    115deg, rgba(255, 255, 255, 0.038) 0 1px, transparent 1px 7px);
 }
 
-.cart-testa {
+/* Il colore sociale, a filo in basso. */
+.tessera::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), transparent 78%);
+}
+
+.tess-banda {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding-bottom: 16px;
+  gap: 9px;
+  padding: 10px 16px;
   border-bottom: 1px solid var(--border-soft);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
 }
 
-.cart-testa img {
-  width: 52px;
-  height: 52px;
+.tess-banda > img {
+  width: 22px;
+  height: 22px;
   object-fit: contain;
+  flex: none;
 }
 
-.cart-testa strong {
-  display: block;
-  font-family: var(--font-display);
-  font-size: 1.4rem;
-  letter-spacing: 0.02em;
-  color: var(--cream);
-  line-height: 1.1;
+.tess-ente {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  min-width: 0;
 }
 
-.cart-testa span {
-  font-size: 0.82rem;
+.tess-ente b {
+  font-family: var(--font-mono);
+  font-size: 0.57rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold-400);
+}
+
+.tess-ente span {
+  font-size: 0.68rem;
   color: var(--text-muted);
 }
 
-.cart-dati {
-  margin: 16px 0 0;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+.tess-sigla {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  border: 1px solid var(--border-soft);
+  border-radius: 5px;
+  padding: 3px 7px;
+  flex: none;
 }
 
-.cart-dati dt {
+.tess-corpo {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 15px 16px 12px;
+}
+
+.tess-logo {
+  width: 68px;
+  height: 68px;
+  object-fit: contain;
+  flex: none;
+}
+
+/* Le societa' storiche non hanno un logo: al suo posto un vuoto dichiarato,
+   non un'immagine rotta. */
+.tess-logo-vuoto {
+  border-radius: 50%;
+  border: 1px dashed var(--border);
+}
+
+.tess-nomi { min-width: 0; }
+
+.tess-nomi strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--cream);
+}
+
+.tess-nomi > span {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+.tess-nomi em {
+  display: block;
+  margin-top: 5px;
+  font-style: normal;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  /* Il colore sociale schiarito: il rosso dell'Armata su questo blu, puro,
+     non si leggerebbe. */
+  color: color-mix(in srgb, var(--accent) 60%, var(--cream));
+}
+
+/* I tre numeri che dicono da quanto uno sta qui dentro. */
+.tess-cifre {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  margin: auto 0 0;
+  padding: 0;
+  background: var(--border-soft);
+  border-top: 1px solid var(--border-soft);
+}
+
+.tess-cifre > div {
+  background: rgba(6, 13, 25, 0.55);
+  padding: 8px 16px 9px;
+}
+
+.tess-cifre dt {
   font-family: var(--font-mono);
-  font-size: 0.6rem;
-  letter-spacing: 0.13em;
+  font-size: 0.53rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--text-dim);
-  margin-bottom: 5px;
 }
 
-.cart-dati dd {
-  margin: 0;
-  font-size: 0.88rem;
+.tess-cifre dd {
+  margin: 3px 0 0;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  line-height: 1;
   color: var(--text);
+  font-variant-numeric: tabular-nums;
 }
 
-.cart-dati dd.mono {
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  word-break: break-all;
-}
+.tess-cifre dd.oro { color: var(--gold-400); }
 
-.cart-incarichi {
+.tess-incarichi {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  padding: 11px 16px 0;
 }
 
 .targhetta {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 600;
   letter-spacing: 0.04em;
   padding: 4px 10px;
@@ -105,15 +217,36 @@
   color: var(--text-muted);
 }
 
-/* Chi vede oltre la propria società lo si riconosce a colpo d'occhio. */
+/* Chi vede oltre la propria societa' lo si riconosce a colpo d'occhio. */
 .targhetta.alta {
   border-color: rgba(217, 180, 106, 0.45);
   background: rgba(217, 180, 106, 0.1);
   color: var(--gold-400);
 }
 
-.cart-nota {
-  margin: 18px 0 0;
+/* La riga in fondo: su una tessera vera sarebbe la banda magnetica. */
+.tess-firma {
+  margin: 10px 0 0;
+  padding: 8px 16px 10px;
+  border-top: 1px solid var(--border-soft);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.03em;
+  color: var(--text-dim);
+  word-break: break-all;
+}
+
+/* Un campo che si legge e non si scrive: niente cornice accesa, niente
+   cursore di scrittura. Si vede che c'e' e si vede che non e' tuo. */
+.tess-griglia .campo.bloccato input {
+  background: rgba(6, 13, 25, 0.5);
+  border-color: var(--border-soft);
+  color: var(--text-muted);
+  cursor: default;
+}
+
+.tess-nota {
+  margin: 12px 2px 0;
   font-size: 0.74rem;
   line-height: 1.6;
   color: var(--text-dim);

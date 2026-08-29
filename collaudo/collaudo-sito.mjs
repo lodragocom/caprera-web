@@ -8,6 +8,7 @@
  * esattamente come si era rotta la pagina Coppe.
  */
 import { chromium } from 'playwright'
+import { guardaIlTetto } from './tetto.mjs'
 
 const BASE = 'http://localhost:4180'
 const PUBBLICHE = ['/', '/classifica', '/risultati', '/squadre', '/rose', '/contratti',
@@ -21,6 +22,7 @@ const p = await b.newPage({ viewport: { width: 1500, height: 1100 } })
 
 let pagina = ''
 const problemi = []
+const tetto = guardaIlTetto(p)
 p.on('pageerror', (e) => problemi.push(`[${pagina}] ERRORE JS: ${e.message}`))
 p.on('console', (m) => {
   if (m.type() === 'error' && !m.text().includes('TUNNEL')) problemi.push(`[${pagina}] CONSOLE: ${m.text()}`)
@@ -146,6 +148,8 @@ for (const [dove, sel, nome, apri] of CLIC) {
 }
 
 await b.close()
+problemi.push(...tetto.problemi())
+console.log(tetto.resoconto())
 console.log('\n' + (problemi.length
   ? `${problemi.length} PROBLEMI:\n` + problemi.join('\n')
   : 'Nessun problema: nessun errore JS, nessuna pagina vuota, tutti i link seguiti.'))

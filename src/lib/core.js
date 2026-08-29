@@ -81,3 +81,35 @@ export function positionHistory(teamId) {
     })
     .filter(Boolean)
 }
+
+/* ------------------------------------------------ le voci del registro */
+
+/**
+ * Il nome di una voce del registro, scritto per essere letto.
+ *
+ * Nel registro della Presidenza le voci sono scritte a mano, e a mano si
+ * scrive «Panchina d'Oro 09». Chi lo tiene sa che vuol dire settembre;
+ * chiunque altro legge un numero. Le nove Panchine mensili sono da settembre
+ * a maggio, e si distinguono dai piazzamenti perche' quelli hanno la o:
+ * «1o» e' il primo classificato, «1» e' gennaio.
+ *
+ * Qui non si corregge il registro — si corregge come lo mostriamo. Il dato
+ * resta quello che la Presidenza ha scritto.
+ */
+const MESI = {
+  1: 'gennaio', 2: 'febbraio', 3: 'marzo', 4: 'aprile', 5: 'maggio',
+  9: 'settembre', 10: 'ottobre', 11: 'novembre', 12: 'dicembre',
+}
+
+export function nomeVoce(voce) {
+  let v = String(voce ?? '').trim()
+  v = v.replace(/Serie a Awards/g, 'Serie A Awards')
+  v = v.replace(/^(Grigliata Serie A)(\d)/, '$1 $2')
+
+  const mensile = v.match(/^(Panchina d'Oro) (\d{1,2})$/)
+  if (mensile && MESI[Number(mensile[2])]) {
+    return `${mensile[1]} · ${MESI[Number(mensile[2])]}`
+  }
+
+  return v.replace(/(\d+)o\b/g, '$1º')
+}

@@ -1,8 +1,9 @@
 import { useDeferredValue, useMemo, useState } from 'react'
 import TeamBadge from '../components/TeamBadge'
 import { getTeam } from '../lib/core'
-import { useArchivio, roseStagione, stagioni } from '../lib/archivio'
+import { useArchivio, roseStagione, stagioni, momentiDelleRose } from '../lib/archivio'
 import { Pagina, Cascata, Voce, Sezione, Numero } from '../components/moto'
+import { Barra, Campo, Cerca, Gruppo } from '../components/Filtri'
 import './Rose.css'
 
 const RUOLI = ['P', 'D', 'C', 'A']
@@ -19,16 +20,38 @@ const RUOLI = ['P', 'D', 'C', 'A']
 export default function Rose() {
   const anni = useArchivio('stagioni', stagioni)
   const elenco = (anni.dati ?? []).map((s) => s.id)
+  /* Il menu le elenca tutte, anche quella che deve ancora cominciare - il
+     budget del prossimo anno esiste prima dell'asta. Ma la pagina non ci si
+     apre sopra: si apre sull'ultima **giocata**, se no il primo che arriva
+     trova dieci rose vuote e pensa che l'archivio sia rotto. */
+  const ultimaGiocata = (anni.dati ?? []).find((s) => s.conclusa)?.id
   const [stagione, setStagione] = useState('')
-  const scelta = stagione || elenco[0] || ''
+  const scelta = stagione || ultimaGiocata || elenco[0] || ''
 
   const [ruolo, setRuolo] = useState('')
   const [q, setQ] = useState('')
   const [ordine, setOrdine] = useState('costo')
   const cerca = useDeferredValue(q)
 
-  const stato = useArchivio(['roseStagione', scelta],
-    () => (scelta ? roseStagione(scelta) : Promise.resolve([])), [scelta])
+  /*
+   * Settembre o maggio.
+   *
+   * Sono due rose diverse e la differenza e' il mercato: chi manca a maggio
+   * se n'e' andato, chi compare solo a maggio e' arrivato dopo. Da sola
+   * nessuna delle due lo dice, e per anni il sito ha mostrato solo maggio -
+   * cioe' la rosa che contiene gli arrivi di gennaio e non contiene le
+   * partenze, senza avvertire che era cosi'.
+   */
+  const [momento, setMomento] = useState('fine')
+  const mo = useArchivio('momentiDelleRose', momentiDelleRose)
+  const conPartenza = mo.dati?.partenza ?? []
+  const ricostruite = mo.dati?.ricostruite ?? []
+  const duePunti = conPartenza.includes(scelta)
+  const vista = duePunti ? momento : 'fine'
+  const dedotta = vista === 'partenza' && ricostruite.includes(scelta)
+
+  const stato = useArchivio(['roseStagione', scelta, vista],
+    () => (scelta ? roseStagione(scelta, vista) : Promise.resolve([])), [scelta, vista])
 
   const righe = useMemo(() => {
     const n = cerca.trim().toLowerCase()
@@ -70,7 +93,11 @@ export default function Rose() {
       </header>
 
       <section className="block">
-        <h2 className="section-title">Crediti investiti · {scelta}</h2>
+        <h2 className="section-title">
+          {vista === 'partenza'
+            ? `Crediti investiti all'asta · ${scelta}`
+            : `Valore delle rose a maggio · ${scelta}`}
+        </h2>
         <Sezione stato={stato} righe={10}>
           <Cascata className="budget-list" tetto={12}>
             {investito.map((b) => (
@@ -89,7 +116,14 @@ export default function Rose() {
           </Cascata>
         </Sezione>
         <p className="note">
-          Il bilancio completo — crediti iniziali, scambi, residui, premi e FFP —
+          {vista === 'partenza'
+            ? `Questa è la somma dei prezzi d'asta di settembre, e combacia con la voce
+               «spesi all'asta» del bilancio: verificata su tutte e dieci le società
+               nelle sei stagioni in cui il bilancio esiste.`
+            : `Attenzione: a maggio la somma non è quello che è stato speso. Contiene chi
+               è arrivato a gennaio e non contiene chi è uscito. Per i crediti investiti
+               scegli «settembre».`}
+          {' '}Il bilancio completo — crediti iniziali, scambi, residui, premi e FFP —
           è riservato ai mister e si vede nell'area personale.
         </p>
       </section>
@@ -97,37 +131,38 @@ export default function Rose() {
       <section className="block">
         <h2 className="section-title">Tutti i calciatori</h2>
 
-        <div className="controls">
-          <div className="field">
-            <label htmlFor="ro-stagione">Stagione</label>
-            <select id="ro-stagione" value={scelta} onChange={(e) => setStagione(e.target.value)}>
+        <Barra>
+          <Campo etichetta="Stagione">
+            <select value={scelta} onChange={(e) => setStagione(e.target.value)}>
               {elenco.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
-          </div>
-
-          <div className="field">
-            <label htmlFor="ro-q">Cerca</label>
-            <input id="ro-q" type="search" placeholder="Calciatore o club…"
-                   value={q} onChange={(e) => setQ(e.target.value)} />
-          </div>
-
-          <div className="field">
-            <label htmlFor="ro-ordine">Ordina per</label>
-            <select id="ro-ordine" value={ordine} onChange={(e) => setOrdine(e.target.value)}>
+          </Campo>
+          {duePunti && (
+            <Gruppo etichetta="Momento della rosa" ora={vista} scegli={setMomento}
+                    voci={[['partenza', 'Settembre'], ['fine', 'Maggio']]} />
+          )}
+          <Cerca valore={q} cambia={setQ} />
+          <Campo etichetta="Ordina per">
+            <select value={ordine} onChange={(e) => setOrdine(e.target.value)}>
               <option value="costo">Costo</option>
               <option value="fm">Fantamedia</option>
               <option value="presenze">Presenze</option>
               <option value="nome">Nome</option>
             </select>
-          </div>
+          </Campo>
+          <Gruppo etichetta="Ruolo" ora={ruolo} scegli={setRuolo}
+                  voci={[['', 'Tutti'], ...RUOLI.map((r) => [r, r])]} />
+        </Barra>
 
-          <div className="seg role-seg">
-            <button aria-pressed={ruolo === ''} onClick={() => setRuolo('')}>Tutti</button>
-            {RUOLI.map((r) => (
-              <button key={r} aria-pressed={ruolo === r} onClick={() => setRuolo(r)}>{r}</button>
-            ))}
-          </div>
-        </div>
+        {dedotta && (
+          <p className="note">
+            La rosa di settembre del {scelta} non viene da un documento: è
+            <b> ricostruita dalle formazioni</b>, e vale circa tre nomi su quattro.
+            Non è una stima — sul 2020-21, dove poi è saltato fuori il file vero, la
+            ricostruzione aveva azzeccato 234 nomi su 299. Il costo d'asta di quegli
+            anni non c'è.
+          </p>
+        )}
 
         <p className="result-count num">{righe.length} calciatori</p>
 

@@ -1,0 +1,26 @@
+-- I listoni di Fantapazz di tutte le stagioni.
+--
+-- Fino a ora l'archivio aveva le quotazioni del solo 2025-26: 680 righe da
+-- `06_caprera_project/Listone_Fantapazz.csv`. Gli altri dieci anni stavano
+-- in `06_caprera_project/Listoni/`, un file per stagione, e da li' arrivano.
+--
+-- **L'etichetta dell'anno e' stata verificata, non creduta.** Ogni listone e'
+-- stato incrociato con le rose di ogni stagione: il file «16:17» riconosce il
+-- 99,6% dei nomi della rosa 2016-17 e cala fino al 17% sul 2025-26. La
+-- diagonale e' pulita su tutte le stagioni tranne una — vedi sotto.
+--
+-- Il 2025-26 **non** si tocca: il file dentro `Listoni/` per quell'anno ha
+-- quotazioni diverse da quello che gia' c'era, correla peggio con quanto le
+-- societa' hanno davvero speso all'asta (0,56 contro 0,70) e ha 153 righe
+-- senza squadra. Quello in archivio e' migliore su tutti e tre i conti.
+--
+-- I nomi ripetuti dentro uno stesso listone non sono errori: sono omonimi in
+-- squadre diverse (Zanon all'Atalanta e Zanon alla Fiorentina nel 2015-16;
+-- Stankovic portiere del Venezia e Stankovic centrocampista dell'Inter nel
+-- 2022-23). Si caricano tutti e due: unirli inventerebbe una persona sola.
+--
+-- ATTENZIONE, e non e' un problema dei listoni: incrociandoli e' venuto fuori
+-- che **la rosa 2023-24 in archivio e' quasi tutta la rosa 2024-25** — 265
+-- righe identiche su 310, e riconosce il listone 2024-25 al 99% contro il 78%
+-- del suo. Sta scritto in `SPIEGAZIONI`, e i listoni non la sistemano.
+delete from caprera.listone where stagione <> '2025-26';

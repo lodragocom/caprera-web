@@ -77,3 +77,29 @@ update caprera.lega
 Il che apre una domanda che è tua: **`carica.sh` fa una cosa sola e grossa.** Forse dovrebbe saper
 fare anche solo le regole — `carica.sh --solo-regole` — visto che il regolamento cambia più spesso
 dell'archivio.
+
+---
+
+## Esito — chiusa il 24/08/2026 (magazziniere)
+
+**Riparata**, con la strada 1 (elenco chiuso, niente `cascade`). Lo trovo gia' fatto in
+`SUPABASE/carica.py`: `IDENTITA = ['misteri','tessere','assegnazioni','schede','incarichi']` viene
+messa da parte in tabelle temporanee e rimessa al suo posto, il `truncate` ha perso il `cascade`, e
+c'e' la guardia `dipendenti_impreviste()` che **ferma** il caricamento se nasce una tabella nuova
+che si appoggia a quelle svuotate — invece di travolgerla in silenzio. E' esattamente quello che la
+consegna chiedeva: meglio un caricamento che si rifiuta di partire.
+
+**Cosa ho verificato con i miei occhi:** il codice (righe 56-105 e 160-219) e lo stato del database
+vivo — `tessere` 1 riga, `misteri` 1 riga, intatte.
+**Cosa NON ho verificato:** non ho lanciato `carica.sh`. Il database e' vivo e ci lavorano altre
+sessioni; la prova sul campo va fatta da chi puo' fermare tutto. Il controllo resta quello scritto
+qui sopra: `select count(*) from caprera.tessere` e `from caprera.misteri` non devono cambiare.
+
+⚠️ **La guardia ha gia' fatto il suo mestiere, e ha trovato una tabella nuova.** Il 24/08
+`statistiche_serie_a` (nata il 23/08, punta a `stagioni` e `calciatori`) era fuori da tutti gli
+elenchi: `carica.sh` si sarebbe fermato. Verificato con la stessa interrogazione della guardia sul
+database vivo, ed era l'unica. Aggiunta ad `ALTRUI` accanto a `movimenti`.
+
+**Resta aperto e non e' un guasto:** `carica.sh --solo-regole`. Serve ancora — il regolamento cambia
+piu' spesso dell'archivio — ma oggi non blocca niente, perche' `lega.regole` si allinea con un
+`update` di quattro righe senza svuotare nulla. Segnato nel rapporto, non riaperto qui.

@@ -120,3 +120,44 @@ Tre controlli, tutti e tre dal database, nessuno a occhio:
 4. Il resto.
 
 Quando questa è caricata, avvisa: le due pagine le rifaccio io e sono poche ore.
+
+---
+
+## Esito — chiusa il 24/08/2026 (magazziniere)
+
+**Caricata.** `caprera.movimenti` esiste con la forma proposta qui (`04-movimenti.sql`), ha il
+caricatore suo (`carica-movimenti.py`) e contiene **261 righe**. La trovo gia' fatta dalla sessione
+del codice; il mio lavoro qui e' stato **verificarla**, e ho trovato una cosa che vale piu' del
+caricamento.
+
+### Il controllo n. 1 di questa consegna e' scritto su un allineamento sbagliato, e va corretto
+
+Cosi' com'e' scritto — `sum(crediti) group by stagione, societa` = `finanze.bonus` **della stessa
+stagione** — **non torna su nessuna riga**: il 2024-25 ha movimenti e `bonus` a zero, il 2025-26 ha
+scarti da −18 a +15. Sembra un caricamento sbagliato. Non lo e'.
+
+Vale la regola che questa consegna stessa cita altrove: **si guadagna in N, si spende all'asta di
+N+1**. Spostato di una stagione, e aggiunto `ffp`, torna **tutto**:
+
+```
+sum(movimenti di N) = finanze(N+1).bonus + finanze(N+1).ffp
+```
+
+Verificato da me sul database vivo, movimenti 2024-25 contro finanze 2025-26: **resto 0 su tutte e
+dieci le societa'.** Armata Rossa 14 = 14 + 0 · Real Monghi 20 = 18 + 2 · Subbuteo 5 = 3 + 2.
+
+**E questo chiude una domanda aperta nello STATO.** Lo STATO dice: *«`ffp` vale 2 per otto societa'
+su dieci: e' quasi certamente il pagamento anticipato. Da confermare»*. Confermato dal registro di
+Guido: quei 2 ci sono, sono dentro il totale che Guido assegna, e da noi finiscono in `ffp` invece
+che in `bonus`. Non e' una discrepanza: e' la stessa cifra in due caselle diverse.
+
+**Il controllo va riscritto cosi'**, ed e' quello vero da tenere come collaudo permanente.
+
+### Il resto
+
+- Controllo n. 3 (nessuna categoria fuori dalle sette): non l'ho rifatto riga per riga.
+- Le due discrepanze note (`residui` di Guido, il −5 di Smit) restano dove stanno: sono roba da L0 e
+  Guido, non mia.
+- **Avviso al Curatore:** il dato c'e'. `/area/crediti` e la sezione Crediti della scheda societa'
+  si possono rifare — ma leggendo `movimenti` **della stagione precedente** per spiegare il `bonus`
+  di quella corrente, che e' esattamente la domanda *«perche' ho tredici crediti?»*.

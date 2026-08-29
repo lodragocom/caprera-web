@@ -64,3 +64,27 @@ deve dare `partenza 680` e `fine 8008` **anche dopo** aver lanciato il caricamen
 - **`carica.sh --solo-regole`**, che ti eri già chiesto: vale doppio adesso. Il `regole-caprera.json`
   è stato completato oggi e il database non lo vede, e l'unica strada che c'è oggi per allinearlo
   passa da uno script che cancella le tessere *e* il listone.
+
+---
+
+## Esito — chiusa il 24/08/2026 (magazziniere)
+
+**Riparata, e le due decisioni lasciate a me sono state prese** (non da me: le trovo gia' fatte).
+
+`carica.py` ha ora `LISTONE_COLONNE = 'stagione, momento, nome, ruolo, club, prezzo'`, scrive
+`'partenza'` nella tupla, e al posto del truncate indiscriminato mette da parte le righe di `fine`
+in una tabella temporanea e le rimette dopo (riga 163 e 328-335). Cancella solo il proprio momento.
+
+**Il controllo chiesto dalla consegna, letto sul database vivo il 24/08:**
+
+| momento | stagioni | righe |
+|---|---|---:|
+| `partenza` | 2020-21 · 2024-25 · 2025-26 | **2.086** |
+| `fine` | dieci, dal 2016-17 al **2025-26** | **8.847** |
+
+Sono piu' delle 680+8.008 di allora perche' nel frattempo sono entrati i due listoni di partenza
+ritrovati (consegna `i-file-ritrovati` §1) e il 2025-26 di fine — cioe' **la seconda decisione
+lasciata a me e' stata presa nel verso giusto**: file e database sono allineati.
+
+**Verificato con i miei occhi:** il codice e i conteggi qui sopra. **Non verificato:** non ho
+lanciato `carica.sh` (database vivo, altre sessioni al lavoro).

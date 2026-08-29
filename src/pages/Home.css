@@ -182,16 +182,6 @@
   .two-col { grid-template-columns: 1fr; gap: 44px; }
 }
 
-.pos {
-  color: var(--text-dim);
-  width: 2.2rem;
-}
-
-tr.podium .pos {
-  color: var(--gold-500);
-  font-weight: 600;
-}
-
 .more-link {
   display: inline-block;
   margin-top: 14px;

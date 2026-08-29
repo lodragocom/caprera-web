@@ -1,0 +1,12 @@
+-- Via il tentativo di settembre 2025, per decisione della Presidenza: non
+-- serve piu' e tenerlo li' fa solo confusione.
+--
+-- Dentro c'erano 4.409 righe. Le quattro tabelle compilate a mano - 48 alias
+-- di nomi, 21 club, 3 abbinamenti manuali, i nomi delle dieci societa' - sono
+-- salvate in `caprera-dati/FONTI/vecchio-progetto-cose-fatte-a-mano.json`
+-- prima di questa cancellazione. Le altre (giocatori_storico, listone_staging,
+-- giocatori, giocatori_extra) venivano da un'API ed erano ricreabili.
+--
+-- Restano in `auth.users` sei utenti di prova di quel programma: quelli si
+-- tolgono dal cruscotto, Authentication -> Users. Da qui non li tocco.
+drop schema vecchio_progetto cascade;

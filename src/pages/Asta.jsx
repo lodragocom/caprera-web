@@ -15,8 +15,12 @@ const RUOLI = [
 export default function Asta() {
   const anni = useArchivio('stagioni', stagioni_)
   const stagioni = (anni.dati ?? []).map((s) => s.id)
+  /* L'asta di una stagione che non si e' ancora giocata non esiste: il menu
+     la mostra, la pagina non ci si apre sopra. */
+  const ultimaGiocata = (anni.dati ?? []).find((s) => s.conclusa)?.id
   const [scelta, setScelta] = useState('')
-  const season = scelta && stagioni.includes(scelta) ? scelta : stagioni[0]
+  const season = scelta && stagioni.includes(scelta)
+    ? scelta : (ultimaGiocata ?? stagioni[0])
 
   const stato = useArchivio(['roseStagione', season],
     () => (season ? roseStagione(season) : Promise.resolve([])), [season])

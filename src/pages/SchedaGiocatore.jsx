@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import TeamBadge from '../components/TeamBadge'
 import { teamName } from '../lib/core'
-import { useArchivio, carriera, contrattiPubblici } from '../lib/archivio'
+import { useArchivio, carriera, carrieraSerieA, contrattiPubblici } from '../lib/archivio'
 import { Pagina, Sezione, Numero, CorpoTabella, Riga } from '../components/moto'
 import './SchedaGiocatore.css'
 
@@ -33,10 +33,40 @@ const COLONNE = [
 export default function SchedaGiocatore() {
   const { id } = useParams()
   const stato = useArchivio(['carriera', id], () => carriera(id), [id])
+  const vera = useArchivio(['carrieraSerieA', id], () => carrieraSerieA(id), [id])
   const contr = useArchivio('contrattiPubblici', contrattiPubblici)
 
+  /*
+   * Due carriere, non una.
+   *
+   * `stato` e' il giocatore **di Caprera**: quante volte il suo mister l'ha
+   * schierato, e cosa ha portato a quella maglia. `vera` e' il giocatore
+   * **in Serie A**: le partite che ha giocato davvero, che qualcuno lo
+   * schierasse o no. La pagina le teneva mescolate — presenze e media voto
+   * dalla prima, gol e assist dalla seconda — senza dirlo.
+   */
   const righe = stato.dati ?? []
   const chi = righe[0]
+
+  const serieA = useMemo(() => {
+    const m = new Map()
+    for (const r of vera.dati ?? []) m.set(`${r.stagione}·${r.societa}`, r)
+    return m
+  }, [vera.dati])
+
+  /* Quante ne ha giocate in Serie A, sommando solo le stagioni che l'archivio
+     ha: se manca la riga di rosa il confronto non si puo' fare, e non si finge. */
+  const confronto = useMemo(() => {
+    let reali = 0, schierato = 0, coperte = 0
+    for (const r of righe) {
+      const s = serieA.get(`${r.stagione}·${r.societa}`)
+      if (s?.presenze == null) continue
+      reali += s.presenze
+      schierato += r.con_voto
+      coperte += 1
+    }
+    return { reali, schierato, coperte, scoperte: righe.length - coperte }
+  }, [righe, serieA])
 
   const tot = useMemo(() => somma(righe), [righe])
 
@@ -107,7 +137,19 @@ export default function SchedaGiocatore() {
               </div>
 
               <div className="sg-totali">
-                <Totale n={tot.con_voto} etichetta="Presenze" nota={`${tot.convocato} convocazioni`} />
+                {/* I due numeri stanno accanto e sarebbe naturale sottrarli, ma
+                    hanno basi diverse quando manca una stagione di Serie A: 37
+                    contro 31 sembra un pareggio, e il confronto vero e' 37
+                    contro 7. La nota dice su cosa e' contato, invece di lasciar
+                    fare il conto sbagliato a chi guarda. */}
+                {confronto.coperte > 0 && (
+                  <Totale n={confronto.reali} etichetta="Partite in Serie A"
+                          nota={confronto.scoperte
+                            ? `su ${confronto.coperte} ${confronto.coperte === 1 ? 'stagione' : 'stagioni'} di ${righe.length}: le altre non le abbiamo`
+                            : 'giocate davvero, schierato o no'} />
+                )}
+                <Totale n={tot.con_voto} etichetta="Schierato in Caprera"
+                        nota={`su ${tot.convocato} volte in distinta`} />
                 {(chi.ruolo === 'A' || chi.ruolo === 'C' || tot.gol > 0) && (
                   <Totale n={tot.gol} etichetta="Gol"
                           nota={tot.rigori ? `${tot.rigori} su rigore` : null} oro />
@@ -119,22 +161,48 @@ export default function SchedaGiocatore() {
                   <Totale n={tot.imbattuto} etichetta="Porte inviolate" oro />
                 )}
                 <Totale n={tot.mv} decimali={2} etichetta="Media voto"
-                        nota="pesata sulle presenze" />
+                        nota="sulle partite in cui l'hanno schierato" />
               </div>
             </header>
+
+            {confronto.coperte > 0 && confronto.reali > confronto.schierato && (
+              <p className="sg-due">
+                Ha giocato <b>{confronto.reali}</b> partite di Serie A. I suoi mister
+                l'hanno mandato in campo <b>{confronto.schierato}</b> volte: le altre{' '}
+                <b>{confronto.reali - confronto.schierato}</b> le ha passate in panchina
+                in Caprera, pur essendo in campo davvero.
+                {confronto.scoperte > 0 && (
+                  <> Il conto salta {confronto.scoperte}{' '}
+                    {confronto.scoperte === 1 ? 'stagione' : 'stagioni'}, dove l'archivio
+                    non ha le sue presenze di Serie A — nel 2025-26 non le ha per
+                    nessuno.</>
+                )}
+              </p>
+            )}
 
             <section className="block">
               <h2 className="section-title">Stagione per stagione</h2>
               <div className="table-wrap">
                 <table className="sg-tabella">
                   <thead>
+                    {/* Due gruppi dichiarati: cosa ha fatto in Serie A, e cosa
+                        ha fatto per la maglia di Caprera. Erano mescolati. */}
+                    <tr className="sg-gruppi">
+                      <th colSpan={3} />
+                      <th colSpan={2} className="sg-g-vera">In Serie A</th>
+                      <th colSpan={3 + colonne.length} className="sg-g-nostra">In Caprera</th>
+                    </tr>
                     <tr>
                       <th className="left">Stagione</th>
                       <th className="left">Società</th>
                       <th>Costo</th>
-                      <th>Pres.</th>
+                      <th title="Partite giocate in Serie A, schierato o no">Giocate</th>
+                      <th title="Media voto in Serie A, su tutte le partite giocate">MV</th>
+                      <th title="Partite in cui il suo mister l'ha schierato e ha preso voto">
+                        Schierato
+                      </th>
                       <th>Tit.</th>
-                      <th>MV</th>
+                      <th title="Media voto sulle sole partite in cui l'hanno schierato">MV</th>
                       {colonne.map((c) => (
                         <th key={c.k} className={c.tenue ? 'tenue' : undefined}>{c.titolo}</th>
                       ))}
@@ -153,6 +221,17 @@ export default function SchedaGiocatore() {
                         </td>
                         <td className="left"><TeamBadge id={r.societa} size="sm" /></td>
                         <td className="num muted">{r.costo ?? '—'}</td>
+                        {(() => {
+                          const s = serieA.get(`${r.stagione}·${r.societa}`)
+                          return (
+                            <>
+                              <td className="num sg-vera">
+                                {s?.presenze ?? <i className="zero">—</i>}
+                              </td>
+                              <td className="num sg-vera">{voto(s?.mv)}</td>
+                            </>
+                          )
+                        })()}
                         <td className="num">
                           {r.con_voto}
                           {r.convocato > r.con_voto && (
@@ -182,12 +261,21 @@ export default function SchedaGiocatore() {
                 </table>
               </div>
               <p className="sg-nota">
-                <b>Pres.</b> sono le partite in cui ha preso un voto; il numero dopo
-                la barra sono le volte in cui era in formazione e il voto non è
-                arrivato. Campionato e coppe insieme, come le conta l'archivio.
+                <b>Giocate</b> e la prima <b>MV</b> sono la Serie A: le partite che
+                ha giocato davvero e la sua media voto su tutte, che qualcuno lo
+                schierasse o no. <b>Schierato</b> è la Caprera: le volte in cui il suo mister
+                l'ha messo in formazione e il voto è arrivato — il numero dopo la
+                barra sono le volte in cui era in distinta e il voto non c'è stato.
+                Anche la seconda <b>MV</b>, i gol e gli assist sono di questo lato:
+                contano solo quando qualcuno lo aveva in campo. Le due medie voto
+                si possono mettere accanto perché sono la stessa misura su partite
+                diverse: se la seconda è più alta, il suo mister lo schierava nelle
+                giornate giuste. Campionato e coppe insieme, come
+                le conta l'archivio.
                 Dove il <b>costo</b> manca, quell'anno non risulta nella rosa di
                 fine stagione pur avendo giocato: succede a chi viene ceduto a
-                gennaio, e la rosa è una fotografia di giugno.
+                gennaio, e la rosa è una fotografia di giugno. Lì mancano anche le
+                <b> Giocate</b>, per la stessa ragione.
                 {[...traslochi.values()].some((n) => n > 1) && (
                   <> Le stagioni segnate con <b>½</b> hanno due righe perché ha
                     giocato per due società nello stesso anno.</>

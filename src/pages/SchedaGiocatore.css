@@ -266,3 +266,48 @@
   font-size: 0.9em;
   color: var(--text-dim);
 }
+
+/* ------------------------------------------------ due carriere, non una
+   La pagina teneva mescolati il giocatore di Serie A e il giocatore di
+   Caprera: presenze e media voto da una parte, gol e assist dall'altra,
+   nella stessa riga e senza un'etichetta. Adesso i due gruppi sono
+   dichiarati, e il colore serve solo a tenerli separati con la coda
+   dell'occhio — l'intestazione lo dice comunque a parole. */
+.sg-due {
+  margin: 0 0 22px;
+  padding: 12px 16px;
+  border-left: 3px solid var(--gold-600);
+  background: rgba(255, 255, 255, 0.014);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  font-size: 0.86rem;
+  line-height: 1.65;
+  color: var(--text-muted);
+}
+
+.sg-due b { color: var(--cream); font-family: var(--font-mono); font-weight: 500; }
+
+.sg-gruppi th {
+  text-align: center;
+  padding-bottom: 4px;
+  border-bottom: none;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.sg-g-vera {
+  color: var(--text-muted);
+  border-bottom: 1px solid rgba(154, 167, 189, 0.35) !important;
+}
+
+.sg-g-nostra {
+  color: var(--gold-500);
+  border-bottom: 1px solid rgba(217, 180, 106, 0.35) !important;
+}
+
+/* Le due colonne della vita vera: piu' quiete, perche' non sono il merito
+   di nessun mister. */
+.sg-vera { color: var(--text-muted); }
+.sg-vera .zero { color: var(--text-dim); font-style: normal; }

@@ -23,19 +23,18 @@ scrivendo l'esito in fondo — e la moviola di quella sessione la cita.
 Ordinate per urgenza, non per data. **Chi le applica scrive l'esito in fondo al file** e la moviola
 di quella sessione le cita.
 
-### Al Magazziniere (Gattuso) — cinque
+### Al Magazziniere (Gattuso) — **due, dopo il giro del 24/08**
 
 | # | consegna | gravità | in una riga |
 |---|---|---|---|
-| 2 | [`carica-sh-distrugge-le-tessere`](2026-08-22-a-magazziniere-carica-sh-distrugge-le-tessere.md) | **alta** | `truncate … cascade` porta via `tessere` e `misteri`: chi lancia lo script si toglie l'accesso all'area |
-| 3 | [`carica-py-e-il-listone`](2026-08-22-a-magazziniere-carica-py-e-il-listone.md) | media | la colonna `momento` non viene scritta, l'insert fallisce; e il truncate porta via 8.688 righe per ricaricarne 680 |
-| 4 | [`premi-crediti`](2026-08-22-a-magazziniere-premi-crediti.md) | media | il pari merito fa sparire una penalità: due società appaiate ultime non pagano il −2 |
-| 5 | [`statistiche-serie-a`](2026-08-22-a-magazziniere-statistiche-serie-a.md) | — | materiale buono che non si aggancia come sembra |
-| 6 | [`i-file-ritrovati`](2026-08-22-a-magazziniere-i-file-ritrovati.md) | — | due listoni di partenza nuovi, le clausole in `Riscatti_Contratti.xlsx`, le rose d'asta di settembre |
+| 5 | [`statistiche-serie-a`](2026-08-22-a-magazziniere-statistiche-serie-a.md) | — | tabella e caricatore ci sono, **ma il caricamento è in corso**: 4 stagioni su 11, una troncata. La chiude chi la sta caricando |
+| 6 | [`i-file-ritrovati`](2026-08-22-a-magazziniere-i-file-ritrovati.md) | — | §1 fatto, §2 a metà (63 clausole su 186), **§3 e §6 fermi sulle quattro domande a L0** |
 
-> **1, 2 e 3 sono lo stesso file** (`carica.py`/`carica.sh`) e la stessa famiglia: uno script
-> scritto il 20/08 alle 16:25 e mai riletto dopo che lo schema è cambiato sette volte. Conviene
-> aprirle insieme. Ma la **1 non aspetta le altre due**: è un `update`, non tocca lo script.
+> Le quattro consegne chiuse il 24/08 erano già state riparate da altre sessioni: il giro del
+> Magazziniere è servito a **verificarle sul database vivo e a chiuderle**, non a rifarle. Due cose
+> sono uscite da quella verifica e non erano note: `carica.sh` oggi **si ferma** su
+> `statistiche_serie_a` (guardia che funziona, elenco da aggiornare — fatto), e il controllo n. 1
+> della consegna sui movimenti era scritto sull'allineamento di stagione sbagliato.
 
 ### Al Curatore (Baggio) — una, con due cose dentro
 
@@ -49,6 +48,22 @@ di quella sessione le cita.
 
 ### Chiuse
 
+- [`carica-sh-distrugge-le-tessere`](2026-08-22-a-magazziniere-carica-sh-distrugge-le-tessere.md) —
+  **24/08, magazziniere.** Riparata con l'elenco chiuso e la guardia `dipendenti_impreviste()`.
+  ⚠️ La guardia ha subito trovato `statistiche_serie_a` fuori elenco: `carica.sh` si sarebbe fermato.
+  Aggiunta ad `ALTRUI`. Lo script **non è stato lanciato** (database vivo).
+- [`carica-py-e-il-listone`](2026-08-22-a-magazziniere-carica-py-e-il-listone.md) — **24/08,
+  magazziniere.** `momento` scritto, `fine` messa da parte e rimessa. Verificato:
+  `partenza 2.086 · fine 8.847`, dieci stagioni.
+- [`premi-crediti`](2026-08-22-a-magazziniere-premi-crediti.md) — **24/08, magazziniere.** Il pari
+  merito è nella vista e il controllo passa. ⚠️ Ma **l'estensione ai premi positivi è in esercizio
+  senza che L0 l'abbia ratificata**. In più: `v_diritti_tv` scritta e pronta in
+  `SUPABASE/10-diritti-tv.sql`, non applicata.
+- [`il-registro-dei-movimenti`](2026-08-22-a-magazziniere-il-registro-dei-movimenti.md) — **24/08,
+  magazziniere.** 261 righe caricate. Il controllo di questa consegna era scritto sull'allineamento
+  sbagliato: la forma giusta è `sum(movimenti di N) = finanze(N+1).bonus + ffp`, e **torna su tutte
+  e dieci le società**. Conferma anche che `ffp = 2` è il pagamento anticipato — domanda che lo
+  STATO aveva aperta.
 - [`regole-ferme-al-20`](2026-08-22-a-magazziniere-regole-ferme-al-20.md) — **applicata il 22/08**
   dalla sessione del codice su richiesta di L0, dichiarata come scavalcamento. `lega.regole` è al
   22/08, impronta md5 identica al file, `v_premi_crediti` invariata. ⚠️ **Ma la regola del pari

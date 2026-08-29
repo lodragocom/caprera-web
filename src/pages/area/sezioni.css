@@ -150,6 +150,15 @@
 }
 
 .lista-rosa li:last-child, .lista-contratti li:last-child { border-bottom: 0; }
+
+/* Un contratto che corre su un giocatore che non c'e' piu': si vede che e'
+   un'altra cosa dagli altri, senza sembrare un errore. */
+.lista-contratti li.fuori { opacity: 0.72; }
+.lista-contratti .motivo {
+  margin-left: auto; padding-right: 14px;
+  font-size: 0.78rem; color: var(--text-muted);
+}
+.lista-contratti li.fuori b { font-weight: 500; }
 .lista-rosa b, .lista-contratti b { color: var(--cream); font-weight: 600; }
 
 .lista-rosa .club { font-size: 0.65rem; color: var(--text-dim); letter-spacing: 0.05em; }
@@ -1123,4 +1132,224 @@
   .ro-stagione select { width: 100%; }
   .ro-confronto-barre > div { grid-template-columns: 1fr; gap: 4px; }
   .ro-confronto-barre b { text-align: left; }
+}
+
+/* ---------------------------------------------------- estratto conto
+   La domanda «perche' ho tredici crediti» ha due profondita': prima il
+   conto («cinque dai giochi»), poi la voce («quattro di MrChampions»).
+   Percio' due livelli di testo e non una tabella piatta: una tabella di
+   ventisei righe tutte uguali dice quanto, ma non dice di cosa. */
+.conto { display: flex; flex-direction: column; }
+
+.conto-gruppo {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.conto-gruppo:first-child { padding-top: 2px; }
+
+.conto-testa {
+  display: flex; justify-content: space-between; align-items: baseline;
+  gap: 12px;
+}
+
+.conto-nome {
+  font-family: var(--font-body);
+  font-size: 0.9rem; font-weight: 600; color: var(--cream);
+}
+
+.conto-testa b { font-size: 1rem; }
+
+.conto-nota {
+  margin: 2px 0 0;
+  font-size: 0.72rem; color: var(--text-dim); line-height: 1.5;
+}
+
+.conto-voci {
+  margin-top: 9px;
+  padding-left: 12px;
+  border-left: 1px solid var(--border);
+  display: flex; flex-direction: column;
+}
+
+.conto-voce {
+  display: flex; justify-content: space-between; align-items: baseline;
+  gap: 12px; padding: 4px 0;
+  font-size: 0.8rem; color: var(--text-muted);
+}
+
+.conto-voce b { font-size: 0.82rem; }
+
+.conto-totale {
+  display: flex; justify-content: space-between; align-items: baseline;
+  gap: 12px; margin-top: 4px; padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.conto-totale span { color: var(--cream); font-weight: 600; font-size: 0.86rem; }
+.conto-totale b { color: var(--gold-400); font-size: 1.25rem; }
+
+/* La cifra dentro il titolo: e' la risposta, e sta nella domanda. */
+.conto-cifra {
+  font-style: normal; font-family: var(--font-mono);
+  color: var(--gold-400);
+}
+
+/* Il riscontro fra due fonti che non si parlano. Verde quando combaciano —
+   e' l'unico posto del sito dove il mister vede che i conti tornano. */
+.conto-quadra,
+.conto-scarta {
+  margin: 14px 0 0;
+  font-size: 0.73rem; line-height: 1.6;
+}
+
+.conto-quadra { color: var(--win); }
+.conto-scarta { color: var(--draw); }
+
+.conto-fonte {
+  margin: 12px 0 0;
+  font-size: 0.72rem; color: var(--text-dim); line-height: 1.6;
+}
+
+.storico-conto { width: 100%; }
+.storico-conto td, .storico-conto th { white-space: nowrap; }
+
+/* La stagione che sta pagando il budget di adesso: e' quella che il mister
+   sta guardando nel blocco sopra, e qui si ritrova. */
+.storico-conto tr.in-cassa td { background: rgba(217, 180, 106, 0.06); }
+.storico-conto tr.in-cassa td:first-child { color: var(--gold-400); }
+
+/* ------------------------------------- crescita dentro la stagione
+   Un totale in testa e due liste corte sotto: «quanto vale adesso la
+   rosa che hai comprato» e «chi l'ha fatta muovere». */
+.cr-somma {
+  display: flex; justify-content: space-between; align-items: baseline;
+  gap: 14px; margin: 14px 0 4px; padding: 12px 14px;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: rgba(217, 180, 106, 0.05);
+}
+
+.cr-somma span { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; }
+.cr-somma span b { color: var(--cream); }
+.cr-somma > b { font-size: 1.3rem; }
+
+.cr-liste {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px 24px; margin-top: 14px;
+}
+
+.cr-lista h3 {
+  margin: 0 0 4px;
+  font-family: var(--font-body); font-size: 0.72rem; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-dim);
+}
+
+.cr-riga {
+  display: grid; grid-template-columns: 1fr auto auto;
+  align-items: baseline; gap: 10px; padding: 5px 0;
+  border-bottom: 1px solid var(--border-soft); font-size: 0.82rem;
+}
+
+.cr-riga:last-child { border-bottom: 0; }
+.cr-chi a { color: var(--cream); text-decoration: none; }
+.cr-chi a:hover { color: var(--gold-400); }
+
+.cr-da {
+  font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.cr-riga b { min-width: 2.4rem; text-align: right; }
+
+.ro-nota-fine { margin-top: 14px; }
+
+/* ------------------------------------------ il mercato di gennaio
+   La riga intera si tinge, perche' «e' ancora in rosa?» si legge prima
+   del nome: e' la domanda che uno si fa scorrendo, non leggendo. */
+tr.ro-uscito  { background: rgba(200, 91, 91, 0.07); }
+tr.ro-entrato { background: rgba(63, 174, 116, 0.07); }
+
+td.ro-mercato { width: 6.5rem; }
+
+.mv-out, .mv-in, .mv-contratto, .mv-asta {
+  font-family: var(--font-mono); font-size: 0.6rem;
+  letter-spacing: 0.09em; text-transform: uppercase;
+  border: 1px solid; border-radius: 20px; padding: 1px 7px; white-space: nowrap;
+}
+
+.mv-out { color: var(--loss); border-color: var(--loss); }
+.mv-in  { color: var(--win);  border-color: var(--win); }
+
+/* Contratto e comprato non sono buono e cattivo: sono due modi di essere
+   arrivato. Percio' niente verde e rosso — l'oro per il contratto, che e'
+   la cosa piu' rara, e il grigio del testo per l'asta, che e' la regola. */
+.mv-contratto {
+  color: var(--gold-400); border-color: color-mix(in srgb, var(--gold-400) 55%, transparent);
+  background: color-mix(in srgb, var(--gold-400) 8%, transparent);
+}
+.mv-asta {
+  color: var(--text-muted); border-color: color-mix(in srgb, var(--text-muted) 35%, transparent);
+}
+
+/* L'interruttore fra stagione e carriera: la stessa forma dell'ordinamento,
+   perche' e' la stessa cosa — un modo di guardare la stessa tabella. */
+.ro-vista { margin-bottom: 6px; }
+.ro-vista button.on { border-color: var(--gold-400); color: var(--gold-400); }
+
+/* Diciannove colonne uguali per tutti e quattro i reparti: cosi' scorrendo
+   la pagina le tabelle si allineano invece di ballare. Sono tante, e la
+   tabella scorre da sola dentro il suo riquadro senza trascinare la pagina. */
+.ro-tabella { overflow-x: auto; }
+.ro-tabella table { min-width: 100%; }
+.ro-tabella th, .ro-tabella td { white-space: nowrap; }
+
+/* Il giallo e il rosso dei cartellini: lo zero resta spento, il numero no. */
+.ro-giallo { color: var(--draw); }
+.ro-rosso  { color: var(--loss); }
+.ro-giallo .zero, .ro-rosso .zero { color: var(--text-dim); }
+
+/* Una domanda aperta, non un errore: bordo oro a sinistra, come gli avvisi. */
+.ro-nota.ro-spaiati {
+  border-left: 2px solid color-mix(in srgb, var(--gold-400) 45%, transparent);
+  padding-left: 12px;
+}
+
+/* La quotazione che non e' di settembre: si vede che e' un ripiego.
+   Meglio un numero che dichiara di venire da un'altra data che un trattino
+   che fa sembrare l'archivio bucato — ma il numero non deve travestirsi. */
+.ro-quota.ro-stimata {
+  color: var(--text-muted); font-style: italic;
+  border-bottom: 1px dotted color-mix(in srgb, var(--text-muted) 50%, transparent);
+  cursor: help;
+}
+
+/* --------------------------------------------- il rimborso dello svincolo */
+/* Accanto al prezzo d'asta di chi e' uscito: quanto e' rientrato in cassa.
+   Senza, il rosso del prezzo sembra una perdita secca mentre meta' di quella
+   cifra e' tornata indietro - «i Calciatori svincolati rendono il 50% del
+   prezzo di acquisto estivo». */
+.cr-reso {
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--win);
+  margin-left: 7px;
+}
+
+.cr-reso-tot {
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--win);
+  margin-left: 8px;
+}
+
+/* La colonna dei nomi nel blocco mercato: e' un elenco, non una cifra. */
+.storico-conto .conto-chi {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+  max-width: 34rem;
 }

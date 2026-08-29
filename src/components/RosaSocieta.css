@@ -1,0 +1,97 @@
+/* La rosa di una societa': stesso disegno nel sito pubblico e nell'area.
+   La barra dei filtri e le schede stanno in Filtri.css, condivise con le
+   altre pagine che elencano qualcosa. Qui resta quello che e' solo suo. */
+
+/* --------------------------------------------------------------- tabella */
+
+.rs-tabella { overflow-x: auto; }
+.rs-tabella table { width: 100%; border-collapse: collapse; }
+
+.rs-tabella th,
+.rs-tabella td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border-soft);
+  text-align: left;
+  font-size: 0.88rem;
+}
+
+.rs-tabella th {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
+.rs-tabella .num { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.rs-tabella td.in-ordine { color: var(--text); }
+.rs-tabella .c-club { color: var(--text-muted); font-family: var(--font-mono); font-size: 0.78rem; }
+.rs-tabella tbody tr:hover { background: var(--navy-850); }
+
+.rs-tabella .ord {
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+
+.rs-tabella .ord.on { color: var(--gold-400); }
+.rs-tabella .ord i { font-style: normal; margin-left: 3px; }
+
+/* ---------------------------------------------------------------- uscite */
+
+.rs-usciti { margin-top: 26px; }
+
+.rs-usciti h3 {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  margin: 0 0 8px;
+}
+
+.rs-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 8px;
+}
+
+.rs-lista li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  background: var(--navy-850);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 9px 12px;
+}
+
+.rs-chi { font-size: 0.9rem; }
+.rs-dove { font-size: 0.78rem; color: var(--text-muted); font-family: var(--font-mono); }
+
+.rs-tipo,
+.rs-cert {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.rs-tipo { background: var(--navy-700); color: var(--text-dim); }
+.rs-tipo.t-scambio,
+.rs-tipo.t-clausola { background: color-mix(in srgb, var(--gold-500) 22%, transparent); color: var(--gold-400); }
+
+.rs-cert { margin-left: auto; box-shadow: inset 0 0 0 1px currentColor; color: var(--text-dim); }
+.rs-cert.c-documento { color: var(--win); }
+.rs-cert.c-foglio { color: var(--gold-400); }
+.rs-cert.c-campo { color: var(--text-dim); }
+

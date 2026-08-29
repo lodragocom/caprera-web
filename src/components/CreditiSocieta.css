@@ -1,18 +1,87 @@
-.crediti-premi td,
-.crediti-premi th {
-  white-space: nowrap;
+/* `.cr` sta in theme.css: la usa anche l'estratto conto nell'area mister. */
+
+/* ------------------------------------------------- premi in crediti
+   Due numeri grossi in testa e poi le stagioni. I due numeri rispondono
+   alle uniche domande che un visitatore si fa davvero — «quanto ha preso
+   in tutto» e «qual e' il colpo piu' grosso» — e il resto e' per chi
+   vuole scendere. */
+.premi-sommario {
+  display: flex; flex-wrap: wrap; gap: 12px;
+  margin-bottom: 18px;
 }
 
-.crediti-premi tfoot td {
-  border-top: 1px solid var(--border);
-  color: var(--text-muted);
-  font-size: 0.82rem;
+.premi-cifra {
+  flex: 1 1 200px;
+  padding: 14px 16px;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: rgba(217, 180, 106, 0.05);
 }
 
-/* i crediti guadagnati e quelli persi si distinguono a colpo d'occhio */
-.cr {
-  font-weight: 600;
+.premi-cifra strong {
+  display: block;
+  font-size: 1.5rem; line-height: 1.2; color: var(--gold-400);
 }
 
-.cr.su  { color: var(--win); }
-.cr.giu { color: var(--loss); }
+.premi-cifra span {
+  display: block; margin-top: 3px;
+  font-size: 0.72rem; color: var(--text-dim); line-height: 1.5;
+}
+
+/* Il premio piu' ricco e' un nome, non una cifra: va rimpicciolito o
+   «Panchina d'Oro 1o» esce dalla scheda su un telefono. */
+.premi-cifra:nth-child(2) strong {
+  font-size: 0.95rem; color: var(--cream);
+}
+
+.premi-stagioni { display: flex; flex-direction: column; }
+
+.premi-stagione {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.premi-stagione:first-child { padding-top: 0; }
+.premi-stagione:last-child { border-bottom: 0; }
+
+.premi-testa {
+  display: flex; justify-content: space-between; align-items: baseline;
+  gap: 12px;
+}
+
+.premi-testa span {
+  font-size: 0.88rem; font-weight: 600; color: var(--cream);
+}
+
+.premi-testa b { font-size: 1rem; }
+
+.premi-voci {
+  margin-top: 8px; padding-left: 12px;
+  border-left: 1px solid var(--border);
+  display: flex; flex-direction: column;
+}
+
+/* Nome, conto di provenienza, crediti. Il conto sta in mezzo e non a capo:
+   «Diritti TV CL» da solo non dice a quale famiglia appartiene, e la
+   famiglia e' l'unica cosa che rende confrontabili due stagioni. */
+.premi-voce {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: baseline; gap: 10px;
+  padding: 4px 0;
+  font-size: 0.8rem;
+}
+
+.premi-nome { color: var(--text-muted); }
+
+.premi-conto {
+  font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase;
+  font-family: var(--font-mono); color: var(--text-dim);
+  border: 1px solid var(--border); border-radius: 3px;
+  padding: 1px 5px; white-space: nowrap;
+}
+
+.premi-voce b { font-size: 0.82rem; min-width: 2.2rem; text-align: right; }
+
+@media (max-width: 480px) {
+  .premi-conto { display: none; }
+}

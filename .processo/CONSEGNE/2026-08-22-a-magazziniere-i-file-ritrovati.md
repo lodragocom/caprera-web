@@ -190,3 +190,31 @@ assegnare crediti veri su una supposizione.
    Coppa Italia e capocannoniere?
 3. Roburro nella Caprera Griglia 24-25: ha partecipato (−28) o no (−100)?
 4. La **Caprera Griglia** dà crediti come la Grigliata Serie A, o è un gioco senza premi?
+
+---
+
+## Stato al 24/08/2026 (magazziniere) — **resta aperta**, ma tre quarti sono fatti
+
+Verificato sul database vivo, non sui file.
+
+- **§1 · i listoni di partenza — FATTO.** `caprera.listone` ha oggi **2.086** righe `partenza` su
+  tre stagioni: 2020-21 **691**, 2024-25 **715**, 2025-26 **680** — esattamente i conteggi di questa
+  consegna. In piu' e' entrato anche il 2025-26 di `fine` (839), quindi le dieci stagioni di fine ci
+  sono tutte. Materiale: `SUPABASE/06-listone-momenti.sql`, caricatore `carica-listoni.py`.
+- **§2 · le clausole — a meta'.** `caprera.contratti` e' passata da 140 a **186** righe e
+  **63 hanno la clausola** (erano zero). Materiale: `SUPABASE/08-contratti.sql` e
+  `dati-contratti.sql`. Le altre 123 restano vuote.
+- **§4 · le rose d'asta — cominciato, e la decisione di scope e' stata presa da qualcun altro.**
+  `caprera.rose` ha una colonna `momento` (`07-rose-partenza-o-fine.sql`) con **620 righe
+  `partenza`** contro 2.999 `fine`. Questa consegna diceva *«e' una tabella nuova, non una colonna
+  in piu': non e' tua da solo»*, ed e' stata risolta come **colonna**. Non la ribalto — ma va
+  saputo che una decisione di scope e' stata presa nei fatti, e che 620 righe sono due stagioni
+  scarse delle tre disponibili.
+- **§3 e §6 · Grigliata e Mr Champions — NON caricati, e non li carico.** I punteggi ci sono, ma le
+  **quattro domande a L0 in fondo a questa consegna non hanno risposta**: la societa' senza
+  intestazione nel Mr Champions 24-25, quale totale conti nella Serie A Griglia, Roburro a −28 o
+  −100, e se la Caprera Griglia dia crediti. Sono crediti veri assegnati su una supposizione: dove
+  esiste un registro di cio' che e' stato deciso la regola si legge, non si deduce. **Servono le
+  quattro risposte.**
+
+**Quindi la consegna resta aperta su §2 (le altre 123 clausole) e su §3/§6 (le quattro domande).**
