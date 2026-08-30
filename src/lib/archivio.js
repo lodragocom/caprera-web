@@ -748,3 +748,54 @@ export async function salvaLaMiaScheda(s) {
 export const staff = () =>
   unaVolta('staff', () => db().from('staff')
     .select('utente, societa, chi, soprannome, incarichi'))
+
+/* ==================================================== La Presidenza */
+
+/**
+ * Le dieci societa' e chi le guida — la schermata di governo.
+ *
+ * Ci sono anche le societa' SCOPERTE, con i campi vuoti: l'elenco serve a
+ * vedere chi manca, quindi chi manca deve comparire. Per questo il database
+ * fa una left join e non una lista di tessere.
+ *
+ * A chi non ha un incarico con `vede_tutto` questa non torna zero righe per
+ * gentilezza della pagina: gliele nega il database. Non aggiungere qui un
+ * controllo "di sicurezza": sarebbe finto, come tutti quelli lato React.
+ */
+export const governoSocieta = () =>
+  db().rpc('governo_societa').then(({ data, error }) => {
+    if (error) throw new Error(error.message)
+    return data ?? []
+  })
+
+/** Intesta una societa' a un'email. La persona puo' non esistere ancora. */
+export async function emettiTessera(email, societa, nome, incarichi = []) {
+  const { data, error } = await db().rpc('emetti_tessera', {
+    p_email: String(email ?? '').trim(),
+    p_societa: societa,
+    p_nome: String(nome ?? '').trim() || null,
+    p_incarichi: incarichi,
+  })
+  if (error) throw new Error(error.message)
+  return data
+}
+
+/**
+ * Toglie la tessera e il collegamento. **L'account resta**: e' della persona,
+ * non della lega. Chi resta ha un accesso e nessuna societa' — il caso che
+ * ADR-003 prevede gia'. Ed e' reversibile: riemettendo la tessera si ricollega.
+ */
+export async function revocaTessera(email) {
+  const { data, error } = await db().rpc('revoca_tessera', { p_email: email })
+  if (error) throw new Error(error.message)
+  return data
+}
+
+/** Cambia gli incarichi. Valgono subito, anche per chi e' gia' collegato. */
+export async function cambiaIncarichi(email, lista) {
+  const { data, error } = await db().rpc('cambia_incarichi', {
+    p_email: email, p_incarichi: lista,
+  })
+  if (error) throw new Error(error.message)
+  return data
+}

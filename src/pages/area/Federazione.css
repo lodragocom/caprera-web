@@ -1,0 +1,149 @@
+/* La dashboard della Presidenza. Stessa tavolozza del resto dell'area: navy e
+   oro. Gli unici colori che si allontanano sono quelli degli stati, e servono
+   a distinguere «si aspetta» da «si guarda». */
+
+.fed h1 { margin-bottom: 0.4rem; }
+
+.fed-nota { color: var(--text-muted); margin: 0 0 0.9rem; }
+
+.fed-avviso {
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--gold-500);
+  background: rgba(217, 180, 106, 0.05);
+  border-radius: var(--radius);
+  padding: 0.7rem 0.9rem;
+  margin: 0 0 1.2rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.fed-errore, .fed-esito {
+  border-radius: var(--radius);
+  padding: 0.6rem 0.9rem;
+  margin: 0 0 0.9rem;
+  font-size: 0.92rem;
+}
+.fed-errore { background: rgba(200, 91, 91, 0.12); border: 1px solid var(--loss); }
+.fed-esito  { background: rgba(63, 174, 116, 0.10); border: 1px solid var(--win); }
+
+.fed-lista { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.fed-riga {
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  background: var(--navy-800);
+  overflow: hidden;
+}
+/* Il bordo di sinistra e' l'unica cosa che si legge scorrendo in fretta:
+   dice se quella societa' chiede qualcosa. */
+.fed-riga.scoperta { border-left: 3px solid var(--gold-500); }
+.fed-riga.sospesa  { border-left: 3px solid var(--loss); }
+.fed-riga.attesa   { border-left: 3px solid var(--draw); }
+.fed-riga.ok       { border-left: 3px solid var(--win); }
+
+.fed-testa {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1.4fr) minmax(0, 1.6fr) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.65rem 0.9rem;
+  cursor: pointer;
+}
+.fed-testa:hover { background: var(--navy-700); }
+
+.fed-stemma { width: 34px; height: 34px; object-fit: contain; }
+
+.fed-chi { display: flex; flex-direction: column; min-width: 0; }
+.fed-societa { font-weight: 600; }
+/* I nomi non si troncano: «Sporting Mangi…» non identifica niente.
+   Regola di progetto, vedi CAPRERA.md. */
+.fed-societa, .fed-mister, .fed-email { overflow-wrap: anywhere; }
+.fed-mister { color: var(--text-muted); font-size: 0.86rem; }
+
+.fed-email { color: var(--text-dim); font-size: 0.86rem; }
+
+.fed-incarichi { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.fed-pallino {
+  border: 1px solid var(--gold-600);
+  color: var(--gold-400);
+  border-radius: 999px;
+  padding: 0.05rem 0.5rem;
+  font-size: 0.74rem;
+  white-space: nowrap;
+}
+
+.fed-stato { font-size: 0.78rem; text-align: right; }
+.s-scoperta { color: var(--gold-400); }
+.s-attesa   { color: var(--draw); }
+.s-sospesa  { color: var(--loss); }
+.s-ok       { color: var(--win); }
+
+/* Il modulo */
+.fed-modulo {
+  border-top: 1px solid var(--border-soft);
+  padding: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: var(--navy-850);
+}
+.fed-modulo label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.88rem; }
+.fed-modulo input[type="email"], .fed-modulo input:not([type]) {
+  background: var(--navy-900);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 0.5rem 0.6rem;
+  font: inherit;
+}
+.fed-modulo input:disabled { color: var(--text-dim); }
+
+.fed-piccolo { color: var(--text-dim); font-size: 0.8rem; margin: 0; }
+
+.fed-ruoli { border: 1px solid var(--border-soft); border-radius: var(--radius); padding: 0.7rem; }
+.fed-ruoli legend { color: var(--gold-400); font-size: 0.82rem; padding: 0 0.35rem; }
+.fed-ruoli label {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 0.45rem;
+  padding: 0.25rem 0;
+  flex-wrap: wrap;
+}
+.fed-ruoli label.alto span { color: var(--gold-400); font-weight: 600; }
+.fed-ruoli small { color: var(--text-dim); flex: 1 1 100%; padding-left: 1.35rem; }
+
+.fed-bottoni { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.fed-bottoni button {
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--navy-700);
+  color: var(--text);
+  padding: 0.45rem 0.9rem;
+  font: inherit;
+  cursor: pointer;
+}
+.fed-bottoni button:hover { background: var(--navy-600); }
+.fed-bottoni button:disabled { opacity: 0.45; cursor: not-allowed; }
+.fed-ok { border-color: var(--gold-600); color: var(--gold-400); }
+.fed-via { border-color: var(--loss); color: var(--loss); }
+
+.fed-conferma {
+  display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center;
+  color: var(--text-muted); font-size: 0.86rem;
+}
+
+/* Sul telefono la griglia diventa una scheda: cinque colonne su 360px
+   schiacciano l'email fino a renderla illeggibile. */
+@media (max-width: 720px) {
+  .fed-testa {
+    grid-template-columns: 34px 1fr;
+    grid-template-areas: "stemma chi" "email email" "incarichi incarichi" "stato stato";
+    row-gap: 0.4rem;
+  }
+  .fed-stemma { grid-area: stemma; }
+  .fed-chi { grid-area: chi; }
+  .fed-email { grid-area: email; }
+  .fed-incarichi { grid-area: incarichi; }
+  .fed-stato { grid-area: stato; text-align: left; }
+}

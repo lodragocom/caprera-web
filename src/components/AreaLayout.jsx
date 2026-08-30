@@ -19,6 +19,14 @@ const VOCI = [
   { to: '/area/tessera', label: 'La mia tessera', icona: '▤' },
 ]
 
+/* Il governo della lega. Sta staccata perche' non e' una sezione in piu':
+   la vede solo chi ha un incarico con `vede_tutto`, e il resto della lega
+   non deve nemmeno sapere che esiste. Nasconderla non e' pero' la sicurezza:
+   quella la fanno le funzioni, che si chiudono su caprera.vede_tutto(). */
+const VOCI_GOVERNO = [
+  { to: '/area/federazione', label: 'Presidenza', icona: '⚑' },
+]
+
 export default function AreaLayout() {
   const { sessione, esci, pronto, incarichi, inVisita, guarda } = useAuth()
 
@@ -80,6 +88,12 @@ export default function AreaLayout() {
         <nav className="dash-nav">
           {VOCI.map((v) => (
             <NavLink key={v.to} to={v.to} end={v.end}>
+              <i aria-hidden="true">{v.icona}</i>
+              {v.label}
+            </NavLink>
+          ))}
+          {vedeTutto && VOCI_GOVERNO.map((v) => (
+            <NavLink key={v.to} to={v.to} className="dash-governo">
               <i aria-hidden="true">{v.icona}</i>
               {v.label}
             </NavLink>

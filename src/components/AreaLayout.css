@@ -277,3 +277,12 @@
   .dash-anteprima { flex: 1 1 100%; }
   .dash-main { padding: 24px 18px 60px; }
 }
+
+/* La voce della Presidenza: staccata dalle altre, perche' non e' una sezione
+   in piu' del mister — e' un altro mestiere. */
+.dash-nav a.dash-governo {
+  margin-top: 0.5rem;
+  border-top: 1px solid var(--border-soft);
+  padding-top: 0.7rem;
+  color: var(--gold-400);
+}
