@@ -1,0 +1,111 @@
+/* Privacy e Termini. Una colonna stretta e molto respiro: sono pagine che si
+   leggono davvero solo se non sembrano un muro. */
+
+.legale {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.legale-occhiello {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold-400);
+}
+
+.legale h1 { margin: 6px 0 4px; }
+
+.legale-data {
+  margin: 0 0 22px;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+/* Il riassunto in cima: chi legge solo questo deve comunque capire. */
+.legale-guida {
+  border-left: 3px solid var(--gold-500);
+  background: rgba(217, 180, 106, 0.05);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 12px 16px;
+  margin: 0 0 26px;
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: var(--text);
+}
+
+.legale h2 {
+  margin: 30px 0 10px;
+  font-size: 1.05rem;
+  color: var(--gold-400);
+}
+
+.legale p, .legale li {
+  font-size: 0.92rem;
+  line-height: 1.7;
+  color: var(--text-muted);
+}
+
+.legale p { margin: 0 0 12px; }
+.legale ul { margin: 0 0 12px; padding-left: 20px; }
+.legale li { margin-bottom: 7px; }
+.legale strong { color: var(--text); }
+.legale a { color: var(--gold-400); }
+.legale code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  color: var(--text);
+}
+
+.legale-nota {
+  font-size: 0.84rem !important;
+  color: var(--text-dim) !important;
+  border-left: 2px solid var(--border-soft);
+  padding-left: 12px;
+}
+
+.legale-tab {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 16px;
+  font-size: 0.86rem;
+}
+
+.legale-tab th {
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--border);
+  padding: 0 10px 7px 0;
+}
+
+.legale-tab td {
+  vertical-align: top;
+  padding: 9px 10px 9px 0;
+  border-bottom: 1px solid var(--border-soft);
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+.legale-bottone {
+  font: inherit;
+  font-size: 0.86rem;
+  padding: 9px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--gold-600);
+  background: transparent;
+  color: var(--gold-400);
+  cursor: pointer;
+}
+.legale-bottone:hover { background: rgba(217, 180, 106, 0.08); }
+
+/* Sul telefono la tabella scorre invece di schiacciare le colonne fino a
+   spezzare le parole a meta'. */
+@media (max-width: 620px) {
+  .legale-tab { display: block; overflow-x: auto; white-space: nowrap; }
+  .legale-tab td, .legale-tab th { white-space: normal; min-width: 140px; }
+}

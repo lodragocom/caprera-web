@@ -317,3 +317,38 @@
 @media (max-width: 860px) {
   .site-nav a.accesso { margin: 8px 0 0; text-align: center; }
 }
+
+/* I link legali in fondo: presenti su ogni pagina, senza rubare la scena.
+   Il bottone dei cookie sembra un link perche' fa la stessa cosa — apre una
+   scelta — e distinguerlo graficamente sarebbe una differenza senza motivo. */
+.copyright-legale {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-left: 14px;
+  padding-left: 14px;
+  border-left: 1px solid var(--border-soft);
+}
+
+.copyright-legale a,
+.copyright-legale button {
+  font: inherit;
+  color: var(--text-dim);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.copyright-legale a:hover,
+.copyright-legale button:hover { color: var(--gold-400); }
+
+@media (max-width: 520px) {
+  .copyright-legale {
+    display: flex;
+    margin: 10px 0 0;
+    padding: 10px 0 0;
+    border-left: 0;
+    border-top: 1px solid var(--border-soft);
+  }
+}

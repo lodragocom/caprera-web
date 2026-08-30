@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { Suspense, lazy, useEffect } from 'react'
+import Consenso from './components/Consenso'
 import Layout from './components/Layout'
 import { AuthProvider } from './lib/auth'
 import Home from './pages/Home'
@@ -36,6 +37,8 @@ const AreaFormazioni = lazy(() => import('./pages/area/Formazioni'))
 const AreaTessera = lazy(() => import('./pages/area/Tessera'))
 const AreaFederazione = lazy(() => import('./pages/area/Federazione'))
 const Statistiche = lazy(() => import('./pages/Statistiche'))
+const Privacy = lazy(() => import('./pages/Privacy'))
+const Termini = lazy(() => import('./pages/Termini'))
 
 /** Riporta in cima ad ogni cambio di rotta. */
 function ScrollTop() {
@@ -81,6 +84,8 @@ export default function App() {
             <Route path="assicurazioni" element={<Assicurazioni />} />
             <Route path="login" element={<Login />} />
             <Route path="statistiche" element={<Statistiche />} />
+            <Route path="privacy" element={<Privacy />} />
+            <Route path="termini" element={<Termini />} />
             <Route path="*" element={<NotFound />} />
           </Route>
 
@@ -98,6 +103,9 @@ export default function App() {
           </Route>
         </Routes>
       </Suspense>
+      {/* Fuori dalle rotte: la scelta sui cookie riguarda il sito, non una
+          pagina, e chi arriva su un indirizzo profondo la deve trovare uguale. */}
+      <Consenso />
       </BrowserRouter>
     </AuthProvider>
   )

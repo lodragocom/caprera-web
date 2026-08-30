@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, Link, useLocation } from 'react-router-dom'
 import { federazioneStemma, capreraLogo } from '../lib/core'
 import { useAuth } from '../lib/auth'
+import { apriConsenso } from '../lib/consenso'
 import './Layout.css'
 
 /**
@@ -172,6 +173,12 @@ export default function Layout() {
         </div>
         <div className="container wide copyright">
           © {new Date().getFullYear()} Federazione Caprera · Tutti i diritti riservati
+          {/* In fondo e senza enfasi, ma su ogni pagina: e' li' che si cercano. */}
+          <span className="copyright-legale">
+            <Link to="/privacy">Privacy</Link>
+            <Link to="/termini">Termini</Link>
+            <button type="button" onClick={apriConsenso}>Cookie</button>
+          </span>
         </div>
       </footer>
     </>

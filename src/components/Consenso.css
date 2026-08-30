@@ -1,0 +1,95 @@
+/* Il banner del consenso. Sta in basso, non copre il sito, e non è una
+   finestra modale: se non hai ancora scelto puoi comunque leggere: il sito
+   pubblico non ti sta osservando finché non dici di sì. */
+
+.cons {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 90;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.cons-corpo {
+  pointer-events: auto;
+  max-width: 620px;
+  width: 100%;
+  background: var(--navy-850);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
+  padding: 16px 18px;
+}
+
+.cons-tit {
+  margin: 0 0 6px;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold-400);
+}
+
+.cons-testo {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+.cons-testo a { color: var(--gold-400); }
+
+.cons-voci {
+  margin: 14px 0 4px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.cons-voce {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border-soft);
+  cursor: pointer;
+}
+.cons-voce.fissa { cursor: default; }
+.cons-voce strong { display: block; font-size: 0.86rem; color: var(--text); }
+.cons-voce span { display: block; margin-top: 3px; font-size: 0.78rem; line-height: 1.5; color: var(--text-dim); }
+.cons-voce em { font-style: normal; font-size: 0.72rem; color: var(--text-dim); white-space: nowrap; }
+.cons-voce input { width: 18px; height: 18px; accent-color: var(--gold-500); flex: none; margin-top: 2px; }
+
+.cons-bottoni {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.cons-bottoni button {
+  font: inherit;
+  font-size: 0.86rem;
+  padding: 9px 16px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--navy-700);
+  color: var(--text);
+}
+
+/* Accetta e Rifiuta hanno lo stesso peso visivo, ed è il punto: se rifiutare
+   sembrasse la scelta scomoda, il sì non sarebbe libero. */
+.cons-si, .cons-no {
+  flex: 1 1 160px;
+  border-color: var(--gold-600);
+  color: var(--gold-400);
+  font-weight: 600;
+}
+.cons-si:hover, .cons-no:hover { background: var(--navy-600); }
+.cons-terzo { flex: 1 1 100%; color: var(--text-muted); }
+
+@media (min-width: 560px) {
+  .cons-terzo { flex: 0 0 auto; }
+}
