@@ -46,7 +46,14 @@ DESTINAZIONE_DATI = RADICE.parent / "caprera-dati" / "SUPABASE" / "migrazioni-da
 # Una migrazione e' riservata se scrive in una delle tre tabelle che il progetto
 # tiene senza finestra pubblica. Il DDL che le CREA non lo e': la forma di una
 # tabella non e' il suo contenuto.
-RISERVATE = re.compile(r"\b(?:insert\s+into|update)\s+caprera\.(finanze|contratti|movimenti)\b")
+# Anche lo STAGING conta: lavoro.registro_mercato porta gli stessi crediti di
+# caprera.movimenti, e guardare solo la tabella d'arrivo lascerebbe passare la
+# copia di partenza. Nel dubbio si guarda il dato, non il nome dello schema.
+RISERVATE = re.compile(
+    r"\b(?:insert\s+into|update|copy)\s+"
+    r"(?:caprera\.(?:finanze|contratti|movimenti)"
+    r"|lavoro\.(?:registro_mercato|\w*(?:finanz|contratt|movimenti|mercato)\w*))\b"
+)
 
 
 def dove_va(sql: str) -> pathlib.Path:
