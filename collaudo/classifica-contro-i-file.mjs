@@ -2,7 +2,7 @@ import { chromium } from 'playwright'
 import fs from 'node:fs'
 
 const atteso = JSON.parse(fs.readFileSync('/home/claude/caprera-web/src/data/standings.json', 'utf8'))
-const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' })
+const b = await chromium.launch(process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {})
 const p = await b.newPage({ viewport: { width: 1500, height: 1100 } })
 const errs = []
 p.on('pageerror', e => errs.push('PAGEERROR ' + e.message))

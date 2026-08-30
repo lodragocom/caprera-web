@@ -1,6 +1,6 @@
 import { chromium } from 'playwright'
 const BASE = 'http://localhost:4180'
-const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' })
+const b = await chromium.launch(process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {})
 const p = await b.newPage({ viewport: { width: 1800, height: 1200 } })
 p.on('pageerror', (e) => console.log('PAGEERROR:', e.message))
 await p.goto(BASE + '/login', { waitUntil: 'networkidle' })

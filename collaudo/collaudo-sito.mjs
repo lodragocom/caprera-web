@@ -17,7 +17,7 @@ const PUBBLICHE = ['/', '/classifica', '/risultati', '/squadre', '/rose', '/cont
 const AREA = ['/area', '/area/rosa', '/area/formazioni', '/area/contratti',
   '/area/crediti', '/area/coppe', '/area/storia']
 
-const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' })
+const b = await chromium.launch(process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {})
 const p = await b.newPage({ viewport: { width: 1500, height: 1100 } })
 
 let pagina = ''
