@@ -260,13 +260,21 @@
 
 .tess-griglia .campi {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
+  /* Due per riga, non «quante ce ne stanno»: con auto-fit su uno schermo largo
+     diventavano quattro colonne strette, e un'email in 200px non si legge. */
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px 18px;
   margin-bottom: 16px;
+  /* Un campo e' alto quanto il suo contenuto e mai quanto il vicino piu' alto.
+     Senza questo, in una griglia gli item si stirano fino all'altezza della
+     riga: basta un campo con la nota sotto per gonfiare tutti gli altri, e si
+     ottengono riquadri vuoti alti il doppio del necessario. */
+  align-items: start;
 }
 
 .tess-griglia .campo {
   display: block;
+  align-self: start;
 }
 
 .tess-griglia .campo > span {

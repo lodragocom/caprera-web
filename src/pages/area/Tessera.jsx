@@ -200,8 +200,10 @@ function Anagrafica({ scheda, setScheda, dopo, team, email }) {
                aiuto="La assegna la Presidenza" />
         <Campo etichetta="Email" value={email ?? '—'} readOnly bloccato
                aiuto="È anche il nome con cui entri" />
-        <Campo etichetta="Nome" {...campo('nome')} autoComplete="given-name" />
-        <Campo etichetta="Cognome" {...campo('cognome')} autoComplete="family-name" />
+        <Campo etichetta="Nome" {...campo('nome')} autoComplete="given-name"
+               aiuto="Lo vede solo la Presidenza" />
+        <Campo etichetta="Cognome" {...campo('cognome')} autoComplete="family-name"
+               aiuto="Nemmeno questo compare in giro" />
         <Campo etichetta="Soprannome" {...campo('soprannome')}
                aiuto="Come ti chiamano in lega" />
         <Campo etichetta="Telefono" {...campo('telefono')} type="tel"
