@@ -144,3 +144,20 @@
 @media (max-width: 640px) {
   .atti-cat { display: none; }   /* sul telefono vince il motivo, non l'etichetta */
 }
+
+/* La nota sta sotto la voce, non accanto: la voce e' il nome della cosa e si
+   legge scorrendo, la nota e' il dettaglio e si legge se serve. */
+.atti-nota-riga {
+  display: block;
+  font-size: 0.76rem;
+  color: var(--text-dim);
+  margin-top: 0.15rem;
+}
+.atti-facolt {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-left: 0.35rem;
+}

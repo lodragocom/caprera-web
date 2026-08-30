@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../../lib/auth'
 import { getTeam, logoUrl } from '../../lib/core'
-import { attiLega, registraAtto, cancellaAtto, stagioni as tutteLeStagioni } from '../../lib/archivio'
+import { attiLega, registraAtto, cancellaAtto, vociAtti, stagioni as tutteLeStagioni } from '../../lib/archivio'
 import { Pagina } from '../../components/moto'
 import './Atti.css'
 
@@ -36,12 +36,14 @@ export default function Atti() {
   const [errore, setErrore] = useState(null)
   const [esito, setEsito] = useState(null)
   const [nuovo, setNuovo] = useState(null)
+  const [catalogo, setCatalogo] = useState([])
 
   const carica = useCallback((s) => {
     attiLega(s).then(setElenco).catch((e) => setErrore(e.message))
   }, [])
 
   useEffect(() => {
+    vociAtti().then(setCatalogo).catch(() => {})
     tutteLeStagioni().then((s) => {
       const ordinate = [...s].sort((a, b) => b.id.localeCompare(a.id))
       setAnni(ordinate)
@@ -107,7 +109,7 @@ export default function Atti() {
 
       {nuovo && (
         <Modulo
-          v={nuovo} set={setNuovo} stagione={stagione}
+          v={nuovo} set={setNuovo} stagione={stagione} catalogo={catalogo}
           salva={() => atto(registraAtto({ ...nuovo, stagione }))}
         />
       )}
@@ -131,7 +133,10 @@ export default function Atti() {
               {g.righe.map((r) => (
                 <tr key={r.id}>
                   <td className="atti-cat">{CATEGORIE.find((c) => c.id === r.categoria)?.nome ?? r.categoria}</td>
-                  <td className="atti-voce">{r.voce}</td>
+                  <td className="atti-voce">
+                    {r.voce}
+                    {r.nota && <span className="atti-nota-riga">{r.nota}</span>}
+                  </td>
                   <td className={`atti-cred ${r.crediti >= 0 ? 'su' : 'giu'}`}>
                     {r.crediti > 0 ? '+' : ''}{r.crediti}
                   </td>
@@ -153,8 +158,22 @@ export default function Atti() {
   )
 }
 
-function Modulo({ v, set, stagione, salva }) {
+function Modulo({ v, set, stagione, salva, catalogo }) {
   const cat = CATEGORIE.find((c) => c.id === v.categoria)
+  /* Le voci gia' usate per questo tipo di atto. Scegliere invece di scrivere
+     e' l'unico modo di non avere in archivio «FPF» e «FFP», «Formazione non
+     data» e «Mancata Formazione» — sinonimi che rendono impossibile contare
+     quante volte una cosa e' successa. */
+  const voci = (catalogo ?? []).filter((c) => c.categoria === v.categoria)
+
+  /* Scelta una voce, l'importo si propone da solo: e' quello dell'ultima
+     volta che quella cosa e' stata assegnata. Resta modificabile, perche' le
+     scale cambiano — il Fantapunti 2o e' stato 3 e 4 in stagioni diverse. */
+  function scegli(voce) {
+    const c = voci.find((x) => x.voce === voce)
+    set({ ...v, voce, crediti: c ? String(c.importo) : v.crediti })
+  }
+
   return (
     <div className="atti-modulo">
       <div className="atti-campi">
@@ -169,7 +188,8 @@ function Modulo({ v, set, stagione, salva }) {
         </label>
         <label>
           Tipo
-          <select value={v.categoria} onChange={(e) => set({ ...v, categoria: e.target.value })}>
+          <select value={v.categoria}
+                  onChange={(e) => set({ ...v, categoria: e.target.value, voce: '' })}>
             {CATEGORIE.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
           </select>
           <em>{cat?.aiuto}</em>
@@ -182,15 +202,36 @@ function Modulo({ v, set, stagione, salva }) {
           <em>Negativo per togliere, positivo per dare</em>
         </label>
       </div>
+
       <label className="atti-motivo">
-        Perché
-        <input value={v.voce ?? ''} onChange={(e) => set({ ...v, voce: e.target.value })}
-               placeholder="Caprera Etica — formazione non inviata alla 12ª" />
+        Voce
+        {/* Un elenco, non un campo libero — ma con la possibilità di scriverne
+            una nuova: il catalogo nasce dalle voci già usate, e una voce nuova
+            ci entra semplicemente usandola. */}
+        <input list="voci-atti" value={v.voce ?? ''}
+               onChange={(e) => scegli(e.target.value)}
+               placeholder="scegli dall’elenco, o scrivine una nuova" />
+        <datalist id="voci-atti">
+          {voci.map((c) => (
+            <option key={c.voce} value={c.voce}>
+              {c.importo > 0 ? `+${c.importo}` : c.importo} · {c.volte} volte, ultima {c.ultima}
+            </option>
+          ))}
+        </datalist>
         <em>
-          È la parte che conta: fra un anno questa riga dovrà spiegarsi da sola,
-          senza che nessuno debba ricordarsi cos’era successo.
+          {voci.length > 0
+            ? `${voci.length} voci già usate per questo tipo. Sceglierne una compila i crediti con l’ultimo importo assegnato.`
+            : 'Nessuna voce ancora usata per questo tipo: scrivila, e la prossima volta sarà nell’elenco.'}
         </em>
       </label>
+
+      <label className="atti-motivo">
+        Nota <span className="atti-facolt">facoltativa</span>
+        <input value={v.nota ?? ''} onChange={(e) => set({ ...v, nota: e.target.value })}
+               placeholder="alla 12ª giornata, dopo la segnalazione del Giudice" />
+        <em>Il dettaglio che fra un anno spiegherà la riga senza doversi ricordare nulla.</em>
+      </label>
+
       <div className="atti-bottoni">
         <button className="atti-ok" onClick={salva}
                 disabled={!v.societa || !v.crediti || !String(v.voce ?? '').trim()}>

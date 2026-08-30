@@ -829,10 +829,11 @@ export const attiLega = (stagione = null) =>
   })
 
 /** Scrive un atto. Il database rifiuta chi non governa, e i motivi vuoti. */
-export async function registraAtto({ stagione, societa, categoria, voce, crediti }) {
+export async function registraAtto({ stagione, societa, categoria, voce, crediti, nota }) {
   const { data, error } = await db().rpc('registra_atto', {
     p_stagione: stagione, p_societa: societa, p_categoria: categoria,
     p_voce: String(voce ?? '').trim(), p_crediti: Number(crediti),
+    p_nota: String(nota ?? '').trim() || null,
   })
   if (error) throw new Error(error.message)
   return data
@@ -860,6 +861,20 @@ export async function cancellaAtto(id) {
  */
 export const conformitaClausole = () =>
   db().rpc('conformita_clausole').then(({ data, error }) => {
+    if (error) throw new Error(error.message)
+    return data ?? []
+  })
+
+/**
+ * Il catalogo delle voci degli atti: quelle gia' usate, con l'importo
+ * dell'ultima volta.
+ *
+ * Serve a smettere di scriverle a mano. Nell'archivio convivono «FPF» e
+ * «FFP», «Formazione non data» e «Mancata Formazione»: sinonimi che rendono
+ * impossibile contare quante volte una cosa e' successa.
+ */
+export const vociAtti = () =>
+  db().rpc('voci_atti').then(({ data, error }) => {
     if (error) throw new Error(error.message)
     return data ?? []
   })
