@@ -1,0 +1,172 @@
+/* Il diario. Le voci sono schede e non righe di tabella: hanno un testo che
+   si legge, e una tabella lo schiaccerebbe. */
+
+.dia h1 { margin-bottom: 0.4rem; }
+.dia-nota { color: var(--text-muted); margin: 0 0 1rem; line-height: 1.6; }
+
+.dia-errore, .dia-esito, .dia-scadute {
+  border-radius: var(--radius);
+  padding: 0.6rem 0.9rem;
+  margin: 0 0 0.9rem;
+  font-size: 0.9rem;
+}
+.dia-errore { background: rgba(200, 91, 91, 0.12); border: 1px solid var(--loss); }
+.dia-esito { background: rgba(63, 174, 116, 0.10); border: 1px solid var(--win); }
+.dia-scadute {
+  background: rgba(200, 91, 91, 0.08);
+  border-left: 3px solid var(--loss);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  color: var(--text-muted);
+}
+
+.dia-barra {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.dia-nuovo, .dia-ok {
+  font: inherit;
+  font-size: 0.88rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--gold-600);
+  background: transparent;
+  color: var(--gold-400);
+  cursor: pointer;
+}
+.dia-nuovo:hover, .dia-ok:hover { background: rgba(217, 180, 106, 0.08); }
+.dia-ok:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.dia-filtro { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+.dia-filtro button {
+  font: inherit;
+  font-size: 0.8rem;
+  background: none;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  color: var(--text-dim);
+  padding: 0.35rem 0.7rem;
+  cursor: pointer;
+}
+.dia-filtro button.sceltA { border-color: var(--gold-600); color: var(--gold-400); }
+
+/* il modulo */
+.dia-modulo {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--navy-850);
+  padding: 1rem;
+  margin-bottom: 1.2rem;
+}
+.dia-campi {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.9rem;
+  align-items: start;
+  margin-bottom: 0.9rem;
+}
+.dia-modulo label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  align-self: start;
+}
+.dia-modulo input, .dia-modulo select, .dia-modulo textarea {
+  background: var(--navy-900);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 0.45rem 0.6rem;
+  font: inherit;
+  font-size: 0.9rem;
+}
+.dia-modulo textarea { resize: vertical; line-height: 1.5; }
+.dia-largo { margin-bottom: 0.9rem; }
+.dia-largo input, .dia-largo textarea { width: 100%; box-sizing: border-box; }
+.dia-facolt {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-left: 0.3rem;
+}
+
+/* le voci */
+.dia-lista { display: flex; flex-direction: column; gap: 0.6rem; }
+
+.dia-voce {
+  display: grid;
+  grid-template-columns: 30px 1fr auto;
+  gap: 0.8rem;
+  align-items: start;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  background: var(--navy-800);
+  padding: 0.8rem 0.9rem;
+}
+/* Il tipo si riconosce dal filo di sinistra prima che dall'icona: scorrendo,
+   il colore arriva prima della forma. */
+.dia-voce.task { border-left: 3px solid var(--gold-500); }
+.dia-voce.referendum { border-left: 3px solid #6f8fd6; }
+.dia-voce.nota { border-left: 3px solid var(--border); }
+.dia-voce.evento { border-left: 3px solid var(--win); }
+.dia-voce.scaduta { border-left-color: var(--loss); background: rgba(200, 91, 91, 0.05); }
+
+.dia-icona {
+  font-size: 1.1rem;
+  color: var(--text-dim);
+  text-align: center;
+  line-height: 1.3;
+}
+.dia-voce.evento .dia-icona { color: var(--win); }
+
+.dia-corpo { min-width: 0; }
+.dia-corpo h2 { margin: 0 0 0.2rem; font-size: 0.98rem; color: var(--text); }
+.dia-corpo p {
+  margin: 0 0 0.4rem;
+  font-size: 0.86rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+  white-space: pre-wrap;   /* i testi degli eventi vanno a capo da soli */
+}
+
+.dia-sotto {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  font-size: 0.74rem;
+  color: var(--text-dim);
+}
+.dia-sotto .giu { color: var(--loss); font-weight: 600; }
+.dia-tipo {
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-size: 0.62rem;
+  color: var(--gold-400);
+}
+.dia-quando { margin-left: auto; }
+
+.dia-azioni { display: flex; flex-direction: column; gap: 0.25rem; }
+.dia-azioni button {
+  font: inherit;
+  font-size: 0.72rem;
+  border: 1px solid var(--border-soft);
+  background: transparent;
+  color: var(--text-dim);
+  border-radius: 6px;
+  padding: 0.18rem 0.5rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.dia-azioni button:hover { border-color: var(--gold-600); color: var(--gold-400); }
+
+@media (max-width: 620px) {
+  .dia-voce { grid-template-columns: 24px 1fr; }
+  .dia-azioni { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; }
+  .dia-quando { margin-left: 0; }
+}

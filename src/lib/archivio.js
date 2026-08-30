@@ -990,3 +990,39 @@ export async function salvaCreditiStagione(stagione, base, giovani) {
   if (error) throw new Error(error.message)
   return data
 }
+
+/* ------------------------------------------- Il diario della Federazione */
+
+/**
+ * Cose da fare, note, referendum ed eventi.
+ *
+ * Gli **eventi** non li scrive nessuno: li scrive il sistema quando succede
+ * qualcosa — oggi, quando un mister si registra. Cosi' la Presidenza vede
+ * cos'e' successo anche senza che nessuno le abbia scritto.
+ */
+export const diarioLega = (stato = 'aperto') =>
+  db().rpc('diario_lega', { p_stato: stato }).then(({ data, error }) => {
+    if (error) throw new Error(error.message)
+    return data ?? []
+  })
+
+/** Aggiunge o aggiorna una voce. Gli eventi non si scrivono a mano. */
+export async function salvaVoceDiario(v) {
+  const { data, error } = await db().rpc('salva_voce_diario', {
+    p_id: v.id ?? null, p_tipo: v.tipo,
+    p_titolo: String(v.titolo ?? '').trim(),
+    p_testo: String(v.testo ?? '').trim() || null,
+    p_scadenza: v.scadenza || null,
+    p_stagione: v.stagione || null,
+    p_societa: v.societa || null,
+  })
+  if (error) throw new Error(error.message)
+  return data
+}
+
+/** Segna fatto, archivia, o riapre. */
+export async function chiudiVoceDiario(id, stato) {
+  const { data, error } = await db().rpc('chiudi_voce_diario', { p_id: id, p_stato: stato })
+  if (error) throw new Error(error.message)
+  return data
+}
