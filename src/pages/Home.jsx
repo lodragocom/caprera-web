@@ -1,15 +1,38 @@
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import TeamBadge from '../components/TeamBadge'
 import {
-  ACTIVE_TEAMS, standings, capreraLogo, federazioneStemma, dieciAnniBlocco, logoUrl, summary,
+  ACTIVE_TEAMS, capreraLogo, federazioneStemma, dieciAnniBlocco, logoUrl, summary,
   CURRENT_SEASON, LAST_PLAYED_SEASON,
 } from '../lib/core'
+import { useArchivio, classifica, classificaPerpetua } from '../lib/archivio'
+import { Sezione } from '../components/moto'
 import './Home.css'
 
-const { palmares: albo, totals, nextRound } = summary
+const { totals, nextRound } = summary
 
 export default function Home() {
-  const table = standings[LAST_PLAYED_SEASON] ?? []
+  const cl = useArchivio(['classifica', LAST_PLAYED_SEASON],
+    () => classifica(LAST_PLAYED_SEASON))
+  const pe = useArchivio('perpetua', classificaPerpetua)
+
+  /* La classifica dell'ultima stagione, con i nomi di prima. */
+  const table = useMemo(
+    () => (cl.dati ?? []).map((r) => ({
+      team: r.societa, position: r.posizione, points: r.punti,
+      played: r.giocate, goalDiff: r.gol_fatti - r.gol_subiti,
+    })),
+    [cl.dati]
+  )
+
+  /* L'albo: il primo di ogni stagione, dalla piu' recente. */
+  const albo = useMemo(() => {
+    const m = new Map()
+    for (const r of pe.dati ?? []) {
+      if (r.posizione === 1) m.set(r.stagione, { season: r.stagione, team: r.societa, points: r.punti })
+    }
+    return [...m.values()].sort((a, b) => b.season.localeCompare(a.season))
+  }, [pe.dati])
 
   return (
     <div className="page home">
@@ -99,6 +122,7 @@ export default function Home() {
         <div className="two-col">
           <div>
             <h2 className="section-title">Classifica {LAST_PLAYED_SEASON}</h2>
+            <Sezione stato={cl} righe={10}>
             <div className="table-wrap">
               <table>
                 <thead>
@@ -127,6 +151,7 @@ export default function Home() {
                 </tbody>
               </table>
             </div>
+            </Sezione>
             <Link to="/classifica" className="more-link">
               Tutte le classifiche →
             </Link>
@@ -134,6 +159,7 @@ export default function Home() {
 
           <div>
             <h2 className="section-title">Albo d'oro</h2>
+            <Sezione stato={pe} righe={10}>
             <ol className="albo">
               {albo.map((a) => (
                 <li key={a.season}>
@@ -143,6 +169,7 @@ export default function Home() {
                 </li>
               ))}
             </ol>
+            </Sezione>
           </div>
         </div>
       </section>

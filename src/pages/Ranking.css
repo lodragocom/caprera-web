@@ -1,4 +1,114 @@
-.num-head { font-size: 0.58rem !important; }
+/* ============================================================
+   Ranking Caprera — il coefficiente e i gironi che ne derivano.
+   ============================================================ */
+
+.rk-testa {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.rk-testa h1 {
+  font-size: clamp(2.3rem, 6vw, 3.6rem);
+  line-height: 0.95;
+  margin: 6px 0 0;
+}
+
+.rk .lede { margin: 16px 0 20px; }
+
+/* ---------------------------------------------- la scelta della finestra */
+.rk-finestra > span {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 7px;
+}
+
+.rk-segmenti {
+  display: inline-flex;
+  background: var(--navy-850);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 3px;
+  gap: 2px;
+}
+
+.rk-segmenti button {
+  background: none;
+  border: 0;
+  border-radius: 7px;
+  padding: 7px 14px;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+
+.rk-segmenti button:hover { color: var(--text); }
+
+.rk-segmenti button.on {
+  background: var(--gold-500);
+  color: var(--navy-900);
+  font-weight: 600;
+}
+
+/* ------------------------------------------------------------ la tabella */
+.rk-tabella tr { cursor: pointer; }
+.rk-tabella tr:focus-visible { outline: 2px solid var(--gold-500); outline-offset: -2px; }
+
+.rk-tabella tr.segnata td {
+  background: rgba(217, 180, 106, 0.09);
+  box-shadow: inset 3px 0 0 var(--gold-500);
+}
+
+/* Punti della stagione, e sotto la posizione di quell'anno. Prima la
+   posizione stava solo nel `title`: su un telefono non esiste. */
+.rk-anno { line-height: 1.15; }
+
+.rk-anno b {
+  display: block;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.rk-anno i {
+  display: block;
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+.rk-pari {
+  font-style: normal;
+  margin-left: 5px;
+  font-size: 0.78em;
+  color: var(--text-dim);
+}
+
+/* ------------------------------------------------------ barra e distacco */
+.rk-scarto {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rk-scarto b {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--text-dim);
+  min-width: 2.9rem;
+}
 
 .coef-bar {
   display: block;
@@ -7,23 +117,31 @@
   background: var(--navy-800);
   border-radius: 4px;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .coef-bar i {
   display: block;
   height: 100%;
+  border-radius: 4px;
   background: linear-gradient(90deg, var(--gold-600), var(--gold-400));
+  transition: width 0.35s ease;
 }
 
+.rk-nota {
+  margin: 12px 0 0;
+  font-size: 0.76rem;
+  color: var(--text-dim);
+}
+
+/* -------------------------------------------------------------- i gironi */
 .gironi {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 14px;
 }
 
-.girone {
-  padding: 20px 22px;
-}
+.girone { padding: 20px 22px; }
 
 .girone h3 {
   font-size: 1.15rem;
@@ -44,11 +162,102 @@
   grid-template-columns: 2.2rem 1fr auto;
   align-items: center;
   gap: 10px;
-  padding: 9px 0;
+  padding: 9px 8px;
+  margin-inline: -8px;
+  border-radius: var(--radius);
   border-bottom: 1px solid var(--border-soft);
+  cursor: pointer;
+  transition: background 0.15s;
 }
 
 .girone li:last-child { border-bottom: 0; }
+.girone li:hover { background: rgba(255, 255, 255, 0.025); }
+
+.girone li.segnata {
+  background: rgba(217, 180, 106, 0.1);
+  box-shadow: inset 3px 0 0 var(--gold-500);
+}
 
 .seed { font-size: 0.68rem; color: var(--text-dim); }
 .coef { font-size: 0.78rem; color: var(--gold-600); }
+
+/* -------------------------------------------------------------- stretto */
+@media (max-width: 760px) {
+  .rk-testa { flex-direction: column; align-items: flex-start; }
+  .rk-finestra { width: 100%; }
+  .rk-segmenti { width: 100%; }
+  .rk-segmenti button { flex: 1; padding: 8px 6px; font-size: 0.78rem; }
+
+  /* La colonna della barra è l'unica che non porta un numero che non si
+     possa leggere altrove: su schermo stretto sparisce, così la tabella
+     smette di scorrere di lato per mostrare una decorazione. */
+  .rk-c-scarto { display: none; }
+  .rk-anno i { font-size: 0.55rem; }
+
+  /*
+   * Su un telefono dieci colonne di stagioni non ci stanno, e la tabella si
+   * difendeva stringendo l'unica colonna elastica: quella dei nomi. Ne usciva
+   * «Smit Gaspach / o» e «Sporting Mangiapr / eti», che è la stessa bugia del
+   * troncamento con un a capo al posto dei puntini.
+   *
+   * Adesso la tabella tiene la sua misura e scorre di lato; posizione e nome
+   * restano incollati a sinistra, così si sa sempre di chi è la riga che si
+   * sta guardando.
+   */
+  .rk-tabella { min-width: 560px; }
+
+  .rk-tabella th:nth-child(1), .rk-tabella td:nth-child(1),
+  .rk-tabella th:nth-child(2), .rk-tabella td:nth-child(2) {
+    position: sticky;
+    z-index: 3;
+    background: var(--navy-850);
+  }
+
+  /* Le intestazioni sono già appiccicate in alto dal tema, e con lo stesso
+     livello delle prime due colonne si dipingevano sopra: la scritta
+     «Società» spariva appena si scorreva di lato. Qui stanno più in alto. */
+  .rk-tabella thead th:nth-child(1),
+  .rk-tabella thead th:nth-child(2) {
+    z-index: 4;
+    background: var(--navy-800);
+  }
+
+  .rk-tabella th:nth-child(1), .rk-tabella td:nth-child(1) { left: 0; }
+  .rk-tabella th:nth-child(2), .rk-tabella td:nth-child(2) {
+    left: 2.4rem;
+    box-shadow: 6px 0 8px -6px rgba(0, 0, 0, 0.65);
+  }
+
+  .rk-tabella tr.segnata td:nth-child(1),
+  .rk-tabella tr.segnata td:nth-child(2) {
+    background: color-mix(in srgb, var(--gold-500) 9%, var(--navy-850));
+  }
+
+  /* Il nome resta intero: la tabella scorre, la parola no. */
+  .rk-tabella .tb-name { white-space: nowrap; }
+  .rk-tabella .rk-chi { gap: 6px; }
+  .rk-parziale { font-size: 0.55rem; padding: 1px 4px; }
+}
+
+/* Le intestazioni delle colonne-stagione: "21-22" a misura piena
+   allargherebbe la tabella più dei numeri che contiene. */
+.rk-tabella .num-head { font-size: 0.58rem; letter-spacing: 0.08em; }
+
+/* Società, ed eventualmente quante stagioni della finestra ha davvero
+   giocato: senza, un coefficiente basso per assenza si legge come un
+   coefficiente basso per demerito. */
+.rk-chi { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+
+.rk-parziale {
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  padding: 2px 6px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.rk-nota b { color: var(--text-muted); font-weight: 500; }

@@ -292,6 +292,12 @@ tbody td {
   white-space: nowrap;
 }
 
+/* La cella che contiene uno stemma e un nome fa eccezione: i numeri stanno
+   bene su una riga, i nomi delle societa' no. "Aston Ville di Corsano" su
+   un telefono, tenuto su una riga sola, esce dalla cella e si accavalla
+   alla successiva. Meglio una riga in piu'. */
+tbody td:has(.team-badge) { white-space: normal; }
+
 tbody td:first-child,
 tbody td.left {
   text-align: left;
@@ -413,3 +419,108 @@ tbody tr:hover td {
   color: #111;
   font-weight: 700;
 }
+
+/* ------------------------------------------------- le ultime cinque gare
+   Sta qui e non nel foglio della Classifica perche' lo usano anche le
+   Squadre e la dashboard: dentro il foglio di una pagina lazy sparirebbe
+   dalle altre, e le pastiglie tornerebbero lettere sbiadite. */
+.forma { display: inline-flex; gap: 4px; }
+
+.pastiglia {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--navy-900);
+}
+
+.p-V { background: var(--win); }
+.p-N { background: var(--draw); }
+.p-P { background: var(--loss); }
+
+/* ------------------------------------------- intestazioni che ordinano
+   Stanno qui e non nel foglio della Classifica perche' le usano anche
+   Giocatori e la scheda di una societa': dentro una pagina lazy
+   sparirebbero dalle altre, come era gia' successo alle pastiglie. */
+.ord {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  transition: color 0.15s;
+}
+
+.ord:hover { color: var(--text); }
+.ord.on { color: var(--gold-400); }
+.ord i { font-style: normal; margin-left: 3px; font-size: 0.8em; }
+
+/* ------------------------------------------------- comandi sul telefono
+   Impilati verticalmente facevano seicento pixel di menu prima del primo
+   dato. Su schermo stretto diventano una riga che scorre di lato: si
+   vedono lo stesso, ma non si mettono davanti al contenuto. */
+@media (max-width: 700px) {
+  .controls {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    /* deve combaciare col padding di `.container` a questa misura (16 px):
+       con -18 la riga sporge di due pixel e la pagina scorre di lato */
+    margin-inline: -16px;
+    padding: 0 16px 4px;
+    align-items: flex-end;
+  }
+  .controls::-webkit-scrollbar { display: none; }
+  .controls > * { flex-shrink: 0; }
+  .controls select,
+  .controls input[type='search'] { min-width: 130px; font-size: 0.86rem; }
+}
+
+/* ------------------------------------------------ classi di più pagine
+   `.avviso`, `.pos` e `tr.podium` erano definite dentro CSS di pagina che
+   il sito carica solo quando serve quella pagina: Contratti, Coppe, Home.
+   Chi arrivava dritto su Ranking le trovava vuote, e l'avviso si vedeva
+   senza il suo bordo e senza il suo colore. Le classi che usa più di una
+   pagina stanno qui, dove ci sono sempre. */
+.avviso {
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  border-left: 3px solid var(--draw);
+  line-height: 1.6;
+}
+
+.avviso strong { color: var(--gold-400); }
+
+/* `.pos` porta solo l'identità (il colore della posizione), che vale ovunque.
+   La larghezza è layout, non identità: la vuole la colonna di una tabella, e
+   fuori da una tabella `.pos` sta dentro griglie con la prima traccia già
+   misurata (Asta `.top-card` 1.6rem, Coppe `.riga-fp` 22px, area `.pan-cl li`
+   1.6rem), dove 2.2rem sfonderebbe nella colonna del nome. Perciò: `td.pos`. */
+.pos { color: var(--text-dim); }
+
+td.pos { width: 2.2rem; }
+
+tr.podium .pos {
+  color: var(--gold-500);
+  font-weight: 600;
+}
+
+/* Un credito guadagnato e uno perso si distinguono a colpo d'occhio, e la
+   distinzione e' la stessa dovunque compaia: la scheda pubblica di una
+   societa' e l'estratto conto del mister parlano della stessa cosa. Stava
+   scritta due volte, in due fogli diversi — qui e' una sola. */
+.cr { font-weight: 600; }
+
+.cr.su   { color: var(--win); }
+.cr.giu  { color: var(--loss); }
+.cr.zero { color: var(--text-dim); }

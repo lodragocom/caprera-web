@@ -1,113 +1,230 @@
-.team-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(288px, 1fr));
-  gap: 16px;
-}
+/* ============================================================
+   Società — schede grandi, perché gli stemmi sono disegni
+   e non icone. Si riordinano dall'alto.
+   ============================================================ */
 
-.team-card {
-  position: relative;
+.sq-testa {
   display: flex;
-  align-items: center;
-  gap: 18px;
-  padding: 22px 22px 22px 26px;
-  overflow: hidden;
-  transition: transform 0.18s, border-color 0.18s;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 26px;
 }
 
-.team-card:hover {
-  transform: translateY(-3px);
-  border-color: var(--gold-600);
+.sq-testa h1 {
+  font-size: clamp(2.6rem, 7vw, 4.2rem);
+  line-height: 0.92;
+  margin: 6px 0 0;
 }
 
-.team-accent {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-}
+.sq-comandi { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
 
-.team-card > img {
-  height: 76px;
-  width: auto;
-  flex-shrink: 0;
-  filter: drop-shadow(0 5px 14px rgba(0, 0, 0, 0.4));
-}
-
-.team-card-body {
-  min-width: 0;
-  flex: 1;
-}
-
-.team-card h2 {
-  font-size: 1.28rem;
-  line-height: 1.15;
-}
-
-.team-card .code {
+.sq-ordine span {
+  display: block;
   font-family: var(--font-mono);
-  font-size: 0.62rem;
-  letter-spacing: 0.18em;
-  color: var(--gold-600);
-  margin: 3px 0 12px;
-}
-
-.team-card dl {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
-  margin: 0;
-}
-
-.team-card dt {
-  font-family: var(--font-mono);
-  font-size: 0.54rem;
-  letter-spacing: 0.11em;
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--text-dim);
-  margin-bottom: 2px;
+  margin-bottom: 7px;
 }
 
-.team-card dd {
-  margin: 0;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--cream);
+.sq-ordine select { font-size: 0.9rem; padding: 10px 14px; min-width: 190px; }
+
+.sq-storiche {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 11px 16px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  transition: color 0.15s, border-color 0.15s;
 }
 
-/* --------------------------------------------------- società storiche */
-.storiche {
-  margin-top: 56px;
-  padding-top: 8px;
-}
+.sq-storiche:hover { color: var(--text); border-color: var(--gold-600); }
+.sq-storiche.on { color: var(--gold-400); border-color: var(--gold-500); }
 
-.storiche .lede {
-  margin: -6px 0 20px;
-  font-size: 0.86rem;
-}
-
-.team-card.inactive {
-  opacity: 0.72;
-}
-
-.team-card.inactive:hover {
-  opacity: 1;
-}
-
-.team-crest-fallback {
+/* --------------------------------------------------------- la griglia */
+.sq-griglia {
   display: grid;
-  place-items: center;
-  width: 76px;
-  height: 76px;
-  flex-shrink: 0;
-  border-radius: 12px;
-  font-family: var(--font-mono);
-  font-size: 1.05rem;
-  letter-spacing: 0.06em;
-  color: var(--cream);
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+  align-items: start;
 }
 
-.team-card .years {
+.sq-carta {
+  position: relative;
+  display: block;
+  padding: 26px 20px 20px;
+  overflow: hidden;
+  text-align: center;
+  transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;
+}
+
+.sq-carta:hover {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.4);
+}
+
+.sq-carta.fuori { opacity: 0.72; }
+.sq-carta.fuori:hover { opacity: 1; }
+
+.sq-accento {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 3px;
+  background: var(--accent);
+}
+
+/* la posizione in campionato, in alto a destra */
+.sq-posizione {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  font-family: var(--font-mono);
   color: var(--text-dim);
-  letter-spacing: 0.06em;
+  line-height: 1;
+}
+
+.sq-posizione b { font-size: 1.05rem; color: var(--text-muted); font-weight: 500; }
+.sq-posizione em { font-style: normal; font-size: 0.7rem; }
+
+/* lo stemma: il pezzo forte della scheda */
+.sq-stemma {
+  height: 132px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.sq-stemma img {
+  max-height: 100%;
+  width: auto;
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.5));
+  transition: transform 0.22s;
+}
+
+.sq-carta:hover .sq-stemma img { transform: scale(1.06); }
+
+.sq-ripiego {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: var(--navy-900);
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+}
+
+.sq-carta h2 {
+  font-size: 1.32rem;
+  line-height: 1.05;
+  margin: 0;
+  color: var(--cream);
+  letter-spacing: 0.02em;
+}
+
+.sq-carta:hover h2 { color: var(--gold-400); }
+
+.sq-sigla {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin: 5px 0 0;
+}
+
+.sq-anni { letter-spacing: 0.05em; }
+
+/* palmarès */
+.sq-palmares {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 12px 0 0;
+}
+
+.sq-trofeo {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.7rem;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(217, 180, 106, 0.3);
+  background: rgba(217, 180, 106, 0.08);
+  color: var(--gold-400);
+  white-space: nowrap;
+}
+
+.sq-trofeo i { font-style: normal; font-size: 0.8rem; }
+
+/* i quattro numeri */
+.sq-numeri {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin: 16px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.sq-numeri dt {
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 3px;
+}
+
+.sq-numeri dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+  color: var(--text);
+}
+
+/* forma */
+.sq-forma {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.sq-forma > span:first-child {
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+@media (max-width: 560px) {
+  .sq-griglia { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+  .sq-carta { padding: 20px 12px 14px; }
+  .sq-stemma { height: 92px; }
+  .sq-carta h2 { font-size: 1.05rem; }
+  .sq-numeri { grid-template-columns: repeat(2, 1fr); gap: 10px 6px; }
+  .sq-forma { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .sq-testa { flex-direction: column; align-items: flex-start; }
+  .sq-comandi { width: 100%; }
+  .sq-ordine { flex: 1; }
+  .sq-ordine select { width: 100%; min-width: 0; }
 }

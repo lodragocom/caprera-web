@@ -1,56 +1,31 @@
 /**
- * Formazioni giornata per giornata, dalla sezione "In campo" di Fantapazz.
+ * Le formazioni, dal database.
  *
- * Dieci stagioni di formazioni fanno ~14 MB: troppo per il pacchetto del sito.
- * Qui viaggia solo l'indice (poche righe per stagione) e il file della singola
- * stagione si scarica quando serve, con `caricaStagione`.
+ * Prima erano quindici megabyte di file, un JSON per stagione, che il sito si
+ * scaricava interi per mostrare una giornata sola. Adesso si chiede la singola
+ * partita che si sta guardando e le altre 2.474 restano dove sono.
+ *
+ * Le funzioni che dispongono i giocatori sul campo e contano i bonus non sono
+ * cambiate: quelle non hanno mai avuto niente a che fare con dove stavano i
+ * dati.
  */
-import indice from '../data/lineups-index.json'
-
-const FILE = import.meta.glob('../data/lineups/*.json')
-
-export const STAGIONI_FORMAZIONI = indice.stagioni.map((s) => s.stagione)
-export const ULTIMA_STAGIONE = STAGIONI_FORMAZIONI[STAGIONI_FORMAZIONI.length - 1]
-
-/** Righe di indice di una stagione: giornate, turni di coppa, societa'. */
-export function indiceDi(stagione) {
-  return indice.stagioni.find((s) => s.stagione === stagione) ?? null
-}
-
-/** Stagioni in cui una societa' ha giocato. */
-export function stagioniDi(teamId) {
-  return indice.stagioni.filter((s) => s.squadre.includes(teamId)).map((s) => s.stagione)
-}
-
-const cache = new Map()
-
-/** Scarica (una volta sola) le formazioni di una stagione. */
-export async function caricaStagione(stagione) {
-  if (cache.has(stagione)) return cache.get(stagione)
-  const carica = FILE[`../data/lineups/${stagione}.json`]
-  if (!carica) return null
-  const m = await carica()
-  const dati = m.default ?? m
-  cache.set(stagione, dati)
-  return dati
-}
+import { supabase } from './supabase'
+import { partiteDi, formazioniPartita, bonusTipi } from './archivio'
 
 /* Sigle per i bottoni dei turni di coppa: per esteso occupano quattro righe. */
-const SIGLA = [
-  ['Qualificazione Champions League', 'Qual. CL'],
-  ['Qualificazione Champions', 'Qual. CL'],
-  ['Champions League', 'CL'],
-  ['Europa League', 'EL'],
-  ['Conference League', 'ConfL'],
-  ['Supercoppa Italiana', 'SC Italiana'],
-  ['Supercoppa Europea', 'SC Europea'],
-  ['Coppa Italia', 'Coppa Italia'],
-]
+const SIGLA = {
+  'coppa-italia': 'Coppa Italia',
+  'qualificazione-champions': 'Qual. CL',
+  champions: 'CL',
+  'europa-league': 'EL',
+  'conference-league': 'ConfL',
+  'supercoppa-italiana': 'SC Italiana',
+  'supercoppa-europea': 'SC Europea',
+}
 
-function abbrevia(turno) {
-  const [comp, ...resto] = turno.split(' - ')
-  const sigla = SIGLA.find(([lungo]) => comp.startsWith(lungo))?.[1] ?? comp
-  const fase = resto.join(' - ')
+function abbrevia(competizione, turno) {
+  const sigla = SIGLA[competizione] ?? competizione
+  const fase = (turno ?? '')
     .replace(/^Giornata\s*/, 'G')
     .replace(/Andata/, 'A')
     .replace(/Ritorno/, 'R')
@@ -59,52 +34,98 @@ function abbrevia(turno) {
   return fase ? `${sigla} · ${fase}` : sigla
 }
 
-/**
- * Tutti gli impegni di una societa' in una stagione, campionato e coppe, in
- * ordine: prima le 36 giornate, poi i turni di coppa. Ogni voce ha una chiave
- * con cui ritrovare la partita.
- */
-export function impegniDi(dati, teamId) {
-  if (!dati) return []
-  const gioca = (p) => p.casa === teamId || p.fuori === teamId
-  const out = dati.giornate
-    .filter((g) => g.partite.some(gioca))
-    .map((g) => ({ chiave: `g${g.giornata}`, breve: `${g.giornata}ª`, titolo: `${g.giornata}ª giornata`, coppa: false }))
-  for (const t of dati.coppe ?? []) {
-    if (t.partite.some(gioca)) {
-      out.push({ chiave: `c${t.turno}`, breve: abbrevia(t.turno), titolo: t.turno, coppa: true })
-    }
-  }
-  return out
+/** Le stagioni in cui una societa' ha giocato. */
+export async function stagioniDi(teamId) {
+  const { data, error } = await supabase.from('v_gare')
+    .select('stagione').eq('societa', teamId).eq('competizione', 'campionato')
+  if (error) throw new Error(error.message)
+  return [...new Set((data ?? []).map((r) => r.stagione))].sort()
 }
 
 /**
- * La partita di una societa' in una giornata o in un turno di coppa, gia'
- * orientata: `mia` e' sempre la formazione della societa' richiesta, `sua`
- * quella dell'avversario.
+ * Tutti gli impegni di una societa' in una stagione, campionato e coppe.
+ * Ogni voce porta con se' l'id della partita: e' quello che poi si chiede.
  */
-export function partitaDi(dati, teamId, chiave) {
-  const gioca = (x) => x.casa === teamId || x.fuori === teamId
-  let p = null
-  if (String(chiave).startsWith('c')) {
-    const t = (dati?.coppe ?? []).find((x) => `c${x.turno}` === chiave)
-    p = t?.partite.find(gioca) ?? null
-  } else {
-    const n = Number(String(chiave).replace('g', ''))
-    const g = dati?.giornate.find((x) => x.giornata === n)
-    p = g?.partite.find(gioca) ?? null
+export async function impegniDi(teamId, stagione) {
+  const [gare, turni] = await Promise.all([
+    partiteDi(stagione, teamId),
+    (async () => {
+      const { data, error } = await supabase.from('turni').select('id, nome')
+      if (error) throw new Error(error.message)
+      return new Map((data ?? []).map((t) => [t.id, t.nome]))
+    })(),
+  ])
+  /*
+   * L'esito viaggia con l'impegno, e non costa niente: `partiteDi` legge gia'
+   * gol e fantapunti di ogni gara, e prima li buttavamo via tenendo solo il
+   * numero della giornata. Con l'esito attaccato, la striscia per scegliere la
+   * giornata smette di essere un elenco di numeri e diventa l'andamento della
+   * stagione - si naviga e si legge con lo stesso gesto.
+   */
+  const comune = (g) => ({
+    esito: !g.giocata ? null
+      : g.gol_fatti > g.gol_subiti ? 'V' : g.gol_fatti === g.gol_subiti ? 'N' : 'P',
+    gol: g.gol_fatti, golSubiti: g.gol_subiti,
+    fp: g.fantapunti, fpAvversario: g.fantapunti_avversario,
+    avversario: g.avversario, inCasa: g.in_casa, giocata: g.giocata,
+  })
+
+  const out = []
+  for (const g of gare ?? []) {
+    if (g.competizione === 'campionato') {
+      out.push({
+        chiave: g.id, breve: `${g.giornata}ª`, titolo: `${g.giornata}ª giornata`,
+        coppa: false, giornata: g.giornata, ...comune(g),
+      })
+    } else {
+      const nome = turni.get(g.turno)
+      out.push({
+        chiave: g.id, breve: abbrevia(g.competizione, nome),
+        titolo: `${g.competizione} · ${nome ?? ''}`.trim(), coppa: true, ...comune(g),
+      })
+    }
   }
-  if (!p) return null
-  const inCasa = p.casa === teamId
+  return out.sort((a, b) =>
+    Number(a.coppa) - Number(b.coppa) || (a.giornata ?? 0) - (b.giornata ?? 0))
+}
+
+/**
+ * La partita, gia' orientata: `mia` e' sempre la formazione della societa'
+ * richiesta, `sua` quella dell'avversario.
+ */
+export async function partitaDi(partitaId, teamId, stagione) {
+  const [lati, gare, nomiBonus] = await Promise.all([
+    formazioniPartita(partitaId),
+    partiteDi(stagione, teamId),
+    bonusTipi(),
+  ])
+  const g = (gare ?? []).find((x) => x.id === partitaId)
+  if (!g) return null
+  const nomi = new Map((nomiBonus ?? []).map((b) => [b.id, b.nome]))
+  const vesti = (lato) => lato && {
+    ...lato,
+    titolari: lato.titolari.map((x) => vestiGiocatore(x, nomi)),
+    panchina: lato.panchina.map((x) => vestiGiocatore(x, nomi)),
+  }
+  const mia = vesti(lati.find((l) => l.societa === teamId))
+  const sua = vesti(lati.find((l) => l.societa !== teamId))
+  if (!mia) return null
   return {
-    inCasa,
-    avversario: inCasa ? p.fuori : p.casa,
-    gol: inCasa ? p.golCasa : p.golFuori,
-    golSubiti: inCasa ? p.golFuori : p.golCasa,
-    fp: inCasa ? p.fpCasa : p.fpFuori,
-    fpAvversario: inCasa ? p.fpFuori : p.fpCasa,
-    mia: p.lati[inCasa ? 0 : 1],
-    sua: p.lati[inCasa ? 1 : 0],
+    inCasa: g.in_casa,
+    avversario: g.avversario,
+    gol: g.gol_fatti,
+    golSubiti: g.gol_subiti,
+    fp: Number(g.fantapunti),
+    fpAvversario: Number(g.fantapunti_avversario),
+    mia, sua,
+  }
+}
+
+function vestiGiocatore(g, nomi) {
+  return {
+    ...g,
+    voto: g.voto == null ? null : Number(g.voto),
+    bonus: (g.bonus ?? []).map((b) => ({ id: b.id, nome: nomi.get(b.id) ?? b.id })),
   }
 }
 
@@ -113,16 +134,87 @@ export function partitaDi(dati, teamId, chiave) {
  * a uguale distanza. Le percentuali sono coordinate dentro il campo, con la
  * porta difesa in basso e l'attacco in alto.
  */
-export function disponi(titolari) {
-  const y = { P: 92, D: 71, C: 46, A: 20 }
-  const out = []
-  for (const r of ['P', 'D', 'C', 'A']) {
-    const gruppo = titolari.filter((g) => g.ruolo === r)
-    gruppo.forEach((g, i) => {
-      // i giocatori di un reparto si spartiscono la larghezza in parti uguali
-      out.push({ ...g, x: ((i + 1) / (gruppo.length + 1)) * 100, y: y[r] })
-    })
+/*
+ * Quanto si allarga una linea, secondo quanti sono.
+ *
+ * Dividere la larghezza in parti uguali - (i+1)/(n+1) - e' la cosa ovvia ed e'
+ * sbagliata in due casi su cinque. Due punte a 33 e 67 stanno larghe come due
+ * ali; quattro difensori a 20-40-60-80 tengono i terzini dentro al campo
+ * invece che sulla fascia.
+ *
+ * Questi numeri vengono dalle tabelle di react-native-football-formation
+ * (arbab-io, MIT), che per ventitre moduli scrive le coordinate a mano invece
+ * di calcolarle. Guardandole tutte insieme la regola che ne esce e' sempre la
+ * stessa, ed e' l'unica cosa che ho preso: **i due esterni vanno sulla fascia,
+ * gli interni restano vicini**. Le loro coordinate no - sono indicizzate per
+ * numero di maglia (1-11), che noi non abbiamo: sappiamo solo il ruolo.
+ *
+ * Le loro tabelle sono leggermente asimmetriche (una linea da cinque fa
+ * 14-32-49-66-82); qui le ho rese simmetriche, perche' l'asimmetria non
+ * significa niente e si vede.
+ */
+const LARGHEZZE = {
+  1: [50],
+  2: [36, 64],
+  3: [25, 50, 75],
+  4: [12, 37, 63, 88],
+  5: [14, 32, 50, 68, 86],
+}
+
+function larghezze(n) {
+  if (LARGHEZZE[n]) return LARGHEZZE[n]
+  // oltre i cinque non capita, ma se capitasse meglio in parti uguali che nulla
+  return Array.from({ length: n }, (_, i) => ((i + 1) / (n + 1)) * 100)
+}
+
+export function disponi(titolari, modulo) {
+  const per = (r) => titolari.filter((g) => g.ruolo === r)
+  const [P, D, C, A] = ['P', 'D', 'C', 'A'].map(per)
+
+  /*
+   * Le linee vengono dal modulo, non dai ruoli.
+   *
+   * Con i soli ruoli un 4-2-3-1 diventava quattro file - portiere, difesa,
+   * **tutti** i centrocampisti in fila, attacco - e in campo si vedeva un
+   * 4-5-1 che nessuno ha mai schierato. Il modulo dice come stavano davvero:
+   * il primo numero e' la difesa, l'ultimo l'attacco, quelli in mezzo sono
+   * le linee di centrocampo.
+   *
+   * Ma il modulo e' una stringa che arriva da Fantapazz, quindi si usa solo
+   * se **torna con i giocatori che abbiamo**: se i conti non quadrano si
+   * ricade sulle quattro file di prima, che sara' approssimativa ma non
+   * inventa una disposizione.
+   */
+  const parti = String(modulo ?? '').split('-').map(Number)
+    .filter((x) => Number.isFinite(x) && x > 0)
+  const centrali = parti.slice(1, -1)
+  const quadra = parti.length >= 3
+    && parti[0] === D.length
+    && parti[parti.length - 1] === A.length
+    && centrali.reduce((a, b) => a + b, 0) === C.length
+
+  let linee
+  if (quadra) {
+    const mid = []
+    let i = 0
+    for (const n of centrali) { mid.push(C.slice(i, i + n)); i += n }
+    linee = [P, D, ...mid, A]
+  } else {
+    linee = [P, D, C, A]
   }
+  linee = linee.filter((l) => l.length)
+
+  /* Il portiere sta sulla sua riga; gli altri reparti si distribuiscono fra
+     l'area e il limite dell'area avversaria. */
+  const fuori = linee.slice(1)
+  const out = []
+  linee.forEach((gruppo, k) => {
+    const y = k === 0 ? 88
+      : fuori.length === 1 ? 45
+      : 70 - ((k - 1) * (70 - 12)) / (fuori.length - 1)
+    const x = larghezze(gruppo.length)
+    gruppo.forEach((g, i) => out.push({ ...g, x: x[i], y }))
+  })
   return out
 }
 

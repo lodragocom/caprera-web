@@ -1,7 +1,12 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import cups, { cupOf, STAGIONI, stagioneCoppe, alboLeggibile, tabelloneDi } from '../lib/coppe'
+import { tabelloneDi } from '../lib/coppe'
 import { getTeam, logoUrl } from '../lib/core'
+import {
+  useArchivio, coppeStagione, stagioni, albo, classifica,
+} from '../lib/archivio'
+import { Pagina } from '../components/moto'
+import { Barra, Campo, Gruppo } from '../components/Filtri'
 import './Coppe.css'
 
 /**
@@ -171,46 +176,115 @@ function Classifica({ righe }) {
   )
 }
 
-function Tabellone({ coppa }) {
-  if (!coppa) return null
-  if (coppa.classifica) return <Classifica righe={coppa.classifica} />
-  const turni = tabelloneDi(coppa)
-  if (!turni.length) return null
-  // dieci giornate di gironi farebbero una scheda alta tre schermi: si scorre
+/*
+ * Un tabellone a eliminazione, letto come si legge un tabellone.
+ *
+ * Prima ogni turno era una colonna alta uguale alle altre, dentro una scheda
+ * stretta: quarti, semifinali e finale sembravano tre elenchi affiancati e
+ * non un percorso. Qui le colonne hanno lo stesso disegno di un tabellone da
+ * mondiali - ogni turno ha meta' delle sfide del precedente, e le sfide si
+ * distribuiscono in verticale in modo che ognuna stia all'altezza delle due
+ * da cui nasce. Il collegamento lo fa il CSS, non un disegno.
+ */
+function Eliminazione({ turni }) {
+  const principali = turni.filter((t) => !t.consolazione)
+  const consolazione = turni.filter((t) => t.consolazione)
+  return (
+    <>
+      <div className="tab-ko" style={{ '--colonne': principali.length }}>
+        {principali.map((t, col) => (
+          <div key={t.titolo} className="ko-turno">
+            <h4>{t.titolo}</h4>
+            <div className="ko-sfide">
+              {t.sfide.map((s, i) => (
+                <div key={i} className={`ko-cella${col < principali.length - 1 ? ' con-tratto' : ''}`}>
+                  <Sfida s={s} verbo={col === principali.length - 1 ? 'vince' : 'passa'} />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+      {consolazione.map((t) => (
+        <div key={t.titolo} className="ko-consolazione">
+          <h4>{t.titolo}</h4>
+          {/* onestà: questa gara la mette Fantapazz, non il regolamento */}
+          <p className="nota-turno">
+            Fra le due perdenti delle semifinali. Il regolamento non prevede una
+            finale per il terzo posto: le eliminate vanno in Conference.
+          </p>
+          {t.sfide.map((s, i) => <Sfida key={i} s={s} verbo="vince" />)}
+        </div>
+      ))}
+    </>
+  )
+}
+
+/** Un girone: le giornate una dopo l'altra, senza nessuno che «passa». */
+function Gironi({ turni }) {
   return (
     <div className={turni.length > 5 ? 'tabellone lungo' : 'tabellone'}>
       {turni.map((t) => (
         <div key={t.titolo} className="turno">
           <h4>{t.titolo}</h4>
-          {/* onestà: questa gara la mette Fantapazz, non il regolamento */}
-          {t.consolazione && (
-            <p className="nota-turno">
-              Fra le due perdenti delle semifinali. Il regolamento non prevede
-              una finale per il terzo posto: le eliminate vanno in Conference.
-            </p>
-          )}
-          {/* dai turni si passa, la finale si vince */}
-          {t.sfide.map((s, i) => (
-            <Sfida key={i} s={s} girone={t.girone}
-                   verbo={t.titolo.startsWith('Finale') ? 'vince' : 'passa'} />
-          ))}
+          {t.sfide.map((s, i) => <Sfida key={i} s={s} girone />)}
         </div>
       ))}
     </div>
   )
 }
 
-export default function Coppe() {
-  const [stagione, setStagione] = useState(STAGIONI[0])
-  const campione = getTeam(stagioneCoppe(stagione)?.campione)
+function Tabellone({ coppa }) {
+  if (!coppa) return null
+  if (coppa.classifica) return <Classifica righe={coppa.classifica} />
+  const turni = tabelloneDi(coppa)
+  if (!turni.length) return null
+  /* Il tabellone si disegna solo dove c'e' davvero un'eliminazione. Nei gironi
+     le giornate non si restringono, e metterle in colonne affiancate direbbe
+     una cosa falsa sulla forma della competizione. */
+  const aGironi = turni.some((t) => t.girone)
+  return aGironi ? <Gironi turni={turni} /> : <Eliminazione turni={turni} />
+}
 
-  const trofei = COPPE.map((c) => ({ scheda: c, dati: c.dati ? cupOf(c.dati, stagione) : null }))
+export default function Coppe() {
+  const anni = useArchivio('stagioni', stagioni)
+  const elenco = (anni.dati ?? []).map((s) => s.id)
+  /* Non l'ultima in elenco: l'ultima **giocata**. Una stagione che deve
+     ancora cominciare non ha coppe da mostrare. */
+  const ultimaGiocata = (anni.dati ?? []).find((s) => s.conclusa)?.id
+  const [scelta, setScelta] = useState('')
+  const stagione = scelta || ultimaGiocata || elenco[0] || ''
+  /* Una competizione alla volta. Nove tabelloni tutti aperti sono nove schede
+     strette in cui nessuno legge niente: la scelta viene prima. */
+  const [coppa, setCoppa] = useState(COPPE[0].id)
+
+  const co = useArchivio(['coppeStagione', stagione],
+    () => (stagione ? coppeStagione(stagione) : Promise.resolve([])), [stagione])
+  const al = useArchivio('albo', albo)
+  const cl = useArchivio(['classifica', stagione],
+    () => (stagione ? classifica(stagione) : Promise.resolve([])), [stagione])
+
+  const campione = getTeam((cl.dati ?? []).find((r) => r.posizione === 1)?.societa)
+
+  /* L'albo d'oro di ogni competizione, gia' pronto da leggere. */
+  const alboPerCoppa = useMemo(() => {
+    const m = new Map()
+    for (const r of al.dati ?? []) {
+      if (!m.has(r.competizione)) m.set(r.competizione, [])
+      m.get(r.competizione).push(r)
+    }
+    for (const righe of m.values()) righe.sort((a, b) => b.stagione.localeCompare(a.stagione))
+    return m
+  }, [al.dati])
+
+  const perId = useMemo(() => new Map((co.dati ?? []).map((c) => [c.id, c])), [co.dati])
+  const trofei = COPPE.map((c) => ({ scheda: c, dati: c.dati ? perId.get(c.dati) ?? null : null }))
   const vinte = trofei.filter((t) => t.dati?.vincitore)
   const aiFantapunti = vinte.filter((t) => t.dati.aiFantapunti)
   const contese = trofei.filter((t) => t.dati?.finaleInParita)
 
   return (
-    <div className="page container wide">
+    <Pagina className="page container wide">
       <header className="page-head">
         <p className="eyebrow">Competizioni</p>
         <h1>Coppe</h1>
@@ -232,8 +306,15 @@ export default function Coppe() {
         </p>
         <div className="albo-griglia">
           {COPPE.filter((c) => c.dati && c.dati !== 'qualificazione-champions').map((c) => {
-            const { righe, edizioni, recordman } = alboLeggibile(c.dati)
+            const righe = alboPerCoppa.get(c.dati) ?? []
             if (!righe.length) return null
+            const conta = new Map()
+            for (const r of righe) conta.set(r.vincitore, (conta.get(r.vincitore) ?? 0) + 1)
+            const ordinati = [...conta.entries()].sort((a, b) => b[1] - a[1])
+            const massimo = ordinati[0]?.[1] ?? 0
+            const recordman = ordinati.filter(([, n]) => n === massimo && n > 1)
+              .map(([team, n]) => ({ team, n }))
+            const edizioni = righe.length
             return (
               <article key={c.id} className="albo-card card" style={{ '--accent': c.colore }}>
                 <header>
@@ -245,7 +326,7 @@ export default function Coppe() {
                     <li key={r.stagione} className={i === 0 ? 'in-carica' : ''}>
                       <span className="stagione num">{r.stagione}</span>
                       <Societa id={r.vincitore} vinta />
-                      {r.aiFantapunti && <span className="dettaglio">ai fantapunti</span>}
+                      {r.ai_fantapunti && <span className="dettaglio">ai fantapunti</span>}
                     </li>
                   ))}
                 </ol>
@@ -265,13 +346,6 @@ export default function Coppe() {
           regolamento, a chi aveva realizzato più fantapunti.
         </p>
       </section>
-
-      <div className="scelta-stagione">
-        {STAGIONI.map((s) => (
-          <button key={s} className={s === stagione ? 'on' : ''}
-                  onClick={() => setStagione(s)}>{s}</button>
-        ))}
-      </div>
 
       <section className="block">
         <h2 className="section-title">Albo {stagione}</h2>
@@ -312,32 +386,54 @@ export default function Coppe() {
         )}
       </section>
 
-      <div className="coppe-grid">
-        {trofei.map(({ scheda: c, dati }) => (
-          <article key={c.id} className="coppa card" style={{ '--accent': c.colore }}>
-            <header>
-              <h2>{c.nome}</h2>
-              {c.novita && <span className="novita">nuova · {c.novita}</span>}
-              {dati?.vincitore && <span className="attiva">{stagione} · vinta</span>}
-            </header>
-            <p className="formula">{c.formula}</p>
-            {c.note && <p className="nota-coppa">{c.note}</p>}
+      <section className="block">
+        <h2 className="section-title">I tabelloni</h2>
+        <Barra>
+          <Campo etichetta="Stagione">
+            <select value={stagione} onChange={(e) => setScelta(e.target.value)}>
+              {elenco.map((s) => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </Campo>
+          <Gruppo etichetta="Competizione" ora={coppa} scegli={setCoppa}
+                  voci={trofei.map(({ scheda, dati }) =>
+                    [scheda.id, scheda.nome, dati?.vincitore ? '★' : undefined])} />
+        </Barra>
 
-            {dati && <Tabellone coppa={dati} />}
+        {(() => {
+          const t = trofei.find((x) => x.scheda.id === coppa)
+          if (!t) return null
+          const { scheda: c, dati } = t
+          return (
+            <article className="coppa card sola" style={{ '--accent': c.colore }}>
+              <header>
+                <h2>{c.nome}</h2>
+                {c.novita && <span className="novita">nuova · {c.novita}</span>}
+                {dati?.vincitore && <span className="attiva">{stagione} · vinta</span>}
+              </header>
+              <p className="formula">{c.formula}</p>
+              {c.note && <p className="nota-coppa">{c.note}</p>}
 
-            {c.premi.length > 0 && (
-              <div className="premi">
-                {c.premi.map((p, i) => (
-                  <span key={i} className="premio">
-                    <b className="num">{p.v}</b>
-                    <em>{p.l}</em>
-                  </span>
-                ))}
-              </div>
-            )}
-          </article>
-        ))}
-      </div>
+              {dati
+                ? <Tabellone coppa={dati} />
+                : <p className="nota-coppa">
+                    Nel {stagione} questa competizione non si è giocata, oppure
+                    l'archivio non ne ha le partite.
+                  </p>}
+
+              {c.premi.length > 0 && (
+                <div className="premi">
+                  {c.premi.map((p, i) => (
+                    <span key={i} className="premio">
+                      <b className="num">{p.v}</b>
+                      <em>{p.l}</em>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </article>
+          )
+        })()}
+      </section>
 
       <section className="block">
         <h2 className="section-title">Montepremi</h2>
@@ -373,6 +469,6 @@ export default function Coppe() {
           per bonifico entro il 31 luglio (DPCM Vincite 08.2026).
         </p>
       </section>
-    </div>
+    </Pagina>
   )
 }

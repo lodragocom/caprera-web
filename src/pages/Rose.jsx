@@ -1,54 +1,88 @@
-import { useMemo, useState, useDeferredValue } from 'react'
+import { useDeferredValue, useMemo, useState } from 'react'
 import TeamBadge from '../components/TeamBadge'
-import {
-  rosters, teams, ROSTER_SEASONS, rosterOf, rosterSummary, financesOf, getTeam,
-} from '../lib/data'
+import { getTeam } from '../lib/core'
+import { useArchivio, roseStagione, stagioni, momentiDelleRose } from '../lib/archivio'
+import { Pagina, Cascata, Voce, Sezione, Numero } from '../components/moto'
+import { Barra, Campo, Cerca, Gruppo } from '../components/Filtri'
 import './Rose.css'
 
-const ROLES = ['P', 'D', 'C', 'A']
-const LATEST = ROSTER_SEASONS[ROSTER_SEASONS.length - 1]
+const RUOLI = ['P', 'D', 'C', 'A']
 
+/**
+ * Rose e crediti investiti, dal database.
+ *
+ * Il bilancio crediti che stava qui e' sparito dalla pagina pubblica, e non
+ * per dimenticanza: nel database le finanze sono riservate ai mister e alla
+ * Presidenza. Prima viaggiavano dentro il pacchetto che il browser scaricava,
+ * cioe' erano pubbliche pur sembrando private. Adesso stanno nell'area
+ * riservata, dove chiunque le legga ha diritto di leggerle.
+ */
 export default function Rose() {
-  const [season, setSeason] = useState(LATEST)
-  const [role, setRole] = useState('')
+  const anni = useArchivio('stagioni', stagioni)
+  const elenco = (anni.dati ?? []).map((s) => s.id)
+  /* Il menu le elenca tutte, anche quella che deve ancora cominciare - il
+     budget del prossimo anno esiste prima dell'asta. Ma la pagina non ci si
+     apre sopra: si apre sull'ultima **giocata**, se no il primo che arriva
+     trova dieci rose vuote e pensa che l'archivio sia rotto. */
+  const ultimaGiocata = (anni.dati ?? []).find((s) => s.conclusa)?.id
+  const [stagione, setStagione] = useState('')
+  const scelta = stagione || ultimaGiocata || elenco[0] || ''
+
+  const [ruolo, setRuolo] = useState('')
   const [q, setQ] = useState('')
-  const [sort, setSort] = useState('cost')
-  const query = useDeferredValue(q)
+  const [ordine, setOrdine] = useState('costo')
+  const cerca = useDeferredValue(q)
 
-  const rows = useMemo(() => {
-    const norm = query.trim().toLowerCase()
-    let out = rosters.filter(
-      (r) =>
-        r.season === season &&
-        (!role || r.role === role) &&
-        (!norm ||
-          r.player.toLowerCase().includes(norm) ||
-          (r.club ?? '').toLowerCase().includes(norm))
-    )
-    const cmp = {
-      cost: (a, b) => (b.cost ?? 0) - (a.cost ?? 0),
+  /*
+   * Settembre o maggio.
+   *
+   * Sono due rose diverse e la differenza e' il mercato: chi manca a maggio
+   * se n'e' andato, chi compare solo a maggio e' arrivato dopo. Da sola
+   * nessuna delle due lo dice, e per anni il sito ha mostrato solo maggio -
+   * cioe' la rosa che contiene gli arrivi di gennaio e non contiene le
+   * partenze, senza avvertire che era cosi'.
+   */
+  const [momento, setMomento] = useState('fine')
+  const mo = useArchivio('momentiDelleRose', momentiDelleRose)
+  const conPartenza = mo.dati?.partenza ?? []
+  const ricostruite = mo.dati?.ricostruite ?? []
+  const duePunti = conPartenza.includes(scelta)
+  const vista = duePunti ? momento : 'fine'
+  const dedotta = vista === 'partenza' && ricostruite.includes(scelta)
+
+  const stato = useArchivio(['roseStagione', scelta, vista],
+    () => (scelta ? roseStagione(scelta, vista) : Promise.resolve([])), [scelta, vista])
+
+  const righe = useMemo(() => {
+    const n = cerca.trim().toLowerCase()
+    const out = (stato.dati ?? []).filter((r) =>
+      (!ruolo || r.ruolo === ruolo)
+      && (!n || r.nome.toLowerCase().includes(n) || (r.club ?? '').toLowerCase().includes(n)))
+    const come = {
+      costo: (a, b) => (b.costo ?? 0) - (a.costo ?? 0),
       fm: (a, b) => (b.fm ?? -1) - (a.fm ?? -1),
-      apps: (a, b) => (b.apps ?? -1) - (a.apps ?? -1),
-      player: (a, b) => a.player.localeCompare(b.player),
-    }[sort]
-    return [...out].sort(cmp)
-  }, [season, role, query, sort])
+      presenze: (a, b) => (b.presenze ?? -1) - (a.presenze ?? -1),
+      nome: (a, b) => a.nome.localeCompare(b.nome),
+    }[ordine]
+    return [...out].sort(come)
+  }, [stato.dati, ruolo, cerca, ordine])
 
-  // riepilogo crediti per squadra nella stagione scelta
-  const budgets = useMemo(
-    () =>
-      teams
-        .map((t) => ({ team: t, ...rosterSummary(rosterOf(season, t.id)) }))
-        .filter((b) => b.size > 0)
-        .sort((a, b) => b.spent - a.spent),
-    [season]
-  )
+  /* Quanto ha investito ogni societa': si conta qui, sono trecento righe. */
+  const investito = useMemo(() => {
+    const acc = new Map()
+    for (const r of stato.dati ?? []) {
+      const c = acc.get(r.societa) ?? { societa: r.societa, spesi: 0, quanti: 0 }
+      c.spesi += r.costo ?? 0
+      c.quanti += 1
+      acc.set(r.societa, c)
+    }
+    return [...acc.values()].sort((a, b) => b.spesi - a.spesi)
+  }, [stato.dati])
 
-  const maxSpent = Math.max(1, ...budgets.map((b) => b.spent))
-  const finanze = financesOf(season)
+  const massimo = Math.max(1, ...investito.map((b) => b.spesi))
 
   return (
-    <div className="page container wide">
+    <Pagina className="page container wide">
       <header className="page-head">
         <p className="eyebrow">Mercato</p>
         <h1>Rose e crediti</h1>
@@ -58,156 +92,110 @@ export default function Rose() {
         </p>
       </header>
 
-      {/* ------------------------------------------------------- finanze */}
-      {finanze.length > 0 && (
-        <section className="block">
-          <h2 className="section-title">Bilancio crediti · {season}</h2>
-          <p className="lede fin-lede">
-            I crediti iniziali sono 250 più i risparmi dell'anno prima, premi e
-            penalità. Il saldo scambi è quanto una società ha incassato (o speso)
-            comprando e vendendo fuori asta.
-          </p>
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th className="left">Società</th>
-                  <th>Iniziali</th>
-                  <th>Spesi</th>
-                  <th>Scambi</th>
-                  <th>Residui</th>
-                  <th>Riportati</th>
-                  <th>Premi/Pen.</th>
-                  <th>FFP</th>
-                </tr>
-              </thead>
-              <tbody>
-                {finanze.map((f) => (
-                  <tr key={f.team}>
-                    <td className="left"><TeamBadge id={f.team} size="sm" /></td>
-                    <td className="num muted">{f.initial ?? '—'}</td>
-                    <td className="num strong">{f.spent ?? '—'}</td>
-                    <td className={`num ${f.trades ? 'gold-text' : 'muted'}`}>
-                      {f.trades ? (f.trades > 0 ? `+${f.trades}` : f.trades) : '—'}
-                    </td>
-                    <td className="num">{f.left ?? '—'}</td>
-                    <td className="num muted">{f.carried ?? '—'}</td>
-                    <td className="num muted">{f.bonus ?? '—'}</td>
-                    <td className="num muted">{f.ffp ?? '—'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      )}
-
-      {/* ---------------------------------------------------- budget bars */}
       <section className="block">
-        <h2 className="section-title">Crediti investiti · {season}</h2>
-        <div className="budget-list">
-          {budgets.map((b) => (
-            <div key={b.team.id} className="budget">
-              <TeamBadge id={b.team.id} size="sm" />
-              <div className="bar">
-                <span
-                  style={{
-                    width: `${(b.spent / maxSpent) * 100}%`,
-                    background: b.team.color,
-                  }}
-                />
-              </div>
-              <span className="num spent">{b.spent}</span>
-              <span className="num size muted">{b.size} cal.</span>
-            </div>
-          ))}
-        </div>
+        <h2 className="section-title">
+          {vista === 'partenza'
+            ? `Crediti investiti all'asta · ${scelta}`
+            : `Valore delle rose a maggio · ${scelta}`}
+        </h2>
+        <Sezione stato={stato} righe={10}>
+          <Cascata className="budget-list" tetto={12}>
+            {investito.map((b) => (
+              <Voce key={b.societa} className="budget">
+                <TeamBadge id={b.societa} size="sm" />
+                <div className="bar">
+                  <span style={{
+                    width: `${(b.spesi / massimo) * 100}%`,
+                    background: getTeam(b.societa)?.color,
+                  }} />
+                </div>
+                <span className="num spent"><Numero valore={b.spesi} /></span>
+                <span className="num size muted">{b.quanti} cal.</span>
+              </Voce>
+            ))}
+          </Cascata>
+        </Sezione>
+        <p className="note">
+          {vista === 'partenza'
+            ? `Questa è la somma dei prezzi d'asta di settembre, e combacia con la voce
+               «spesi all'asta» del bilancio: verificata su tutte e dieci le società
+               nelle sei stagioni in cui il bilancio esiste.`
+            : `Attenzione: a maggio la somma non è quello che è stato speso. Contiene chi
+               è arrivato a gennaio e non contiene chi è uscito. Per i crediti investiti
+               scegli «settembre».`}
+          {' '}Il bilancio completo — crediti iniziali, scambi, residui, premi e FFP —
+          è riservato ai mister e si vede nell'area personale.
+        </p>
       </section>
 
-      {/* --------------------------------------------------------- table */}
       <section className="block">
         <h2 className="section-title">Tutti i calciatori</h2>
 
-        <div className="controls">
-          <div className="field">
-            <label htmlFor="ro-season">Stagione</label>
-            <select id="ro-season" value={season} onChange={(e) => setSeason(e.target.value)}>
-              {[...ROSTER_SEASONS].reverse().map((s) => (
-                <option key={s} value={s}>{s}</option>
-              ))}
+        <Barra>
+          <Campo etichetta="Stagione">
+            <select value={scelta} onChange={(e) => setStagione(e.target.value)}>
+              {elenco.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
-          </div>
-
-          <div className="field">
-            <label htmlFor="ro-q">Cerca</label>
-            <input
-              id="ro-q"
-              type="search"
-              placeholder="Calciatore o club…"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-            />
-          </div>
-
-          <div className="field">
-            <label htmlFor="ro-sort">Ordina per</label>
-            <select id="ro-sort" value={sort} onChange={(e) => setSort(e.target.value)}>
-              <option value="cost">Costo</option>
+          </Campo>
+          {duePunti && (
+            <Gruppo etichetta="Momento della rosa" ora={vista} scegli={setMomento}
+                    voci={[['partenza', 'Settembre'], ['fine', 'Maggio']]} />
+          )}
+          <Cerca valore={q} cambia={setQ} />
+          <Campo etichetta="Ordina per">
+            <select value={ordine} onChange={(e) => setOrdine(e.target.value)}>
+              <option value="costo">Costo</option>
               <option value="fm">Fantamedia</option>
-              <option value="apps">Presenze</option>
-              <option value="player">Nome</option>
+              <option value="presenze">Presenze</option>
+              <option value="nome">Nome</option>
             </select>
-          </div>
+          </Campo>
+          <Gruppo etichetta="Ruolo" ora={ruolo} scegli={setRuolo}
+                  voci={[['', 'Tutti'], ...RUOLI.map((r) => [r, r])]} />
+        </Barra>
 
-          <div className="seg role-seg">
-            <button aria-pressed={role === ''} onClick={() => setRole('')}>Tutti</button>
-            {ROLES.map((r) => (
-              <button key={r} aria-pressed={role === r} onClick={() => setRole(r)}>
-                {r}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <p className="result-count num">{rows.length} calciatori</p>
-
-        {rows.length === 0 ? (
-          <p className="empty">Nessun risultato.</p>
-        ) : (
-          <div className="table-wrap tall">
-            <table>
-              <thead>
-                <tr>
-                  <th className="left">R</th>
-                  <th className="left">Calciatore</th>
-                  <th className="left">Club</th>
-                  <th className="left">Società</th>
-                  <th>Costo</th>
-                  <th>Pres.</th>
-                  <th>MV</th>
-                  <th>FM</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((p, i) => (
-                  <tr key={i}>
-                    <td className="left">
-                      <span className={`badge role-${p.role}`}>{p.role}</span>
-                    </td>
-                    <td className="left strong">{p.player}</td>
-                    <td className="left muted num club">{p.club ?? '—'}</td>
-                    <td className="left"><TeamBadge id={p.team} size="sm" /></td>
-                    <td className="num">{p.cost ?? '—'}</td>
-                    <td className="num muted">{p.apps ?? '—'}</td>
-                    <td className="num muted">{p.mv?.toFixed(2) ?? '—'}</td>
-                    <td className="num">{p.fm?.toFixed(2) ?? '—'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        {dedotta && (
+          <p className="note">
+            La rosa di settembre del {scelta} non viene da un documento: è
+            <b> ricostruita dalle formazioni</b>, e vale circa tre nomi su quattro.
+            Non è una stima — sul 2020-21, dove poi è saltato fuori il file vero, la
+            ricostruzione aveva azzeccato 234 nomi su 299. Il costo d'asta di quegli
+            anni non c'è.
+          </p>
         )}
+
+        <p className="result-count num">{righe.length} calciatori</p>
+
+        <Sezione stato={stato} righe={12} vuoto="Nessun risultato.">
+          {righe.length === 0 ? <p className="empty">Nessun risultato.</p> : (
+            <div className="table-wrap tall">
+              <table>
+                <thead>
+                  <tr>
+                    <th className="left">R</th><th className="left">Calciatore</th>
+                    <th className="left">Club</th><th className="left">Società</th>
+                    <th>Costo</th><th>Pres.</th><th>MV</th><th>FM</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {righe.map((p, i) => (
+                    <tr key={i}>
+                      <td className="left"><span className={`badge role-${p.ruolo}`}>{p.ruolo}</span></td>
+                      <td className="left strong">{p.nome}</td>
+                      <td className="left muted num club">{p.club ?? '—'}</td>
+                      <td className="left"><TeamBadge id={p.societa} size="sm" /></td>
+                      <td className="num">{p.costo ?? '—'}</td>
+                      <td className="num muted">{p.presenze ?? '—'}</td>
+                      <td className="num muted">{p.mv != null ? Number(p.mv).toFixed(2) : '—'}</td>
+                      <td className="num">{p.fm != null ? Number(p.fm).toFixed(2) : '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Sezione>
       </section>
-    </div>
+    </Pagina>
   )
 }

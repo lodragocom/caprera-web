@@ -1,5 +1,28 @@
 # Collaudo del sito
 
+## Provare le pagine che leggono dal database
+
+`finto-supabase.mjs` è un finto Supabase: parla il minimo dialetto di
+PostgREST che il sito usa davvero, e davanti ha un Postgres locale con lo
+stesso archivio. Serve a provare le pagine che leggono dal database senza
+toccare quello vero — e senza doverlo raggiungere.
+
+    node collaudo/finto-supabase.mjs &
+    # in .env, temporaneamente:
+    #   VITE_SUPABASE_URL=http://localhost:5410
+    npm run build && npx vite preview --port 4180 &
+    node collaudo/classifica-contro-i-file.mjs
+
+`classifica-contro-i-file.mjs` apre la Classifica, gira tutte e dieci le
+stagioni e confronta **ogni riga** con `src/data/standings.json`. Se un numero
+cambia passando dai file al database, è un errore e non un miglioramento.
+
+Due difetti trovati così, che a occhio non si sarebbero visti: la cache dello
+strato dati si incartava su sé stessa e restituiva `undefined`, e i numeri
+animati sotto la piega dello schermo restavano a **zero** finché non ci si
+scorreva sopra.
+
+
 Due script che aprono il sito con un browser vero e provano a romperlo.
 
 Servono perche' un errore JavaScript non si vede a occhio: la pagina resta

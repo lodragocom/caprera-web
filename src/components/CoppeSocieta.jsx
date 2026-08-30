@@ -2,7 +2,11 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import TeamBadge from './TeamBadge'
 import { getTeam } from '../lib/core'
-import { trofeiDi, percorsoDi, stagioniCoppeDi } from '../lib/coppe'
+import { percorsoFra } from '../lib/coppe'
+import {
+  useArchivio, bacheca as bachecaDi, stagioniCoppeDi, coppeStagione,
+} from '../lib/archivio'
+import { Sezione } from './moto'
 import './CoppeSocieta.css'
 
 /**
@@ -28,7 +32,22 @@ const COLORE = {
 
 /** Tutti i trofei vinti, dal piu' recente. */
 export function Bacheca({ teamId, titolo = 'Bacheca' }) {
-  const trofei = trofeiDi(teamId)
+  const stato = useArchivio(['bacheca', teamId], () => bachecaDi(teamId), [teamId])
+  const trofei = useMemo(
+    () => [...(stato.dati ?? [])]
+      .map((t) => ({ id: t.competizione, nome: t.competizione_nome,
+                     stagione: t.stagione, aiFantapunti: t.ai_fantapunti }))
+      .sort((a, b) => b.stagione.localeCompare(a.stagione)),
+    [stato.dati]
+  )
+  if (stato.caricamento || stato.errore) {
+    return (
+      <section className="block">
+        <h2 className="section-title">{titolo}</h2>
+        <Sezione stato={stato} righe={3}><span /></Sezione>
+      </section>
+    )
+  }
   if (!trofei.length) {
     return (
       <section className="block">
@@ -79,13 +98,22 @@ function Gara({ p, teamId }) {
 
 /** Il cammino di una societa' nelle coppe di una stagione. */
 export function PercorsoCoppe({ teamId, titolo = 'Percorso in coppa' }) {
-  const stagioni = useMemo(() => stagioniCoppeDi(teamId), [teamId])
-  const [stagione, setStagione] = useState(stagioni[0])
+  const anni = useArchivio(['stagioniCoppeDi', teamId], () => stagioniCoppeDi(teamId), [teamId])
+  const stagioni = useMemo(
+    () => [...new Set((anni.dati ?? []).map((r) => r.stagione))].sort().reverse(),
+    [anni.dati]
+  )
+  const [scelta, setScelta] = useState('')
+  const stagione = scelta && stagioni.includes(scelta) ? scelta : stagioni[0]
+
+  const co = useArchivio(['coppeStagione', stagione],
+    () => (stagione ? coppeStagione(stagione) : Promise.resolve([])), [stagione])
   const percorso = useMemo(
-    () => (stagione ? percorsoDi(teamId, stagione) : []),
-    [teamId, stagione]
+    () => (co.dati ? percorsoFra(teamId, co.dati) : []),
+    [teamId, co.dati]
   )
 
+  if (anni.caricamento) return null
   if (!stagioni.length) return null
 
   return (
@@ -94,10 +122,11 @@ export function PercorsoCoppe({ teamId, titolo = 'Percorso in coppa' }) {
       <div className="scelta-stagione">
         {stagioni.map((s) => (
           <button key={s} className={s === stagione ? 'on' : ''}
-                  onClick={() => setStagione(s)}>{s}</button>
+                  onClick={() => setScelta(s)}>{s}</button>
         ))}
       </div>
 
+      <Sezione stato={co} righe={6}>
       <div className="percorso">
         {percorso.map((c) => (
           <article key={c.id} className={c.vinta ? 'tappa card vinta' : 'tappa card'}
@@ -135,6 +164,7 @@ export function PercorsoCoppe({ teamId, titolo = 'Percorso in coppa' }) {
           </article>
         ))}
       </div>
+      </Sezione>
     </section>
   )
 }

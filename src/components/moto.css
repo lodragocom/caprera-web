@@ -1,0 +1,57 @@
+/* ---------------------------------------------------- lo scheletro */
+.scheletro {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.scheletro-riga {
+  border-radius: 8px;
+  background: linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0.035) 30%,
+    rgba(255, 255, 255, 0.075) 50%,
+    rgba(255, 255, 255, 0.035) 70%
+  );
+  background-size: 280% 100%;
+  animation: scorre 1.5s ease-in-out infinite;
+}
+
+@keyframes scorre {
+  from { background-position: 180% 0; }
+  to   { background-position: -80% 0; }
+}
+
+/* ------------------------------------------------------- il guasto */
+.guasto {
+  padding: 14px 18px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(214, 92, 92, 0.35);
+  border-left: 3px solid var(--loss);
+  background: rgba(214, 92, 92, 0.06);
+  font-size: 0.86rem;
+  color: var(--text-muted);
+}
+
+.guasto button {
+  margin-left: 6px;
+  padding: 3px 10px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--gold-400);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.guasto button:hover { border-color: var(--gold-500); }
+
+/* Chi ha chiesto di non muovere niente non vede muoversi niente: nemmeno
+   lo scheletro, che resta fermo e grigio. Non e' negoziabile. */
+@media (prefers-reduced-motion: reduce) {
+  .scheletro-riga {
+    animation: none;
+    background: rgba(255, 255, 255, 0.05);
+  }
+}

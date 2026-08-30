@@ -116,6 +116,124 @@
   color: var(--loss);
 }
 
+/* ------------------------------------------- il cambio società (visita) */
+.dash-team.in-visita {
+  border-style: dashed;
+}
+
+.dash-visita {
+  margin: 14px 0 4px;
+}
+
+.dash-visita label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+
+.dash-visita select {
+  width: 100%;
+  min-width: 0;
+  background: var(--navy-850);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 0.82rem;
+}
+
+.dash-visita select:focus-visible {
+  outline: none;
+  border-color: var(--gold-500);
+}
+
+.dash-torna {
+  margin-top: 8px;
+  width: 100%;
+  background: none;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  padding: 7px;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.dash-torna:hover {
+  color: var(--gold-400);
+  border-color: var(--gold-500);
+}
+
+/* La fascia in cima all'area: non deve poter passare inosservata. */
+.dash-avviso-visita {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 0 0 26px;
+  padding: 11px 16px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(217, 180, 106, 0.4);
+  background: rgba(217, 180, 106, 0.09);
+  font-size: 0.82rem;
+  color: var(--text);
+}
+
+.dash-avviso-visita strong { color: var(--gold-400); }
+
+.dash-avviso-visita button {
+  margin-left: auto;
+  background: none;
+  border: 1px solid rgba(217, 180, 106, 0.45);
+  border-radius: var(--radius);
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  color: var(--gold-400);
+}
+
+.dash-avviso-visita button:hover { background: rgba(217, 180, 106, 0.14); }
+
+/* Gli incarichi di lega, sotto il pulsante di uscita. */
+.dash-incarichi { margin-top: 14px; }
+
+.dash-incarichi-tit {
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin: 0 0 8px;
+}
+
+.dash-incarichi ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.dash-incarichi li {
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+  color: var(--text-muted);
+}
+
+.dash-incarichi li.alto {
+  border-color: rgba(217, 180, 106, 0.45);
+  background: rgba(217, 180, 106, 0.1);
+  color: var(--gold-400);
+}
+
 .dash-anteprima {
   font-size: 0.68rem;
   color: var(--text-dim);

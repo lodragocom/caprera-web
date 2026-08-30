@@ -1,95 +1,283 @@
-.round-block {
-  margin-bottom: 34px;
-}
+/* ============================================================
+   Calendario — campionato e coppe, partita per partita.
+   Stessa impaginazione della Classifica: sono le due pagine che
+   si guardano una dopo l'altra.
+   ============================================================ */
 
-.round-title {
-  font-size: 1.05rem;
+.ri-testa {
   display: flex;
-  align-items: baseline;
-  gap: 12px;
-  margin-bottom: 12px;
-  color: var(--gold-500);
-  letter-spacing: 0.1em;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
 }
 
-.round-title em {
+.ri-testa h1 {
+  font-size: clamp(2.6rem, 7vw, 4.2rem);
+  line-height: 0.92;
+  margin: 6px 0 0;
+  letter-spacing: 0.01em;
+}
+
+.ri-stagione span {
+  display: block;
   font-family: var(--font-mono);
-  font-style: normal;
   font-size: 0.6rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--text-dim);
-  border: 1px solid var(--border-soft);
-  border-radius: 4px;
-  padding: 2px 7px;
+  margin-bottom: 7px;
 }
 
-.match-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 10px;
+.ri-stagione select {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  padding: 10px 14px;
+  min-width: 150px;
 }
 
-.match {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+/* -------------------------------------------------- le competizioni
+   Erano un menu a tendina: la Coppa Italia esisteva solo per chi
+   pensava di aprirlo. Come linguette si vedono tutte insieme. */
+.ri-schede {
+  display: flex;
+  gap: 6px;
+  margin: 22px 0 18px;
+  border-bottom: 1px solid var(--border-soft);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.ri-schede::-webkit-scrollbar { display: none; }
+
+.ri-schede button {
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: 11px 18px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.ri-schede button:hover { color: var(--text); }
+.ri-schede button.on { color: var(--gold-400); border-bottom-color: var(--gold-500); }
+
+/* ---------------------------------------------------------- i filtri */
+.ri-barra {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.ri-filtri { display: flex; gap: 12px; }
+
+.ri-filtri label { display: block; }
+
+.ri-filtri span {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+
+.ri-filtri select { font-size: 0.88rem; padding: 9px 12px; min-width: 130px; }
+
+.ri-conto {
+  display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 13px 14px;
-  min-height: 58px;
+  gap: 14px;
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-dim);
 }
 
-.match.pending {
-  opacity: 0.62;
+.ri-conto b {
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  color: var(--text);
+  font-weight: 500;
 }
 
-.side {
+.ri-conto button {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 5px 12px;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+
+.ri-conto button:hover { border-color: var(--gold-500); color: var(--gold-400); }
+
+/* ---------------------------------------------------------- le giornate */
+.ri-blocco { margin-bottom: 26px; }
+
+.ri-titolo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold-500);
+  margin: 0 0 10px;
+}
+
+.ri-titolo::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--border), transparent);
+}
+
+.ri-titolo em {
+  font-style: normal;
+  order: 3;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+}
+
+/* Le partite di una giornata sono cinque righe, non cinque schede:
+   in colonna si leggono come un calendario invece che come una vetrina. */
+.ri-elenco {
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  background: var(--navy-850);
+  overflow: hidden;
+}
+
+/* ---------------------------------------------------------- la partita */
+.ri-partita {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--border-soft);
+  transition: background 0.15s;
+}
+
+.ri-elenco > *:last-child .ri-partita { border-bottom: 0; }
+
+a.ri-partita:hover { background: rgba(217, 180, 106, 0.05); }
+a.ri-partita:hover .ri-freccia { color: var(--gold-400); transform: translateX(2px); }
+
+.ri-partita.da-giocare { opacity: 0.7; }
+
+.ri-freccia {
+  font-size: 1.2rem;
+  color: var(--text-dim);
+  line-height: 1;
+  transition: color 0.15s, transform 0.15s;
+}
+
+.ri-squadra {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   min-width: 0;
 }
 
-.side.away {
-  justify-self: end;
+.ri-squadra.ospite { flex-direction: row-reverse; }
+
+.ri-squadra img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
-.side.away .team-badge {
-  flex-direction: row-reverse;
-  text-align: right;
+/* Il nome non si taglia mai: va a capo se serve.
+   `break-word` e non `anywhere`: il secondo spezza le parole anche quando
+   ci starebbero, e "Sanguemi/sto" e' peggio di "Sangue…". */
+.ri-squadra span {
+  min-width: 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.2;
+  overflow-wrap: break-word;
 }
 
-.side.win .tb-name {
+.ri-squadra.vince span { color: var(--cream); font-weight: 600; }
+
+.ri-punteggio { text-align: center; min-width: 82px; }
+
+.ri-punteggio strong {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 1.28rem;
+  font-weight: 500;
   color: var(--cream);
-  font-weight: 600;
+  line-height: 1;
 }
 
-.score {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 52px;
-}
-
-.score strong {
-  font-size: 1.14rem;
-  font-weight: 600;
-  color: var(--cream);
-  letter-spacing: 0.02em;
-}
-
-.score .sep {
+.ri-punteggio strong i {
+  font-style: normal;
   color: var(--text-dim);
-  margin-inline: 3px;
-  font-weight: 400;
+  margin: 0 3px;
+  font-size: 0.85em;
 }
 
-.score .fp {
-  font-size: 0.62rem;
+.ri-punteggio span {
+  display: block;
+  margin-top: 5px;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
   color: var(--text-dim);
-  margin-top: 1px;
+  white-space: nowrap;
 }
 
-.score .tbd {
-  font-size: 0.68rem;
-  letter-spacing: 0.14em;
+.ri-vs {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
   color: var(--text-dim);
-  text-transform: uppercase;
+}
+
+/* -------------------------------------------------------------- stretto */
+@media (max-width: 700px) {
+  .ri-testa { flex-direction: column; align-items: flex-start; }
+  .ri-stagione { width: 100%; }
+  .ri-stagione select { width: 100%; }
+
+  /* i filtri restano su una riga che scorre, invece di impilarsi
+     in ottocento pixel di menu prima della prima partita */
+  .ri-barra { flex-direction: column; align-items: stretch; gap: 12px; }
+
+  /* -16px e non -18: sotto i 700 px `.container` ha 16 px di padding, e con
+     18 la riga sporgeva di due pixel per lato — abbastanza per far scorrere
+     tutta la pagina di lato. */
+  .ri-filtri {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin-inline: -16px;
+    padding: 0 16px 4px;
+  }
+  .ri-filtri::-webkit-scrollbar { display: none; }
+  .ri-filtri label { flex-shrink: 0; }
+  .ri-filtri select { min-width: 118px; font-size: 0.84rem; }
+
+  .ri-partita { padding: 11px 12px; gap: 8px; }
+  .ri-squadra img { width: 24px; height: 24px; }
+  .ri-squadra span { font-size: 0.78rem; }
+  .ri-punteggio { min-width: 66px; }
+  .ri-punteggio strong { font-size: 1.1rem; }
+  .ri-freccia { display: none; }
 }

@@ -22,3 +22,13 @@
   font-size: 0.62rem;
   color: var(--gold-600);
 }
+
+/* Il nome porta alla scheda del calciatore. */
+.gi-nome { color: var(--cream); transition: color 0.15s; }
+.gi-nome:hover { color: var(--gold-400); text-decoration: underline; text-underline-offset: 3px; }
+
+.gi-avviso {
+  margin: -4px 0 14px;
+  font-size: 0.76rem;
+  color: var(--text-dim);
+}

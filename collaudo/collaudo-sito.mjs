@@ -8,10 +8,11 @@
  * esattamente come si era rotta la pagina Coppe.
  */
 import { chromium } from 'playwright'
+import { guardaIlTetto } from './tetto.mjs'
 
 const BASE = 'http://localhost:4180'
 const PUBBLICHE = ['/', '/classifica', '/risultati', '/squadre', '/rose', '/contratti',
-  '/albo-doro', '/giocatori', '/stats', '/asta', '/ranking', '/coppe', '/regolamento',
+  '/albo-doro', '/giocatori', '/giocatori/1084', '/partita/1', '/stats', '/asta', '/ranking', '/coppe', '/regolamento',
   '/assicurazioni', '/statistiche', '/login']
 const AREA = ['/area', '/area/rosa', '/area/formazioni', '/area/contratti',
   '/area/crediti', '/area/coppe', '/area/storia']
@@ -21,6 +22,7 @@ const p = await b.newPage({ viewport: { width: 1500, height: 1100 } })
 
 let pagina = ''
 const problemi = []
+const tetto = guardaIlTetto(p)
 p.on('pageerror', (e) => problemi.push(`[${pagina}] ERRORE JS: ${e.message}`))
 p.on('console', (m) => {
   if (m.type() === 'error' && !m.text().includes('TUNNEL')) problemi.push(`[${pagina}] CONSOLE: ${m.text()}`)
@@ -84,13 +86,13 @@ for (const r of squadre) {
 console.log('\n=== AREA MISTER ===')
 pagina = '/login'
 await p.goto(BASE + '/login', { waitUntil: 'networkidle' })
-await p.locator('.scelta', { hasText: 'Prosecco' }).click()
-await p.locator('.campo input').fill('Salvo')
+await p.locator('input[type="email"]').fill('salvo@prova.it')
+await p.locator('input[type="password"]').fill('provaprova')
 await p.locator('.login-go').click()
-await p.waitForTimeout(900)
+await p.waitForTimeout(1200)
 // Dentro l'area si naviga cliccando, non con goto: la sessione sta in memoria
 // e un caricamento da zero riporterebbe al login (scelta voluta, vedi auth.jsx).
-const VOCI_AREA = ['Panoramica', 'La mia rosa', 'Formazioni', 'Contratti', 'Crediti', 'Coppe', 'Storia e racconto']
+const VOCI_AREA = ['Panoramica', 'La mia rosa', 'Formazioni', 'Contratti', 'Crediti', 'Coppe', 'Storia e racconto', 'La mia tessera']
 for (const voce of VOCI_AREA) {
   pagina = `/area · ${voce}`
   await p.locator('.dash-nav a', { hasText: voce }).click()
@@ -106,19 +108,32 @@ for (const voce of VOCI_AREA) {
 }
 
 console.log('\n=== LINK SEGUITI DAVVERO ===')
+// `apri` e' la scheda da cliccare prima: le sezioni della scheda societa'
+// non sono tutte in pagina insieme, e cercarle senza aprirle e' un falso
+// allarme garantito.
 const CLIC = [
   ['/coppe', ".albo-lista a[href^='/squadre/']", 'albo d\'oro → società'],
   ['/coppe', ".match a[href^='/squadre/']", 'tabellone → società'],
   ['/coppe', ".trofeo a[href^='/squadre/']", 'albo stagione → società'],
   ['/squadre/prosecco', ".trofeo-card", 'bacheca → coppe'],
   ['/squadre/prosecco', ".tappa a[href^='/squadre/']", 'percorso → società'],
-  ['/squadre/prosecco', ".mini a[href^='/squadre/']", 'partite → società'],
+  ['/squadre/prosecco', "a.sd-gara[href^='/squadre/']", 'partite → società', 'Partite'],
   ['/albo-doro', "a[href^='/squadre/']", 'albo d\'oro pagina → società'],
+  ['/giocatori', "a.gi-nome", 'giocatori → scheda calciatore'],
+  ['/giocatori/1084', ".sg-maglia[href^='/squadre/']", 'scheda calciatore → società'],
+  ['/risultati', "a.ri-partita", 'calendario → tabellino'],
+  ['/partita/1', ".pt-lato[href^='/squadre/']", 'tabellino → società'],
+  ['/partita/1', "a.pt-nome[href^='/giocatori/']", 'tabellino → scheda calciatore'],
 ]
-for (const [dove, sel, nome] of CLIC) {
+for (const [dove, sel, nome, apri] of CLIC) {
   pagina = dove
   await p.goto(BASE + dove, { waitUntil: 'networkidle' })
   await p.waitForTimeout(900)
+  if (apri) {
+    await p.locator('.sd-schede button', { hasText: apri }).click().catch(() =>
+      problemi.push(`[${dove}] non trovo la scheda "${apri}"`))
+    await p.waitForTimeout(1200)
+  }
   const n = await p.locator(sel).count()
   if (!n) { problemi.push(`[${dove}] nessun link per "${nome}" (${sel})`); console.log(`${nome}: NESSUN LINK`); continue }
   const href = await p.locator(sel).first().getAttribute('href')
@@ -133,6 +148,8 @@ for (const [dove, sel, nome] of CLIC) {
 }
 
 await b.close()
+problemi.push(...tetto.problemi())
+console.log(tetto.resoconto())
 console.log('\n' + (problemi.length
   ? `${problemi.length} PROBLEMI:\n` + problemi.join('\n')
   : 'Nessun problema: nessun errore JS, nessuna pagina vuota, tutti i link seguiti.'))
