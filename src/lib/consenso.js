@@ -83,11 +83,19 @@ export function applica(g = consenso()) {
 /* ---------------------------------------------------------------- i codici */
 
 /*
- * Gli identificativi stanno nelle variabili d'ambiente, non qui: sono
- * configurazione, cambiano fra prova ed esercizio, e uno che non c'è deve
- * semplicemente non accendere niente invece di caricare uno script vuoto.
+ * Gli identificativi.
+ *
+ * Non sono segreti — finiscono comunque nel JavaScript che chiunque puo'
+ * leggere — quindi quello di Analytics sta scritto qui: se vivesse solo in una
+ * variabile d'ambiente, basterebbe dimenticarla su Cloudflare per avere un
+ * sito che raccoglie il consenso e poi non misura niente, senza che nessun
+ * errore lo dica. La variabile resta e ha la precedenza, per poterlo spegnere
+ * o cambiare senza toccare il codice.
+ *
+ * I pixel social non hanno un valore predefinito: quando ci saranno, si
+ * mettono. Uno che non c'e' non accende niente.
  */
-const GA = import.meta.env.VITE_GA_ID
+const GA = import.meta.env.VITE_GA_ID ?? 'G-4K6JM9FR4G'
 const META = import.meta.env.VITE_META_PIXEL
 const TIKTOK = import.meta.env.VITE_TIKTOK_PIXEL
 
