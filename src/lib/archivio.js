@@ -920,3 +920,60 @@ export async function ritiraVoce(id, attiva) {
   if (error) throw new Error(error.message)
   return data
 }
+
+/* ---------------------------------------- Il settaggio della stagione */
+
+/** Lo specchio della stagione: parametri, crediti, quante finestre e contratti. */
+export const stagioneSettaggio = (stagione) =>
+  db().rpc('stagione_settaggio', { p_stagione: stagione }).then(({ data, error }) => {
+    if (error) throw new Error(error.message)
+    return data?.[0] ?? null
+  })
+
+/** Giornate e stato della stagione. */
+export async function salvaStagione(stagione, giornate, conclusa) {
+  const { data, error } = await db().rpc('salva_stagione', {
+    p_stagione: stagione, p_giornate: Number(giornate), p_conclusa: !!conclusa,
+  })
+  if (error) throw new Error(error.message)
+  return data
+}
+
+/** Le finestre di mercato di una stagione. */
+export const finestre = (stagione) =>
+  db().from('finestre').select('id, stagione, tipo, etichetta, apre, chiude, fonte')
+    .eq('stagione', stagione).order('apre')
+    .then(({ data, error }) => {
+      if (error) throw new Error(error.message)
+      return data ?? []
+    })
+
+/** Aggiunge o aggiorna una finestra. `id` nullo = nuova. */
+export async function salvaFinestra(f) {
+  const { data, error } = await db().rpc('salva_finestra', {
+    p_id: f.id ?? null, p_stagione: f.stagione, p_tipo: f.tipo,
+    p_etichetta: String(f.etichetta ?? '').trim(),
+    p_apre: f.apre || null, p_chiude: f.chiude || null,
+  })
+  if (error) throw new Error(error.message)
+  return data
+}
+
+/** Cancella una finestra. Quelle d'archivio non si toccano. */
+export async function cancellaFinestra(id) {
+  const { data, error } = await db().rpc('cancella_finestra', { p_id: id })
+  if (error) throw new Error(error.message)
+  return data
+}
+
+/**
+ * I crediti di partenza, uguali per tutti. Gli `iniziali` si rifanno da soli:
+ * sono una somma, non un dato che si scrive.
+ */
+export async function salvaCreditiStagione(stagione, base, giovani) {
+  const { data, error } = await db().rpc('salva_crediti_stagione', {
+    p_stagione: stagione, p_base: Number(base), p_giovani: Number(giovani),
+  })
+  if (error) throw new Error(error.message)
+  return data
+}

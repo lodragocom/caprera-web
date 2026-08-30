@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../../lib/auth'
 import { catalogoVoci, salvaVoce, ritiraVoce } from '../../lib/archivio'
-import { Pagina } from '../../components/moto'
 import './Catalogo.css'
 
 /**
@@ -33,7 +32,7 @@ const VUOTA = {
   descrizione: '', attiva: true, ordine: 100,
 }
 
-export default function Catalogo() {
+export function Catalogo() {
   const { vedeTutto } = useAuth()
   const [voci, setVoci] = useState(null)
   const [errore, setErrore] = useState(null)
@@ -64,18 +63,10 @@ export default function Catalogo() {
     return CATEGORIE.map((c) => [c, m.get(c.id) ?? []]).filter(([, v]) => v.length)
   }, [voci, ritirate])
 
-  if (!vedeTutto) {
-    return (
-      <Pagina className="cat">
-        <h1>Premi e penalità</h1>
-        <p className="cat-nota">Questa sezione è di chi ha un incarico di governo.</p>
-      </Pagina>
-    )
-  }
+  if (!vedeTutto) return null
 
   return (
-    <Pagina className="cat">
-      <h1>Premi e penalità</h1>
+    <div className="cat">
       <p className="cat-nota">
         Le voci che la Presidenza può assegnare. Definirle qui vuol dire poter{' '}
         <strong>creare una penalità prima di doverla applicare</strong>, invece di
@@ -135,7 +126,7 @@ export default function Catalogo() {
           </table>
         </section>
       ))}
-    </Pagina>
+    </div>
   )
 }
 

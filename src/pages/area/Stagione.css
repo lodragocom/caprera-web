@@ -1,0 +1,203 @@
+/* Il settaggio della stagione. In cima lo specchio — i numeri che dicono a
+   colpo d'occhio se manca qualcosa — e sotto le quattro parti. */
+
+.sta h1 { margin-bottom: 0.7rem; }
+.sta-nota { color: var(--text-muted); margin: 0 0 0.9rem; line-height: 1.6; font-size: 0.9rem; }
+
+.sta-scelta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  align-items: flex-end;
+  margin-bottom: 0.9rem;
+}
+.sta-scelta > label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+.sta-specchio {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.1rem;
+  align-items: baseline;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+.sta-specchio b {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--text);
+  margin-right: 0.28rem;
+}
+/* Zero finestre non è un dato come gli altri: è una cosa che manca. */
+.sta-specchio .manca b { color: var(--loss); }
+.sta-specchio .aperta { color: var(--win); }
+.sta-specchio .chiusa { color: var(--text-dim); }
+
+.sta-manca {
+  border-left: 3px solid var(--loss);
+  background: rgba(200, 91, 91, 0.08);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 0.65rem 0.9rem;
+  margin: 0 0 1rem;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+/* le quattro parti */
+.sta-parti {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  border-bottom: 1px solid var(--border-soft);
+  margin-bottom: 1.1rem;
+}
+.sta-parti button {
+  font: inherit;
+  font-size: 0.86rem;
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: var(--text-dim);
+  padding: 0.5rem 0.8rem;
+  cursor: pointer;
+  margin-bottom: -1px;
+}
+.sta-parti button:hover { color: var(--text); }
+.sta-parti button.sceltA {
+  color: var(--gold-400);
+  border-bottom-color: var(--gold-500);
+}
+
+.sta-errore, .sta-esito {
+  border-radius: var(--radius);
+  padding: 0.6rem 0.9rem;
+  margin: 0 0 0.9rem;
+  font-size: 0.9rem;
+}
+.sta-errore { background: rgba(200, 91, 91, 0.12); border: 1px solid var(--loss); }
+.sta-esito { background: rgba(63, 174, 116, 0.10); border: 1px solid var(--win); }
+
+.sta-blocco {
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  background: var(--navy-850);
+  padding: 1.1rem;
+}
+
+.sta-campi {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.9rem;
+  align-items: start;   /* mai stirati all'altezza del vicino più alto */
+  margin-bottom: 0.9rem;
+}
+
+.sta-blocco label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  align-self: start;
+}
+.sta-blocco input, .sta-blocco select {
+  background: var(--navy-900);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 0.45rem 0.6rem;
+  font: inherit;
+  font-size: 0.9rem;
+}
+.sta-blocco em {
+  font-style: normal;
+  font-size: 0.74rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+.sta-largo { margin-bottom: 0.9rem; }
+.sta-largo input { width: 100%; box-sizing: border-box; }
+
+.sta-riga {
+  flex-direction: row !important;
+  align-items: flex-start;
+  gap: 0.5rem !important;
+  margin: 0.9rem 0;
+}
+.sta-riga input { accent-color: var(--gold-500); margin-top: 0.15rem; }
+.sta-riga span { display: flex; flex-direction: column; gap: 0.15rem; color: var(--text); font-size: 0.88rem; }
+
+.sta-avviso {
+  border-left: 3px solid var(--gold-500);
+  background: rgba(217, 180, 106, 0.05);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 0.6rem 0.85rem;
+  margin: 0 0 0.9rem;
+  font-size: 0.84rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+.sta-ok, .sta-nuovo {
+  font: inherit;
+  font-size: 0.88rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--gold-600);
+  background: transparent;
+  color: var(--gold-400);
+  cursor: pointer;
+}
+.sta-ok:hover, .sta-nuovo:hover { background: rgba(217, 180, 106, 0.08); }
+.sta-ok:disabled { opacity: 0.4; cursor: not-allowed; }
+.sta-nuovo { margin-bottom: 0.9rem; }
+
+.sta-modulo {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--navy-900);
+  padding: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.sta-tab { width: 100%; border-collapse: collapse; font-size: 0.87rem; }
+.sta-tab td {
+  padding: 0.5rem 0.6rem 0.5rem 0;
+  border-bottom: 1px solid var(--border-soft);
+  color: var(--text-muted);
+}
+.sta-tab tr:last-child td { border-bottom: 0; }
+.sta-tipo {
+  width: 1%;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold-400);
+}
+.sta-date { white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--text); }
+.sta-azioni { width: 1%; white-space: nowrap; text-align: right; }
+.sta-azioni button {
+  font: inherit;
+  font-size: 0.74rem;
+  border: 1px solid var(--border-soft);
+  background: transparent;
+  color: var(--text-dim);
+  border-radius: 6px;
+  padding: 0.2rem 0.5rem;
+  margin-left: 0.3rem;
+  cursor: pointer;
+}
+.sta-azioni button:hover { border-color: var(--gold-600); color: var(--gold-400); }
+.sta-azioni em { font-style: normal; font-size: 0.7rem; color: var(--text-dim); }
+
+@media (max-width: 640px) {
+  .sta-tab { display: block; overflow-x: auto; white-space: nowrap; }
+}
