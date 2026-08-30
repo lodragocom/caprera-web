@@ -882,30 +882,43 @@ export const vociAtti = () =>
 /* ------------------------------------- Il catalogo di premi e penalita' */
 
 /**
- * Le voci definite: premi e penalita' che la Presidenza puo' registrare.
+ * Il catalogo visto da una stagione: cosa esiste, quanto vale **qui**, e
+ * quante volte e' stato usato.
  *
- * Diverso da `vociAtti()`, che le ricavava da quelle gia' usate: qui sono
- * **definite**, quindi una penalita' nuova esiste prima di essere applicata e
- * un importo si corregge senza aspettare l'occasione di riusarlo.
+ * Le due cose sono separate apposta. La **voce** dice cos'e' ed e' per
+ * sempre; l'**importo** appartiene a una stagione, perche' le scale della
+ * lega cambiano — il Fantapunti 9o e' stato -4, poi -3, poi -2. E l'uso si
+ * CONTA dai movimenti invece di scriverlo a mano in un testo che il giorno
+ * dopo e' gia' vecchio.
  */
-export const catalogoVoci = () =>
-  db().from('voci_atto').select('id, categoria, nome, importo, descrizione, attiva, ordine')
-    .order('categoria').order('ordine').order('nome')
-    .then(({ data, error }) => {
-      if (error) throw new Error(error.message)
-      return data ?? []
-    })
+export const catalogoStagione = (stagione) =>
+  db().rpc('catalogo_stagione', { p_stagione: stagione }).then(({ data, error }) => {
+    if (error) throw new Error(error.message)
+    return data ?? []
+  })
 
-/** Aggiunge o aggiorna una voce. `id` nullo = nuova. */
+/** Aggiunge o aggiorna una voce: cos'e', non quanto vale. */
 export async function salvaVoce(v) {
   const { data, error } = await db().rpc('salva_voce_atto', {
     p_id: v.id ?? null,
     p_categoria: v.categoria,
     p_nome: String(v.nome ?? '').trim(),
-    p_importo: v.importo === '' || v.importo == null ? null : Number(v.importo),
     p_descrizione: String(v.descrizione ?? '').trim() || null,
     p_attiva: v.attiva !== false,
-    p_ordine: Number(v.ordine ?? 100),
+  })
+  if (error) throw new Error(error.message)
+  return data
+}
+
+/**
+ * Quanto vale una voce in una stagione. Un importo **nullo** la toglie da
+ * quell'anno: non tutte le voci valgono tutti gli anni, ed e' il modo di
+ * dirlo senza cancellare la voce e la storia che le sta dietro.
+ */
+export async function salvaImportoVoce(voce, stagione, importo) {
+  const { data, error } = await db().rpc('salva_importo_voce', {
+    p_voce: voce, p_stagione: stagione,
+    p_importo: importo === '' || importo == null ? null : Number(importo),
   })
   if (error) throw new Error(error.message)
   return data

@@ -119,7 +119,7 @@ export default function Stagione() {
       {parte === 'stagione' && dati && <Parametri d={dati} atto={atto} />}
       {parte === 'mercato' && anno && <Mercato stagione={anno} atto={atto} />}
       {parte === 'crediti' && dati && <Crediti d={dati} atto={atto} />}
-      {parte === 'voci' && <Catalogo />}
+      {parte === 'voci' && <Catalogo stagione={anno} />}
     </Pagina>
   )
 }

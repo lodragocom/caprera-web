@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../../lib/auth'
 import { getTeam, logoUrl } from '../../lib/core'
-import { attiLega, registraAtto, cancellaAtto, catalogoVoci, stagioni as tutteLeStagioni } from '../../lib/archivio'
+import { attiLega, registraAtto, cancellaAtto, catalogoStagione, stagioni as tutteLeStagioni } from '../../lib/archivio'
 import { Pagina } from '../../components/moto'
 import './Atti.css'
 
@@ -40,12 +40,17 @@ export default function Atti() {
 
   const carica = useCallback((s) => {
     attiLega(s).then(setElenco).catch((e) => setErrore(e.message))
+    // Il catalogo si rilegge ad ogni cambio d'anno: gli importi appartengono
+    // alla stagione, e proporre quelli di un'altra sarebbe peggio che non
+    // proporne nessuno.
+    if (s) {
+      catalogoStagione(s)
+        .then((v) => setCatalogo(v.filter((x) => x.attiva && x.ha_importo)))
+        .catch(() => setCatalogo([]))
+    }
   }, [])
 
   useEffect(() => {
-    // il catalogo DEFINITO, non piu' quello dedotto da cio' che era gia'
-    // stato usato: cosi' una penalita' nuova esiste prima di servire
-    catalogoVoci().then((v) => setCatalogo(v.filter((x) => x.attiva))).catch(() => {})
     tutteLeStagioni().then((s) => {
       const ordinate = [...s].sort((a, b) => b.id.localeCompare(a.id))
       setAnni(ordinate)

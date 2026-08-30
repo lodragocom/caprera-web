@@ -156,3 +156,82 @@
   .cat-azioni { display: block; text-align: left; padding-bottom: 0.5rem !important; }
   .cat-azioni button { margin: 0.3rem 0.3rem 0 0; }
 }
+
+/* --- l'importo si cambia dove si legge --------------------------------- */
+
+.cat-imp {
+  width: 1%;
+  white-space: nowrap;
+  padding-right: 0.9rem !important;
+  vertical-align: top;
+}
+.cat-imp input {
+  width: 68px;
+  text-align: right;
+  background: var(--navy-900);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 0.3rem 0.45rem;
+  font: inherit;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+}
+.cat-imp input:focus-visible { outline: none; border-color: var(--gold-500); }
+
+/* Compare solo quando il numero e' cambiato: un bottone «salva» sempre acceso
+   su settanta righe e' rumore, e non si distingue piu' cosa e' da salvare. */
+.cat-conferma {
+  display: block;
+  margin-top: 0.25rem;
+  font: inherit;
+  font-size: 0.68rem;
+  border: 1px solid var(--gold-600);
+  background: transparent;
+  color: var(--gold-400);
+  border-radius: 5px;
+  padding: 0.12rem 0.4rem;
+  cursor: pointer;
+  width: 68px;
+}
+
+/* Una voce senza importo in questa stagione: esiste, ma qui non vale. */
+.cat-sez tr.senza .cat-nome { color: var(--text-dim); }
+.cat-sez tr.senza .cat-imp input { border-style: dashed; }
+
+.cat-nome small {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  margin-top: 0.2rem;
+}
+
+.cat-filtro { display: flex; gap: 0.3rem; }
+.cat-filtro button {
+  font: inherit;
+  font-size: 0.8rem;
+  background: none;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  color: var(--text-dim);
+  padding: 0.35rem 0.7rem;
+  cursor: pointer;
+}
+.cat-filtro button.sceltA { border-color: var(--gold-600); color: var(--gold-400); }
+.cat-filtro span {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  margin-left: 0.3rem;
+  color: var(--text);
+}
+
+.cat-facolt {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-left: 0.3rem;
+}
+.cat-poi { font-size: 0.78rem; color: var(--text-dim); margin-left: 0.7rem; }
