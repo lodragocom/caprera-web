@@ -23,6 +23,23 @@ verbale — `../caprera-dati/ADR/ADR-002-Vetrina-Public-Viste-Sottili.md`: l'alt
 esporre lo schema `caprera` con una **spunta nel cruscotto Supabase**, e una spunta non si
 versiona.
 
+### Le migrazioni stanno in due repo, e non per caso
+
+**Questo repository è pubblico.** Le 118 migrazioni sono divise:
+
+- **`supabase/migrations/` (qui, 100)** — schema, viste, funzioni, regole di riga, e i dati che sul
+  sito sono pubblici comunque: rose, listoni, calciatori, statistiche.
+- **`../caprera-dati/SUPABASE/migrazioni-dati/` (18)** — quelle che caricano **contratti, finanze o
+  movimenti**. `caprera-dati` non è pubblico.
+
+Il perché è lo stesso principio delle regole di riga: il sito è aperto a chiunque **perché** decide
+lui cosa mostrare a chi. Un `.sql` in un repo pubblico scavalca quel meccanismo — dà i numeri senza
+passare dal sito né dal login. **La forma di una tabella non è il suo contenuto**: il
+`create table caprera.finanze` resta qui, gli `insert` che la riempiono no.
+
+`python3 scripts/esporta-migrazioni.py` applica la divisione **da solo** — chi aggiunge una
+migrazione non deve ricordarsene. Controllo: `--controlla`, esce 1 se il repo è indietro.
+
 - Materiale del database: `../caprera-dati/SUPABASE/` (`01-schema.sql`, `02-viste.sql`,
   `03-sicurezza.sql`, `carica.py`, `carica.sh`). Ragionamento in
   `../caprera-dati/SPIEGAZIONI/SPIEGAZIONE_Schema_Supabase.md`.
