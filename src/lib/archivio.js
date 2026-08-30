@@ -848,3 +848,18 @@ export async function cancellaAtto(id) {
   if (error) throw new Error(error.message)
   return data
 }
+
+/**
+ * La conformita' delle clausole rescissorie.
+ *
+ * Per ogni contratto: il valore Fantapazz di partenza, il minimo previsto dal
+ * regolamento (D 50%, C 75%, altri 100%) e se la clausola dichiarata lo
+ * rispetta. E' il controllo che mancava quando la clausola si dichiarava per
+ * email — ed e' il motivo per cui due contratti sono passati sotto soglia
+ * senza che nessuno potesse accorgersene.
+ */
+export const conformitaClausole = () =>
+  db().rpc('conformita_clausole').then(({ data, error }) => {
+    if (error) throw new Error(error.message)
+    return data ?? []
+  })

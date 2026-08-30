@@ -1,0 +1,105 @@
+/* Le clausole rescissorie. Di norma si mostrano solo i contratti fuori norma:
+   un elenco di 186 righe in cui due sono il problema nasconde il problema. */
+
+.cla h1 { margin-bottom: 0.4rem; }
+.cla-nota { color: var(--text-muted); margin: 0 0 1rem; line-height: 1.6; }
+
+.cla-errore {
+  background: rgba(200, 91, 91, 0.12);
+  border: 1px solid var(--loss);
+  border-radius: var(--radius);
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 0.9rem;
+}
+
+.cla-conto {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.1rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  background: var(--navy-850);
+  font-size: 0.84rem;
+  color: var(--text-dim);
+  margin-bottom: 0.9rem;
+}
+.cla-conto b { font-family: var(--font-display); font-size: 1.15rem; color: var(--text); margin-right: 0.25rem; }
+.cla-conto .giu b { color: var(--loss); }
+.cla-conto .su b { color: var(--win); }
+
+.cla-avviso {
+  border-left: 3px solid var(--gold-500);
+  background: rgba(217, 180, 106, 0.05);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 0.6rem 0.9rem;
+  margin: 0 0 0.9rem;
+  font-size: 0.86rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+.cla-tutti {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  margin-bottom: 0.8rem;
+  cursor: pointer;
+}
+.cla-tutti input { accent-color: var(--gold-500); }
+
+.cla-tab { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+.cla-tab th {
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--border);
+  padding: 0 0.6rem 0.5rem 0;
+  white-space: nowrap;
+}
+.cla-tab td {
+  padding: 0.5rem 0.6rem 0.5rem 0;
+  border-bottom: 1px solid var(--border-soft);
+  color: var(--text-muted);
+}
+.cla-tab .n { text-align: right; font-variant-numeric: tabular-nums; }
+.cla-tab tr.fuori td { background: rgba(200, 91, 91, 0.07); }
+.cla-tab td.giu { color: var(--loss); font-weight: 600; }
+
+.cla-soc { white-space: nowrap; color: var(--text); }
+.cla-soc img { width: 18px; height: 18px; object-fit: contain; vertical-align: -4px; margin-right: 0.4rem; }
+
+.cla-ruolo {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  color: var(--gold-400);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0 0.28rem;
+  margin-left: 0.3rem;
+}
+
+/* Il ruolo cambiato: si vede che c'è, e passandoci sopra si legge perché
+   cambia la soglia. Nasconderlo farebbe sembrare il verdetto più solido di
+   quanto sia. */
+.cla-cambio {
+  font-size: 0.68rem;
+  color: var(--draw);
+  border-bottom: 1px dotted var(--draw);
+  margin-left: 0.35rem;
+  cursor: help;
+}
+
+.cla-esito { white-space: nowrap; font-size: 0.78rem; }
+.e-sotto-soglia { color: var(--loss); font-weight: 600; }
+.e-a-norma { color: var(--win); }
+.e-senza-clausola, .e-senza-prezzo { color: var(--text-dim); }
+
+@media (max-width: 760px) {
+  .cla-tab { display: block; overflow-x: auto; white-space: nowrap; }
+}

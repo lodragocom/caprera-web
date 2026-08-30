@@ -26,6 +26,7 @@ const VOCI = [
 const VOCI_GOVERNO = [
   { to: '/area/federazione', label: 'Presidenza', icona: '⚑' },
   { to: '/area/atti', label: 'Atti di governo', icona: '§' },
+  { to: '/area/clausole', label: 'Clausole', icona: '⚖' },
 ]
 
 export default function AreaLayout() {
