@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { supabase, CONFIGURATO } from './supabase'
+import { dimentica } from './archivio'
 
 /**
  * La Tessera del Tifoso.
@@ -83,17 +84,39 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (!CONFIGURATO) return undefined
     let vivo = true
+    let ultimoUtente = null
 
     supabase.auth.getSession().then(async ({ data }) => {
       if (!vivo) return
+      ultimoUtente = data.session?.user?.id ?? null
       setUtente(data.session?.user ?? null)
       await leggiTessera(data.session?.user)
       if (vivo) setPronto(true)
     })
 
+    /*
+      Le interrogazioni si tengono in memoria per non rifarle ad ogni pagina
+      (`unaVolta` in archivio.js), e le chiavi sono la domanda: 'mieiIncarichi',
+      'laMiaTessera'. Ma quelle domande **dipendono da chi la fa**, non da come
+      e' scritta: se la memoria resta piena quando cambia la persona, il sito
+      continua a rispondere con quello che vedeva quella di prima.
+
+      E' il motivo per cui bisognava ricaricare a mano dopo ogni accesso: si
+      apre il sito da sconosciuti, la home chiede, poi si entra — e le risposte
+      da sconosciuto sono ancora li'.
+
+      Si svuota **solo quando cambia davvero la persona**, non ad ogni evento:
+      `onAuthStateChange` scatta anche al rinnovo del token, ogni ora, e li'
+      buttare via tutto significherebbe riscaricare l'archivio per niente.
+    */
     const { data: sub } = supabase.auth.onAuthStateChange(async (evento, sessione) => {
       if (!vivo) return
       if (evento === 'PASSWORD_RECOVERY') setRecupero(true)
+      const adesso = sessione?.user?.id ?? null
+      if (adesso !== ultimoUtente) {
+        dimentica()
+        ultimoUtente = adesso
+      }
       setUtente(sessione?.user ?? null)
       await leggiTessera(sessione?.user)
       setPronto(true)
