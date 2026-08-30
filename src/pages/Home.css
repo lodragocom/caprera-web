@@ -363,3 +363,24 @@
   }
   .decennale .centro { order: -1; }
 }
+
+/* Il video di presentazione.
+   L'altezza e' contenuta apposta: il poster e' lo stemma, che e' QUADRATO, e
+   senza un limite riempirebbe mezza pagina prima ancora che qualcuno prema
+   play. `contain` lo tiene intero invece di deformarlo, e il fondo scuro
+   riempie il resto — cosi' funziona anche se il prossimo video sara'
+   verticale, che oggi non sappiamo. */
+.video-pres {
+  display: block;
+  width: 100%;
+  max-height: 380px;
+  object-fit: contain;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-soft);
+  background: var(--navy-900);
+  box-shadow: var(--shadow);
+}
+
+@media (max-width: 620px) {
+  .video-pres { max-height: 300px; }
+}

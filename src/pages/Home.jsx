@@ -91,6 +91,31 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ---------------------------------------------------------- video */}
+      <section className="container wide block">
+        <h2 className="section-title">La Federazione in mezzo minuto</h2>
+        {/*
+          `preload="none"`: il video pesa 11 MB e dura 29 secondi. Senza questo
+          lo scaricherebbe **chiunque apra la home**, anche chi non lo guarda —
+          e su una rete lenta sarebbe la cosa più pesante del sito. Così il
+          costo lo paga solo chi preme play.
+
+          Il poster è lo stemma: si vede subito di cosa si tratta, e sono
+          21 KB invece di undici megabyte.
+        */}
+        <video
+          className="video-pres"
+          controls
+          preload="none"
+          poster={federazioneStemma}
+          playsInline
+        >
+          <source src={`${import.meta.env.BASE_URL}video/presentazione.mp4`} type="video/mp4" />
+          Il tuo browser non riesce a mostrare il video.{' '}
+          <a href={`${import.meta.env.BASE_URL}video/presentazione.mp4`}>Scaricalo</a>.
+        </video>
+      </section>
+
       {/* --------------------------------------------------------- stats */}
       <section className="container wide">
         <div className="stat-row">
