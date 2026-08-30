@@ -3,7 +3,10 @@
    Navy araldico + oro, ripreso dallo stemma della lega.
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap');
+/* I font li serviamo noi: vedi public/fonts/font.css e il commento che c'e'
+   dentro. Non e' una scelta di prestazioni — la richiesta a Google partiva
+   prima del consenso ai cookie. */
+@import url('/fonts/font.css');
 
 :root {
   /* superfici */
