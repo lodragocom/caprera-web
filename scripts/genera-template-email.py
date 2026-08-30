@@ -8,7 +8,7 @@ debba essere fatta tre volte e dimenticata due.
 """
 import pathlib
 
-STEMMA = "https://ziggietzdtdtpsfmpthm.supabase.co/storage/v1/object/public/pubblico/stemma.png"
+STEMMA = "https://ziggietzdtdtpsfmpthm.supabase.co/storage/v1/object/public/pubblico/federazione-stemma.png"
 
 GUSCIO = """<!doctype html>
 <html lang="it">
