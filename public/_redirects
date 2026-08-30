@@ -1,6 +1,0 @@
-# Cloudflare Pages: il sito e' una sola pagina con le rotte gestite da
-# react-router. Senza questa riga, aprire direttamente
-# federazionecaprera.com/area/tessera (o ricaricare la pagina) darebbe 404:
-# quel file su disco non esiste, esiste solo index.html.
-# 200, non 301: l'indirizzo nella barra deve restare quello vero.
-/*    /index.html   200

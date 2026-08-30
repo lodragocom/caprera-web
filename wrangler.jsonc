@@ -1,0 +1,26 @@
+{
+  // Il sito della Federazione su Cloudflare Workers.
+  //
+  // Cloudflare non l'ha creato come progetto Pages ma come Worker con static
+  // assets — e' il default di adesso — e li' il fallback per una single page
+  // application NON si scrive in `_redirects`.
+  //
+  // La riga `/*  /index.html  200`, che su Pages e' la regola giusta, qui e' un
+  // anello infinito: riscrive verso /index.html, che rientra nella regola, che
+  // riscrive di nuovo. Cloudflare se ne accorge e rifiuta il deploy — e fa bene,
+  // perche' l'alternativa sarebbe scoprirlo dal sito che non risponde.
+  //
+  // Al suo posto c'e' `not_found_handling`: stesso effetto — chi apre
+  // /classifica o ricarica /area/tessera riceve index.html e il router fa il
+  // resto — dichiarato dove questa piattaforma lo cerca.
+  //
+  // `_headers` invece resta valido e continua a funzionare: sta in public/ e
+  // Vite lo copia in dist/ ad ogni build.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "caprera-web",
+  "compatibility_date": "2026-08-30",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  }
+}
