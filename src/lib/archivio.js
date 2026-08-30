@@ -799,3 +799,16 @@ export async function cambiaIncarichi(email, lista) {
   if (error) throw new Error(error.message)
   return data
 }
+
+/**
+ * Elimina l'accesso di una persona: scheda, incarichi, collegamento e account.
+ *
+ * **Non si torna indietro.** La via normale e' `revocaTessera`, che lascia
+ * l'account: questa serve quando la persona deve sparire, non solo cambiare
+ * squadra. Il database rifiuta di cancellare chi chiama.
+ */
+export async function eliminaAccesso(email) {
+  const { data, error } = await db().rpc('elimina_accesso', { p_email: email })
+  if (error) throw new Error(error.message)
+  return data
+}

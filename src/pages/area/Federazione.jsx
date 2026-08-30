@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { useAuth } from '../../lib/auth'
 import { getTeam, logoUrl } from '../../lib/core'
 import {
-  governoSocieta, emettiTessera, revocaTessera, cambiaIncarichi, incarichi as tuttiGliIncarichi,
+  governoSocieta, emettiTessera, revocaTessera, cambiaIncarichi, eliminaAccesso,
+  incarichi as tuttiGliIncarichi,
 } from '../../lib/archivio'
 import { Pagina, Cascata, Voce } from '../../components/moto'
 import './Federazione.css'
@@ -143,7 +144,7 @@ function Modulo({ r, ruoli, atto }) {
   const [email, setEmail] = useState(r.email ?? '')
   const [nome, setNome] = useState(r.nome ?? '')
   const [scelti, setScelti] = useState((r.incarichi ?? []).filter((i) => i !== 'mister'))
-  const [conferma, setConferma] = useState(false)
+  const [conferma, setConferma] = useState(null)   // 'revoca' | 'elimina'
 
   const spunta = (id) =>
     setScelti(scelti.includes(id) ? scelti.filter((x) => x !== id) : [...scelti, id])
@@ -193,16 +194,40 @@ function Modulo({ r, ruoli, atto }) {
           </button>
         )}
         {r.email && !conferma && (
-          <button className="fed-via" onClick={() => setConferma(true)}>Revoca la tessera…</button>
+          <>
+            <button className="fed-via" onClick={() => setConferma('revoca')}>
+              Revoca la tessera…
+            </button>
+            {r.registrato && (
+              <button className="fed-via" onClick={() => setConferma('elimina')}>
+                Elimina l’accesso…
+              </button>
+            )}
+          </>
         )}
-        {r.email && conferma && (
+
+        {/* Due conferme distinte, perché sono due cose diverse: una si disfa,
+            l'altra no. Un solo bottone «sei sicuro?» le confonderebbe. */}
+        {conferma === 'revoca' && (
           <span className="fed-conferma">
             La società resta scoperta. L’accesso della persona <strong>non</strong> viene
             cancellato, e riemettendo la tessera si ricollega da solo.
             <button className="fed-via" onClick={() => atto(revocaTessera(r.email))}>
               Revoca davvero
             </button>
-            <button onClick={() => setConferma(false)}>Lascia stare</button>
+            <button onClick={() => setConferma(null)}>Lascia stare</button>
+          </span>
+        )}
+        {conferma === 'elimina' && (
+          <span className="fed-conferma grave">
+            <strong>Non si torna indietro.</strong> Spariscono scheda, incarichi,
+            collegamento e l’accesso stesso: <em>{r.email}</em> non potrà più entrare,
+            e per rientrare dovrà registrarsi da capo. Se ti serve solo liberare la
+            società, usa <strong>Revoca la tessera</strong>.
+            <button className="fed-via" onClick={() => atto(eliminaAccesso(r.email))}>
+              Elimina davvero
+            </button>
+            <button onClick={() => setConferma(null)}>Lascia stare</button>
           </span>
         )}
       </div>

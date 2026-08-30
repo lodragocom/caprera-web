@@ -147,3 +147,13 @@
   .fed-incarichi { grid-area: incarichi; }
   .fed-stato { grid-area: stato; text-align: left; }
 }
+
+/* La conferma dell'eliminazione si distingue da quella della revoca: una si
+   disfa, l'altra no, e devono sembrare due cose diverse anche di sfuggita. */
+.fed-conferma.grave {
+  border: 1px solid var(--loss);
+  border-radius: var(--radius);
+  padding: 0.6rem 0.75rem;
+  background: rgba(200, 91, 91, 0.08);
+  color: var(--text);
+}
