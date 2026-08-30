@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../../lib/auth'
 import { getTeam, logoUrl } from '../../lib/core'
-import { attiLega, registraAtto, cancellaAtto, vociAtti, stagioni as tutteLeStagioni } from '../../lib/archivio'
+import { attiLega, registraAtto, cancellaAtto, catalogoVoci, stagioni as tutteLeStagioni } from '../../lib/archivio'
 import { Pagina } from '../../components/moto'
 import './Atti.css'
 
@@ -43,7 +43,9 @@ export default function Atti() {
   }, [])
 
   useEffect(() => {
-    vociAtti().then(setCatalogo).catch(() => {})
+    // il catalogo DEFINITO, non piu' quello dedotto da cio' che era gia'
+    // stato usato: cosi' una penalita' nuova esiste prima di servire
+    catalogoVoci().then((v) => setCatalogo(v.filter((x) => x.attiva))).catch(() => {})
     tutteLeStagioni().then((s) => {
       const ordinate = [...s].sort((a, b) => b.id.localeCompare(a.id))
       setAnni(ordinate)
@@ -170,8 +172,8 @@ function Modulo({ v, set, stagione, salva, catalogo }) {
      volta che quella cosa e' stata assegnata. Resta modificabile, perche' le
      scale cambiano — il Fantapunti 2o e' stato 3 e 4 in stagioni diverse. */
   function scegli(voce) {
-    const c = voci.find((x) => x.voce === voce)
-    set({ ...v, voce, crediti: c ? String(c.importo) : v.crediti })
+    const c = voci.find((x) => x.nome === voce)
+    set({ ...v, voce, crediti: c && c.importo != null ? String(c.importo) : v.crediti })
   }
 
   return (
@@ -213,15 +215,16 @@ function Modulo({ v, set, stagione, salva, catalogo }) {
                placeholder="scegli dall’elenco, o scrivine una nuova" />
         <datalist id="voci-atti">
           {voci.map((c) => (
-            <option key={c.voce} value={c.voce}>
-              {c.importo > 0 ? `+${c.importo}` : c.importo} · {c.volte} volte, ultima {c.ultima}
+            <option key={c.id} value={c.nome}>
+              {c.importo == null ? '' : (c.importo > 0 ? `+${c.importo}` : c.importo)}
+              {c.descrizione ? ` · ${c.descrizione}` : ''}
             </option>
           ))}
         </datalist>
         <em>
           {voci.length > 0
-            ? `${voci.length} voci già usate per questo tipo. Sceglierne una compila i crediti con l’ultimo importo assegnato.`
-            : 'Nessuna voce ancora usata per questo tipo: scrivila, e la prossima volta sarà nell’elenco.'}
+            ? `${voci.length} voci a catalogo per questo tipo. Sceglierne una compila i crediti col valore predefinito, che resta modificabile.`
+            : 'Nessuna voce a catalogo per questo tipo: definiscila in «Premi e penalità», oppure scrivila qui.'}
         </em>
       </label>
 

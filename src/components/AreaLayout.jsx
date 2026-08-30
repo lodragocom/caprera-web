@@ -27,6 +27,7 @@ const VOCI_GOVERNO = [
   { to: '/area/federazione', label: 'Presidenza', icona: '⚑' },
   { to: '/area/atti', label: 'Atti di governo', icona: '§' },
   { to: '/area/clausole', label: 'Clausole', icona: '⚖' },
+  { to: '/area/catalogo', label: 'Premi e penalità', icona: '⊞' },
 ]
 
 export default function AreaLayout() {

@@ -878,3 +878,45 @@ export const vociAtti = () =>
     if (error) throw new Error(error.message)
     return data ?? []
   })
+
+/* ------------------------------------- Il catalogo di premi e penalita' */
+
+/**
+ * Le voci definite: premi e penalita' che la Presidenza puo' registrare.
+ *
+ * Diverso da `vociAtti()`, che le ricavava da quelle gia' usate: qui sono
+ * **definite**, quindi una penalita' nuova esiste prima di essere applicata e
+ * un importo si corregge senza aspettare l'occasione di riusarlo.
+ */
+export const catalogoVoci = () =>
+  db().from('voci_atto').select('id, categoria, nome, importo, descrizione, attiva, ordine')
+    .order('categoria').order('ordine').order('nome')
+    .then(({ data, error }) => {
+      if (error) throw new Error(error.message)
+      return data ?? []
+    })
+
+/** Aggiunge o aggiorna una voce. `id` nullo = nuova. */
+export async function salvaVoce(v) {
+  const { data, error } = await db().rpc('salva_voce_atto', {
+    p_id: v.id ?? null,
+    p_categoria: v.categoria,
+    p_nome: String(v.nome ?? '').trim(),
+    p_importo: v.importo === '' || v.importo == null ? null : Number(v.importo),
+    p_descrizione: String(v.descrizione ?? '').trim() || null,
+    p_attiva: v.attiva !== false,
+    p_ordine: Number(v.ordine ?? 100),
+  })
+  if (error) throw new Error(error.message)
+  return data
+}
+
+/**
+ * Mette da parte una voce, o la rimette in uso. **Non si cancella**: una voce
+ * usata in passato deve restare leggibile negli atti che la citano.
+ */
+export async function ritiraVoce(id, attiva) {
+  const { data, error } = await db().rpc('ritira_voce_atto', { p_id: id, p_attiva: attiva })
+  if (error) throw new Error(error.message)
+  return data
+}
