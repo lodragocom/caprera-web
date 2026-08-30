@@ -36,6 +36,7 @@ const AreaCoppe = lazy(() => AreaSezioni().then((m) => ({ default: m.Coppe })))
 const AreaFormazioni = lazy(() => import('./pages/area/Formazioni'))
 const AreaTessera = lazy(() => import('./pages/area/Tessera'))
 const AreaFederazione = lazy(() => import('./pages/area/Federazione'))
+const AreaAtti = lazy(() => import('./pages/area/Atti'))
 const Statistiche = lazy(() => import('./pages/Statistiche'))
 const Privacy = lazy(() => import('./pages/Privacy'))
 const Termini = lazy(() => import('./pages/Termini'))
@@ -100,6 +101,7 @@ export default function App() {
             <Route path="storia" element={<AreaStoria />} />
             <Route path="tessera" element={<AreaTessera />} />
             <Route path="federazione" element={<AreaFederazione />} />
+            <Route path="atti" element={<AreaAtti />} />
           </Route>
         </Routes>
       </Suspense>

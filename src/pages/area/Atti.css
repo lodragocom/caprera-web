@@ -1,0 +1,146 @@
+/* Gli atti di governo. Un elenco per società, perché la domanda vera non è
+   «quali atti ho firmato» ma «quanto ha preso o perso ciascuno, e perché». */
+
+.atti h1 { margin-bottom: 0.4rem; }
+.atti-nota { color: var(--text-muted); margin: 0 0 1rem; }
+
+.atti-barra {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  align-items: flex-end;
+  margin-bottom: 1rem;
+}
+.atti-barra label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+.atti-barra select, .atti-modulo select, .atti-modulo input {
+  background: var(--navy-900);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 0.45rem 0.6rem;
+  font: inherit;
+  font-size: 0.9rem;
+}
+.atti-nuovo, .atti-ok {
+  font: inherit;
+  font-size: 0.88rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--gold-600);
+  background: transparent;
+  color: var(--gold-400);
+  cursor: pointer;
+}
+.atti-nuovo:hover, .atti-ok:hover { background: rgba(217, 180, 106, 0.08); }
+.atti-ok:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.atti-errore, .atti-esito {
+  border-radius: var(--radius);
+  padding: 0.6rem 0.9rem;
+  margin: 0 0 0.9rem;
+  font-size: 0.9rem;
+}
+.atti-errore { background: rgba(200, 91, 91, 0.12); border: 1px solid var(--loss); }
+.atti-esito { background: rgba(63, 174, 116, 0.10); border: 1px solid var(--win); }
+
+/* il modulo */
+.atti-modulo {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--navy-850);
+  padding: 1rem;
+  margin-bottom: 1.2rem;
+}
+.atti-campi {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.9rem;
+  align-items: start;      /* mai stirati all'altezza del vicino piu' alto */
+}
+.atti-modulo label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  align-self: start;
+}
+.atti-modulo em {
+  font-style: normal;
+  font-size: 0.74rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+.atti-motivo { margin-top: 0.9rem; }
+.atti-motivo input { width: 100%; box-sizing: border-box; }
+.atti-bottoni { margin-top: 0.9rem; }
+
+/* l'elenco */
+.atti-soc {
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  background: var(--navy-800);
+  margin-bottom: 0.7rem;
+  overflow: hidden;
+}
+.atti-soc header {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.6rem 0.9rem;
+  background: var(--navy-850);
+  border-bottom: 1px solid var(--border-soft);
+}
+.atti-soc header img { width: 26px; height: 26px; object-fit: contain; }
+.atti-soc h2 { margin: 0; font-size: 0.98rem; flex: 1; }
+
+.atti-tot {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-variant-numeric: tabular-nums;
+}
+.atti-tot.su, .atti-cred.su { color: var(--win); }
+.atti-tot.giu, .atti-cred.giu { color: var(--loss); }
+
+.atti-soc table { width: 100%; border-collapse: collapse; }
+.atti-soc td {
+  padding: 0.45rem 0.9rem;
+  border-bottom: 1px solid var(--border-soft);
+  font-size: 0.86rem;
+  vertical-align: top;
+}
+.atti-soc tr:last-child td { border-bottom: 0; }
+
+.atti-cat { color: var(--gold-400); white-space: nowrap; width: 1%; font-size: 0.78rem; }
+.atti-voce { color: var(--text-muted); }
+.atti-cred {
+  text-align: right;
+  white-space: nowrap;
+  width: 1%;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.atti-fonte { text-align: right; width: 1%; white-space: nowrap; }
+.atti-fonte em { font-style: normal; font-size: 0.7rem; color: var(--text-dim); }
+.atti-fonte button {
+  font: inherit;
+  border: 1px solid var(--border-soft);
+  background: transparent;
+  color: var(--text-dim);
+  border-radius: 6px;
+  width: 22px;
+  height: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+.atti-fonte button:hover { border-color: var(--loss); color: var(--loss); }
+
+@media (max-width: 640px) {
+  .atti-cat { display: none; }   /* sul telefono vince il motivo, non l'etichetta */
+}

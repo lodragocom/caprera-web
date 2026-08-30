@@ -25,6 +25,7 @@ const VOCI = [
    quella la fanno le funzioni, che si chiudono su caprera.vede_tutto(). */
 const VOCI_GOVERNO = [
   { to: '/area/federazione', label: 'Presidenza', icona: '⚑' },
+  { to: '/area/atti', label: 'Atti di governo', icona: '§' },
 ]
 
 export default function AreaLayout() {

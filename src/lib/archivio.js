@@ -812,3 +812,39 @@ export async function eliminaAccesso(email) {
   if (error) throw new Error(error.message)
   return data
 }
+
+/* --------------------------------------------- Gli atti della Presidenza */
+
+/**
+ * Gli atti di governo di una stagione: penalita', premi, Caprera Etica.
+ *
+ * Il mercato non c'e' e non e' una dimenticanza: quello nasce dalle
+ * compravendite e ha una pagina sua. Qui si guarda cio' che la Presidenza
+ * **decide**, che e' l'altra meta' di `finanze.bonus`.
+ */
+export const attiLega = (stagione = null) =>
+  db().rpc('atti_lega', { p_stagione: stagione }).then(({ data, error }) => {
+    if (error) throw new Error(error.message)
+    return data ?? []
+  })
+
+/** Scrive un atto. Il database rifiuta chi non governa, e i motivi vuoti. */
+export async function registraAtto({ stagione, societa, categoria, voce, crediti }) {
+  const { data, error } = await db().rpc('registra_atto', {
+    p_stagione: stagione, p_societa: societa, p_categoria: categoria,
+    p_voce: String(voce ?? '').trim(), p_crediti: Number(crediti),
+  })
+  if (error) throw new Error(error.message)
+  return data
+}
+
+/**
+ * Cancella un atto — **solo** quelli decisi dalla Presidenza da qui.
+ * Le righe trascritte dal registro di Guido non si toccano: se una e'
+ * sbagliata si registra un atto che la corregge, come uno storno.
+ */
+export async function cancellaAtto(id) {
+  const { data, error } = await db().rpc('cancella_atto', { p_id: id })
+  if (error) throw new Error(error.message)
+  return data
+}
