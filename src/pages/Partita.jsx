@@ -5,7 +5,7 @@ import { getTeam, logoUrl, teamName } from '../lib/core'
 import {
   useArchivio, partita, turni, formazioniPartita, bonusTipi, competizioni,
 } from '../lib/archivio'
-import { tabellinoLato, perReparto, MAX_SOSTITUZIONI } from '../lib/tabellino'
+import { tabellinoLato, perReparto, maxSostituzioni } from '../lib/tabellino'
 import { Pagina, Sezione, Numero } from '../components/moto'
 import './Partita.css'
 
@@ -165,7 +165,7 @@ export default function Partita() {
                     sono applicate con la regola della lega — al posto di un
                     titolare senza voto entra il primo di panchina dello stesso
                     ruolo che il voto ce l'ha, seguendo l'ordine della panchina,
-                    fino a {MAX_SOSTITUZIONI}. Ricalcolando così tutte le
+                    fino a {maxSostituzioni(g.stagione)}. Ricalcolando così tutte le
                     formazioni di dieci stagioni il totale coincide con quello
                     registrato nel 98,7% dei casi, e nelle ultime tre stagioni
                     sempre.

@@ -21,8 +21,30 @@
  * risultato scritto in archivio.
  */
 
-/** Massimo di sostituzioni per partita (regolamento, § campo). */
-export const MAX_SOSTITUZIONI = 4
+/**
+ * Massimo di sostituzioni per partita, **per stagione**.
+ *
+ * Erano quattro fino al 2025-26. Dal 2026-27 sono cinque, per esito del
+ * Referendum Separazione Carriere (L0, 30/08/2026).
+ *
+ * Non è una costante e non può esserlo: ricalcolare una partita del 2022-23
+ * con cinque sostituzioni vorrebbe dire **riscrivere il passato con la regola
+ * di adesso** — e il tabellino serve proprio a spiegare come è andata allora.
+ * Stessa logica delle soglie del modificatore difesa qui sotto: ogni valore
+ * vale dalla stagione in cui compare fino a quella in cui ne subentra un
+ * altro.
+ */
+const SOSTITUZIONI = [
+  ['2026-27', 5],
+  ['0000-00', 4],   // tutto ciò che viene prima
+]
+
+export function maxSostituzioni(stagione) {
+  return (SOSTITUZIONI.find(([da]) => (stagione ?? '9999-99') >= da) ?? ['', 4])[1]
+}
+
+/** Quante se ne fanno oggi. Per una partita, usare `maxSostituzioni(stagione)`. */
+export const MAX_SOSTITUZIONI = maxSostituzioni('2026-27')
 
 /**
  * Le eccezioni al valore di un bonus, per stagione.
@@ -138,6 +160,8 @@ export function fantavoto(g, valori, stagione) {
  */
 export function tabellinoLato(lato, valori, stagione, fpRegistrati) {
   const conFv = (g) => ({ ...g, fv: fantavoto(g, valori, stagione) })
+  // Quante se ne facevano QUELL'anno, non quante se ne fanno adesso.
+  const massimo = maxSostituzioni(stagione)
 
   const titolari = [...(lato.titolari ?? [])]
     .sort((a, b) => a.ordine - b.ordine).map(conFv)
@@ -154,12 +178,12 @@ export function tabellinoLato(lato, valori, stagione, fpRegistrati) {
       continue
     }
     /* Il primo di panchina di quel ruolo che ha preso voto, nell'ordine in
-       cui il mister l'ha messa. Esaurite le quattro sostituzioni, il posto
-       resta vuoto: e' quello che succede davvero. */
+       cui il mister l'ha messa. Esaurite le sostituzioni di quella stagione,
+       il posto resta vuoto: e' quello che succede davvero. */
     const i = panchina.findIndex(
       (p, k) => !usati.has(k) && p.ruolo === t.ruolo && p.fv != null
     )
-    if (i === -1 || cambi.length >= MAX_SOSTITUZIONI) {
+    if (i === -1 || cambi.length >= massimo) {
       campo.push({ ...t, come: 'assente' })
       continue
     }
