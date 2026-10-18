@@ -7,6 +7,7 @@ import { gareSocieta, aggregaCampionato, serieCampionato, seriePremio, quotazion
 import { Linee, Barre, Dispersione } from './GraficiLega'
 import './AnalisiLega.css'
 import PerformanceGiocatori from './PerformanceGiocatori'
+import RoseArchivio from './RoseArchivio'
 
 const nome=id=>getTeam(id)?.name??id
 const breve=id=>getTeam(id)?.short??id
@@ -16,9 +17,12 @@ const premi=['valore_rosa','fair_play','panchina_oro','zdenek']
 const numero=v=>v==null?null:Number(v)
 function Pannello({titolo,nota,children,wide=false}){return <section className={`ana-pannello${wide?' ana-largo':''}`}><h2>{titolo}</h2>{nota&&<p className="ana-nota">{nota}</p>}{children}</section>}
 
-export default function AnalisiLega({societa=null,soloCampionato=false,stagioneIniziale=null}) {
-  const [parametri]=useSearchParams()
-  const [scelta,setScelta]=useState(null),[tab,setTab]=useState(parametri.get('sezione')==='performance'?'performance':'campionato')
+export default function AnalisiLega({societa=null,soloCampionato=false,stagioneIniziale=null,privato=false}) {
+  const [parametri,setParametri]=useSearchParams()
+  const [scelta,setScelta]=useState(null)
+  const sezione=parametri.get('sezione')
+  const tab=['campionato','rose-storico','rose','giocatori','performance','confronti','storico'].includes(sezione)?sezione:'campionato'
+  const setTab=id=>setParametri(p=>{const next=new URLSearchParams(p);next.set('sezione',id);return next})
   const anni=useArchivio('stagioni',stagioni)
   const stagione=scelta??stagioneIniziale??stagioneAttiva(anni.dati??[])?.id
   const pa=useArchivio(['partite',stagione,'campionato'],()=>stagione?partite(stagione):Promise.resolve([]),[stagione])
@@ -31,12 +35,13 @@ export default function AnalisiLega({societa=null,soloCampionato=false,stagioneI
   const squadre=useMemo(()=>[...new Set([...(ca.dati??[]).map(r=>r.societa),...gare.map(g=>g.societa),...(ro.dati??[]).map(r=>r.societa)])],[ca.dati,gare,ro.dati])
   const valore=useMemo(()=>quotazioniRose(ro.dati??[],quote),[ro.dati,quote])
   const ultima=Math.max(0,...gare.map(g=>g.giornata))
-  const tabs=[['campionato','Campionato'],['rose','Rose e valori'],['giocatori','Giocatori e svincolati'],['performance','Performance giocatori'],['confronti','Scontri diretti'],['storico','Storico']]
+  const tabs=[['campionato','Campionato'],['rose-storico','Rose attuali e storico'],['rose','Rose e valori'],['giocatori','Giocatori e svincolati'],['performance','Performance giocatori'],['confronti','Scontri diretti'],['storico','Storico']]
   return <div className="analisi-lega">
-    {!soloCampionato&&<><div className="ana-intro"><div><h2>Il laboratorio della lega</h2><p>Risultati, valori e confronti dalla stagione in corso allo storico.</p></div><label>Stagione<select aria-label="Stagione delle analisi" value={stagione??''} onChange={e=>setScelta(e.target.value)}>{(anni.dati??[]).map(s=><option key={s.id}>{s.id}</option>)}</select></label></div><nav className="ana-tabs" aria-label="Analisi della lega">{tabs.map(([id,t])=><button type="button" key={id} aria-pressed={tab===id} onClick={()=>setTab(id)}>{t}</button>)}</nav></>}
+    {!soloCampionato&&<><div className="ana-intro"><div><h2>Il laboratorio della lega</h2><p>Risultati, valori e confronti dalla stagione in corso allo storico.</p></div>{tab!=='rose-storico'&&<label>Stagione<select aria-label="Stagione delle analisi" value={stagione??''} onChange={e=>setScelta(e.target.value)}>{(anni.dati??[]).map(s=><option key={s.id}>{s.id}</option>)}</select></label>}</div><nav className="ana-tabs" aria-label="Analisi della lega">{tabs.map(([id,t])=><button type="button" key={id} aria-pressed={tab===id} onClick={()=>setTab(id)}>{t}</button>)}</nav></>}
     {pa.errore&&<p role="alert">Impossibile caricare i risultati: {pa.errore}</p>}
     {pa.caricamento&&<p role="status">Carico le analisi della stagione…</p>}
     {(tab==='campionato'||soloCampionato)&&<Campionato key={stagione} stagione={stagione} gare={gare} classifica={ca.dati??[]} statistiche={st.dati??[]} erroreStatistiche={st.errore} squadre={squadre} societa={societa} ultima={ultima} compatta={soloCampionato}/>}
+    {!soloCampionato&&tab==='rose-storico'&&<RoseArchivio key={societa} societaIniziale={societa} privato={privato}/>}
     {!soloCampionato&&tab==='rose'&&<Rose valori={valore} rose={ro.dati??[]} quote={quote} correnti={Boolean(li.dati?.fine?.length)} />}
     {!soloCampionato&&tab==='giocatori'&&<Giocatori key={stagione} rose={ro.dati??[]} quote={quote} correnti={Boolean(li.dati?.fine?.length)}/>}
     {!soloCampionato&&tab==='performance'&&<PerformanceGiocatori key={stagione} stagione={stagione} societaIniziale={societa}/>}

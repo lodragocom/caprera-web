@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useDeferredValue, useMemo, useState } from 'react'
 import TeamBadge from '../components/TeamBadge'
 import { getTeam } from '../lib/core'
@@ -84,6 +85,7 @@ export default function Rose() {
       <header className="page-head">
         <p className="eyebrow">Mercato</p>
         <h1>Rose e crediti</h1>
+        <p><Link to="/statistiche?sezione=rose-storico">Rose attuali e storico · dati e grafici della Shiny →</Link></p>
         <p className="lede">
           Ogni rosa vale 6-9-9-7 e si costruisce con 250 crediti più 3 per gli Under.
           Qui trovi chi ha comprato chi, a quanto, e come è andata.

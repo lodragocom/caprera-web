@@ -1,5 +1,13 @@
 # Collaudo del sito
 
+## Rose attuali e storico Shiny
+
+`node collaudo/collaudo-rose-storico.mjs` usa la fonte privata e API simulate:
+3.193 righe, filtri, dodici colonne, storico, dati mancanti, assenze, isolamento
+dei dettagli contrattuali, errori RPC e mobile. Nessuna scrittura al database.
+`node collaudo/rose-storico-permessi.mjs` verifica i permessi del database reale
+in transazione di sola lettura sempre annullata, senza stampare identità.
+
 ## Consegna delle formazioni
 
 - `node --test collaudo/consegna-regole.test.mjs`: validazione titolari, modulo e panchina.

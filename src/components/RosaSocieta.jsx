@@ -154,7 +154,7 @@ export default function RosaSocieta({ teamId, stagioni, stagioneIniziale, compat
         <Scheda etichetta="Calciatori" valore={riepilogo.quanti}
                 sotto={`${riepilogo.perRuolo.P}-${riepilogo.perRuolo.D}-${riepilogo.perRuolo.C}-${riepilogo.perRuolo.A}`} />
         {riepilogo.conCosto > 0 && (
-          <Scheda etichetta={vista === 'partenza' ? 'Speso all’asta' : 'Valore rosa'}
+          <Scheda etichetta={vista === 'partenza' ? 'Speso all’asta' : 'Costo della rosa'}
                   valore={riepilogo.spesi} sotto="crediti" />
         )}
         {riepilogo.fmMedia && <Scheda etichetta="Fantamedia" valore={riepilogo.fmMedia} sotto="media rosa" />}

@@ -1040,6 +1040,7 @@ export function Rosa() {
             {corrente ? `Stagione ${scelta}` : `Archivio · ${scelta}`}
           </p>
           <h1>La mia rosa</h1>
+          <p><Link to="/area/analisi?sezione=rose-storico">Rose attuali e storico · tabelle e grafici della Shiny →</Link></p>
         </div>
         <label className="ro-stagione">
           <span>Stagione</span>

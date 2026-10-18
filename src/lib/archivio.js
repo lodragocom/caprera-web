@@ -108,6 +108,20 @@ export function useArchivio(chiave, domanda, dipendenze = []) {
 
 const db = () => supabase
 
+// Fotografia Clubs > Rose: conserva anche le colonne storiche della fonte.
+export const sintesiRoseShiny = () => unaVolta('sintesiRoseShiny', () =>
+  db().from('rose_sintesi_shiny').select('*').order('societa').order('stagione'))
+export const storicoRoseShiny = societa => unaVolta(['storicoRoseShiny',societa].join('·'), () =>
+  tutte(() => db().from('rose_storico_shiny').select('*').eq('societa',societa).order('ordine')))
+export const assenzeRoseShiny = societa => unaVolta(['assenzeRoseShiny',societa].join('·'), () =>
+  db().from('rose_assenze_shiny').select('*').eq('societa',societa).order('ragione').order('nome'))
+// Dettagli riservati senza cache: il database verifica tessera e incarichi.
+export async function dettagliRosaShiny(societa) {
+  const {data,error} = await db().rpc('dettagli_rosa_shiny',{p_societa:societa})
+  if(error) throw new Error(error.message)
+  return data
+}
+
 // Consegne: dati privati e mutevoli, senza cache fra dispositivi o sessioni.
 export async function laMiaConsegna(turno = null) {
   const { data, error } = await db().rpc('la_mia_consegna', { p_turno: turno })

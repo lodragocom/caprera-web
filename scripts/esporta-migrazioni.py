@@ -51,9 +51,15 @@ DESTINAZIONE_DATI = RADICE.parent / "caprera-dati" / "SUPABASE" / "migrazioni-da
 # copia di partenza. Nel dubbio si guarda il dato, non il nome dello schema.
 RISERVATE = re.compile(
     r"\b(?:insert\s+into|update|copy)\s+"
-    r"(?:caprera\.(?:finanze|contratti|movimenti)"
+    r"(?:caprera\.(?:finanze|contratti|movimenti|rose_riservate_shiny)"
     r"|lavoro\.(?:registro_mercato|\w*(?:finanz|contratt|movimenti|mercato)\w*))\b"
 )
+
+# Export acquisiti nel repository delle fonti il 18/10: conservarne la sede
+# canonica anche se contengono dati sportivi. Non duplicarli su GitHub.
+FONTI_PRIVATE = {
+    '20261018173000', '20261018181000', '20261018200000', '20261018201000',
+}
 
 
 def dove_va(sql: str) -> pathlib.Path:
@@ -106,7 +112,7 @@ def main() -> int:
 
     nuovi, cambiati, uguali, riservate = [], [], 0, 0
     for versione, nome, sql in righe:
-        cartella = dove_va(sql or "")
+        cartella = DESTINAZIONE_DATI if versione in FONTI_PRIVATE else dove_va(sql or "")
         if cartella is DESTINAZIONE_DATI:
             riservate += 1
             if not cartella.parent.parent.exists():
