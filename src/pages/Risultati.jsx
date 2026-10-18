@@ -23,7 +23,7 @@ import './Risultati.css'
  * Ogni partita porta al suo tabellino.
  */
 export default function Risultati() {
-  const [stagione, setStagione] = useState(CURRENT_SEASON)
+  const [scelta, setStagione] = useState(null)
   const [societa, setSocieta] = useState('')
   const [comp, setComp] = useState('campionato')
   /*
@@ -36,6 +36,7 @@ export default function Risultati() {
   const [giornata, setGiornata] = useState(undefined)
 
   const anni = useArchivio('stagioni', stagioni)
+  const stagione = scelta ?? (anni.dati ?? []).find((s) => !s.conclusa)?.id ?? anni.dati?.[0]?.id ?? CURRENT_SEASON
   const tutte = useArchivio('competizioni', competizioni)
   const ediz = useArchivio(['edizioni', stagione], () => edizioni(stagione), [stagione])
 

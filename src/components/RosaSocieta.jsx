@@ -57,7 +57,7 @@ export default function RosaSocieta({ teamId, stagioni, stagioneIniziale, compat
   const conPartenza = mo.dati?.partenza ?? []
   const ricostruite = mo.dati?.ricostruite ?? []
   const duePunti = conPartenza.includes(stagione)
-  const vista = duePunti ? momento : 'fine'
+  const vista = (mo.dati?.corrente ?? []).includes(stagione) ? 'corrente' : duePunti ? momento : 'fine'
 
   const stato = useArchivio(['rosa', stagione, teamId, vista],
     () => (stagione ? rosaDi(stagione, teamId, vista) : Promise.resolve([])),

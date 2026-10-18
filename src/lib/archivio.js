@@ -1,5 +1,6 @@
 import { supabase, CONFIGURATO } from './supabase'
 import { useEffect, useState } from 'react'
+import { stagioneAttiva, roseAttuali } from './stagioni'
 
 /**
  * L'archivio, letto dal database.
@@ -107,6 +108,40 @@ export function useArchivio(chiave, domanda, dipendenze = []) {
 
 const db = () => supabase
 
+// Consegne: dati privati e mutevoli, senza cache fra dispositivi o sessioni.
+export async function laMiaConsegna(turno = null) {
+  const { data, error } = await db().rpc('la_mia_consegna', { p_turno: turno })
+  if (error) throw new Error(error.code === 'PGRST202'
+    ? 'La consegna delle formazioni non è ancora attiva. Contatta la Presidenza.' : error.message)
+  return data
+}
+
+export async function inviaFormazione(turno, formazione, revisione) {
+  const { data, error } = await db().rpc('invia_la_mia_formazione', {
+    p_turno: turno, p_modulo: formazione.modulo, p_titolari: formazione.titolari,
+    p_panchina: formazione.panchina, p_revisione: revisione,
+  })
+  if (error) throw new Error(error.message)
+  return data
+}
+
+export async function salvaBozzaFormazione(stagione, formazione, revisione) {
+  const { data, error } = await db().rpc('salva_la_mia_bozza', {
+    p_stagione: stagione, p_modulo: formazione.modulo, p_titolari: formazione.titolari,
+    p_panchina: formazione.panchina, p_revisione: revisione,
+  })
+  if (error) throw new Error(error.message)
+  return data
+}
+
+export async function prossimoImpegno(stagione, societa) {
+  const { data, error } = await db().from('partite').select('giornata,casa,fuori')
+    .eq('stagione', stagione).eq('competizione', 'campionato').eq('giocata', false)
+    .or(`casa.eq.${societa},fuori.eq.${societa}`).order('giornata').limit(1)
+  if (error) throw new Error(error.message)
+  return data?.[0] ?? null
+}
+
 /* ------------------------------------------------------------ anagrafica */
 
 export const societa = () =>
@@ -116,6 +151,11 @@ export const societa = () =>
 export const stagioni = () =>
   unaVolta('stagioni', () => db().from('stagioni')
     .select('id, ordine, giornate, conclusa').order('ordine', { ascending: false }))
+
+export function useStagioneCorrente() {
+  const stato = useArchivio('stagioni', stagioni)
+  return { ...stato, stagione: stagioneAttiva(stato.dati ?? []) }
+}
 
 export const competizioni = () =>
   unaVolta('competizioni', () => db().from('competizioni')
@@ -149,10 +189,21 @@ export const forma = (stagione) =>
     .select('id, societa, giornata, esito, gol_fatti, gol_subiti, avversario, in_casa')
     .eq('stagione', stagione).order('giornata'))
 
+/** Valori pubblicati dalla Shiny: non si deducono cartellini o panchina dai gol. */
+export const statisticheGiornata = (stagione) =>
+  unaVolta(['statisticheGiornata', stagione].join('·'), () => db().from('statistiche_giornata')
+    .select('societa,giornata,fantapunti,valore_rosa,fair_play,panchina_oro,zdenek,fonte,aggiornato_al')
+    .eq('stagione', stagione).order('giornata').order('societa'))
+
 /** La classifica perpetua: cento righe, si sommano qui. */
 export const classificaPerpetua = () =>
-  unaVolta('perpetua', () => db().from('classifiche')
-    .select('stagione, societa, posizione, giocate, vinte, pari, perse, gol_fatti, gol_subiti, punti'))
+  Promise.all([unaVolta('perpetua', () => db().from('classifiche')
+    .select('stagione, societa, posizione, giocate, vinte, pari, perse, gol_fatti, gol_subiti, punti')), stagioni()])
+    .then(([righe, anni]) => {
+      // Una prima posizione provvisoria non e' un titolo vinto.
+      const concluse = new Set(anni.filter((a) => a.conclusa).map((a) => a.id))
+      return righe.filter((r) => concluse.has(r.stagione))
+    })
 
 export const classificaFantapunti = (stagione) =>
   unaVolta(['fantapunti', stagione].join('·'), () => db().from('v_classifica_fantapunti')
@@ -306,17 +357,19 @@ export const stagioniCoppeDi = (teamId) =>
  * mercato di gennaio: e' quella che il sito mostra dappertutto, ed e' anche
  * l'unica che esisteva prima. «partenza» e' quella uscita dall'asta.
  *
- * Il valore predefinito e' «fine» apposta: chi chiede una rosa senza dire
- * quale intende quella di sempre, e nessuna pagina cambia significato perche'
- * ne e' entrata un'altra accanto.
+ * Senza un momento esplicito si legge la rosa corrente, se presente, oppure
+ * quella di fine anno. Le fotografie non vengono mai sommate.
  */
-export const roseStagione = (stagione, momento = 'fine') =>
-  unaVolta(['roseStagione', stagione, momento].join('·'), () => db().from('rose')
+export const roseStagione = (stagione, momento = null) =>
+  unaVolta(['roseStagione', stagione, momento ?? 'attuale'].join('·'), () => {
+    const domanda = db().from('rose')
     // `calciatore` serve per portare dal nome in rosa alla sua scheda
     // `fonte` dice se la rosa di settembre e' trascritta da un file o
     // ricostruita dal campo: senza, chi legge non sa quanto fidarsi.
-    .select('calciatore, societa, nome, ruolo, club, costo, costo_stimato, presenze, mv, fm, fonte')
-    .eq('stagione', stagione).eq('momento', momento))
+    .select('id, momento, calciatore, societa, nome, ruolo, club, costo, costo_stimato, presenze, mv, fm, fonte')
+    .eq('stagione', stagione).order('id')
+    return momento ? domanda.eq('momento', momento) : domanda.in('momento', ['corrente','fine'])
+  }).then((righe) => momento ? righe : roseAttuali(righe ?? []))
 
 /**
  * Il listone di Fantapazz: quanto vale ogni calciatore secondo loro.
@@ -376,9 +429,11 @@ export const carrieraSocieta = (teamId) =>
     .eq('societa', teamId).order('stagione'))
 
 /** Le stagioni per cui esiste una rosa registrata. */
-export const stagioniRose = () =>
-  unaVolta('stagioniRose', () => tutte(() => db().from('rose')
-    .select('stagione').eq('momento', 'fine').order('id')))
+export const stagioniRose = (societa = null) =>
+  unaVolta(['stagioniRose',societa].join('·'), () => tutte(() => {
+    const q = db().from('rose').select('stagione').in('momento', ['corrente','fine']).order('id')
+    return societa ? q.eq('societa',societa) : q
+  }))
 
 /**
  * La rosa di una societa' in una stagione, a un momento preciso.
@@ -394,11 +449,8 @@ export const stagioniRose = () =>
  * nomi su quattro — misurato, non stimato: sul 2020-21, dove poi e' saltato
  * fuori il file vero, la ricostruzione aveva azzeccato 234 nomi su 299.
  */
-export const rosa = (stagione, teamId, momento = 'fine') =>
-  unaVolta(['rosa', stagione, teamId, momento].join('·'), () => db().from('rose')
-    .select('nome, ruolo, club, costo, costo_stimato, presenze, mv, fm, calciatore, fonte')
-    .eq('stagione', stagione).eq('societa', teamId).eq('momento', momento)
-    .order('ruolo').order('costo', { ascending: false }))
+export const rosa = (stagione, teamId, momento = null) =>
+  roseStagione(stagione, momento).then((righe) => righe.filter((r) => r.societa === teamId))
 
 /**
  * Quali stagioni hanno la rosa di settembre, e da dove viene.
@@ -417,6 +469,7 @@ export const momentiDelleRose = () =>
       const p = (righe ?? []).filter((r) => r.momento === 'partenza')
       return {
         partenza: p.map((r) => r.stagione).sort(),
+        corrente: (righe ?? []).filter((r) => r.momento === 'corrente').map((r) => r.stagione).sort(),
         ricostruite: p.filter((r) => r.fonte === 'campo').map((r) => r.stagione).sort(),
       }
     })
@@ -461,8 +514,8 @@ export const impieghi = (calciatoreId) =>
  *  Oltre il tetto delle mille: si legge a pezzi, con `tutte`. */
 export const tutteLeRose = () =>
   unaVolta('tutteLeRose', () => tutte(() => db().from('rose')
-    .select('calciatore, stagione, societa, nome, ruolo, club, costo, presenze, mv, fm')
-    .eq('momento', 'fine').order('id')))
+    .select('calciatore, stagione, societa, nome, ruolo, club, costo, presenze, mv, fm, momento')
+    .in('momento', ['corrente','fine']).order('id'))).then(righe=>roseAttuali(righe??[]))
 
 /**
  * La carriera di un calciatore in Caprera: una riga per stagione.
@@ -538,6 +591,25 @@ export const contrattiPubblici = () =>
     .select('societa, nome, ruolo, under, dalla, alla, anni'))
 
 /* -------------------------------------------------------------- formazioni */
+
+export const performanceGiocatori = stagione =>
+  unaVolta(['performanceGiocatori', stagione].join('·'), () => tutte(() =>
+    db().from('performance_giocatori').select('*').eq('stagione', stagione)
+      .order('nome').order('ruolo').order('giornata_serie_a')))
+
+export const performanceMedie = stagione =>
+  unaVolta(['performanceMedie', stagione].join('·'), () => tutte(() =>
+    db().from('performance_medie').select('*').eq('stagione', stagione)
+      .order('nome').order('ruolo')))
+
+/** Disponibilità degli schieramenti, senza scaricare tutti i giocatori. */
+export async function partiteConFormazione(ids, societa) {
+  if (!ids.length) return new Set()
+  const { data, error } = await db().from('formazioni')
+    .select('partita').eq('societa', societa).in('partita', ids)
+  if (error) throw new Error(error.message)
+  return new Set((data ?? []).map(f => String(f.partita)))
+}
 
 /**
  * La formazione delle due societa' in una partita.

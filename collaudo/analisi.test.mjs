@@ -1,0 +1,9 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import {gareSocieta,aggregaCampionato,serieCampionato,seriePremio,quotazioniRose} from '../src/lib/analisi.js'
+const partite=[{id:1,giornata:1,casa:'a',fuori:'b',gol_casa:2,gol_fuori:1,fp_casa:76,fp_fuori:71,giocata:true},{id:2,giornata:2,casa:'b',fuori:'a',gol_casa:0,gol_fuori:0,fp_casa:60,fp_fuori:60,giocata:true},{id:3,giornata:3,casa:'a',fuori:'b',giocata:false}]
+test('fantapunti senza bonus casa, punti e risultati distinti',()=>{const gare=gareSocieta(partite);assert.equal(gare.length,4);const a=aggregaCampionato(gare).find(g=>g.societa==='a');assert.deepEqual([a.punti,a.fantapunti,a.gol_fatti,a.gol_subiti,a.giocate],[4,135,2,1,2])})
+test('intervallo e casa/trasferta si applicano alla società',()=>{const g=gareSocieta(partite);assert.deepEqual(aggregaCampionato(g,{da:2,campo:'trasferta'}).map(r=>[r.societa,r.punti,r.fantapunti]),[['a',1,60]]);assert.deepEqual(serieCampionato(g,'a','punti',{da:2}),[{x:2,y:1}])})
+test('un voto mancante non è zero e non sottrae un bonus',()=>{const g=gareSocieta([{...partite[0],fp_casa:null}]);assert.equal(g[0].fantapunti,null);assert.equal(aggregaCampionato(g).find(r=>r.societa==='a').fantapunti,null)})
+test('valore rosa è fotografia; premi si sommano, buchi restano assenti',()=>{const r=[{societa:'a',giornata:2,valore_rosa:100,fair_play:-1},{societa:'a',giornata:4,valore_rosa:110,fair_play:-.5}];assert.deepEqual(seriePremio(r,'a','valore_rosa').map(p=>p.y),[100,110]);assert.deepEqual(seriePremio(r,'a','fair_play'),[{x:2,y:-1},{x:4,y:-1.5}])})
+test('quotazione incompleta non produce un falso valore complessivo',()=>{const rose=[{societa:'a',nome:'X',ruolo:'P',club:'A',costo:2},{societa:'a',nome:'Y',ruolo:'D',club:'B',costo:3}];const r=quotazioniRose(rose,[{nome:'X',ruolo:'P',club:'A',prezzo:10}])[0];assert.equal(r.valore,null);assert.equal(r.costo,5);assert.equal(r.quotati,1)})

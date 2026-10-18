@@ -7,7 +7,7 @@ import { Bacheca, PercorsoCoppe } from '../components/CoppeSocieta'
 import CreditiSocieta from '../components/CreditiSocieta'
 import {
   useArchivio, classificaPerpetua, bacheca as bachecaDi, partiteDi,
-  classifica, forma,
+  classifica, forma, useStagioneCorrente, stagioniRose,
 } from '../lib/archivio'
 import { Pagina, Sezione, Numero, Scheletro } from '../components/moto'
 import RosaSocieta from '../components/RosaSocieta'
@@ -37,11 +37,13 @@ export default function SquadraDetail() {
   const { id } = useParams()
   const team = getTeam(id)
   const [sezione, setSezione] = useState('storia')
+  const { stagione: aperta } = useStagioneCorrente()
+  const corrente = aperta?.id ?? LAST_PLAYED_SEASON
 
   const cl = useArchivio('perpetua', classificaPerpetua)
   const ba = useArchivio(['bacheca', id], () => bachecaDi(id), [id])
-  const og = useArchivio(['classifica', LAST_PLAYED_SEASON], () => classifica(LAST_PLAYED_SEASON))
-  const fo = useArchivio(['forma', LAST_PLAYED_SEASON], () => forma(LAST_PLAYED_SEASON))
+  const og = useArchivio(['classifica', corrente], () => classifica(corrente), [corrente])
+  const fo = useArchivio(['forma', corrente], () => forma(corrente), [corrente])
 
   /* Carriera e andamento: si contano dalle cento righe di classifica. */
   const { career, history } = useMemo(() => {
@@ -117,7 +119,7 @@ export default function SquadraDetail() {
 
         {(posizione || ultime.length > 0) && (
           <aside className="sd-ora">
-            <p className="eyebrow">{LAST_PLAYED_SEASON}</p>
+            <p className="eyebrow">{corrente}</p>
             {posizione && <strong className="sd-pos">{posizione}<em>º</em></strong>}
             {ultime.length > 0 && (
               <span className="forma">
@@ -251,9 +253,9 @@ function Numeretto({ etichetta, valore, sotto, oro, tinta }) {
  * questa societa' ha davvero giocato.
  */
 function Rosa({ teamId }) {
-  const cl = useArchivio('perpetua', classificaPerpetua)
+  const cl = useArchivio(['stagioniRose',teamId], () => stagioniRose(teamId), [teamId])
   const stagioni = useMemo(
-    () => [...new Set((cl.dati ?? []).filter((r) => r.societa === teamId)
+    () => [...new Set((cl.dati ?? [])
       .map((r) => r.stagione))].sort().reverse(),
     [cl.dati, teamId]
   )

@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { supabase, CONFIGURATO } from './supabase'
 import { dimentica } from './archivio'
+import { traduciErroreAuth as traduci } from './erroriAuth'
 
 /**
  * La Tessera del Tifoso.
@@ -219,33 +220,6 @@ export function AuthProvider({ children }) {
   }), [pronto, utente, tessera, incarichi, visita, recupero])
 
   return <Ctx.Provider value={valore}>{children}</Ctx.Provider>
-}
-
-/**
- * I messaggi di Supabase sono in inglese e parlano di "credentials".
- * Qui diventano frasi che dicono cosa fare.
- */
-function traduci(m = '') {
-  const t = m.toLowerCase()
-  if (t.includes('invalid login credentials')) {
-    return 'Email o password non corrispondono. Se è la prima volta, devi prima creare la password.'
-  }
-  if (t.includes('email not confirmed')) {
-    return 'Devi ancora confermare l’email: cerca il messaggio della Federazione, anche fra la posta indesiderata.'
-  }
-  if (t.includes('user already registered')) {
-    return 'Questa email è già registrata: entra con la tua password, o falla reimpostare.'
-  }
-  if (t.includes('password should be') || t.includes('at least')) {
-    return 'La password è troppo corta: servono almeno sei caratteri.'
-  }
-  if (t.includes('should be different') || t.includes('same_password')) {
-    return 'La nuova password è identica a quella di adesso: scegline un’altra.'
-  }
-  if (t.includes('rate limit') || t.includes('too many')) {
-    return 'Troppi tentativi ravvicinati. Aspetta un minuto e riprova.'
-  }
-  return m
 }
 
 export function useAuth() {

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { stagioneAttiva } from '../../lib/stagioni'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../lib/auth'
 import { getTeam, teamName, logoUrl, LAST_PLAYED_SEASON, nomeVoce } from '../../lib/core'
@@ -13,9 +14,9 @@ import { Bacheca, PercorsoCoppe } from '../../components/CoppeSocieta'
 import { Sezione } from '../../components/moto'
 import './sezioni.css'
 import { UsciteSocieta } from '../../components/RosaSocieta'
+import CruscottoMister from '../../components/CruscottoMister'
+import BilancioGrafici from '../../components/BilancioGrafici'
 
-/** La stagione dei trofei in corso: l'ultima con risultati. */
-const STAGIONE_COPPE = LAST_PLAYED_SEASON
 
 const TETTO = { D: 3, C: 3, A: 2 }
 const RUOLI = ['P', 'D', 'C', 'A']
@@ -35,23 +36,16 @@ function useSocieta() {
 
   const cl = useArchivio('perpetua', classificaPerpetua)
   const anni = useArchivio('stagioni', stagioniDb)
+  const stagioneRosa = stagioneAttiva(anni.dati ?? [])?.id ?? LAST_PLAYED_SEASON
   const ba = useArchivio(['bacheca', team.id], () => bachecaDi(team.id), [team.id])
-  const fo = useArchivio(['forma', LAST_PLAYED_SEASON], () => formaDi(LAST_PLAYED_SEASON))
+  const fo = useArchivio(['forma', stagioneRosa], () => formaDi(stagioneRosa), [stagioneRosa])
   /* La classifica dell'ultima stagione: nella dashboard si vede dove sei
      rispetto a chi ti sta intorno, non solo il numero della tua posizione. */
-  const ca = useArchivio(['classifica', LAST_PLAYED_SEASON],
-    () => classificaDi(LAST_PLAYED_SEASON))
+  const ca = useArchivio(['classifica', stagioneRosa],
+    () => classificaDi(stagioneRosa), [stagioneRosa])
 
-  /*
-   * L'ultima stagione **giocata**, non l'ultima in elenco.
-   *
-   * Da quando l'archivio contiene anche il 2026-27 - che ha i budget ma non
-   * ha ancora avuto l'asta - `anni.dati[0]` e' una stagione senza rose, e
-   * tutta l'area riservata si apriva su una rosa vuota. `conclusa` e' il
-   * campo che separa le due cose ed e' gia' in tabella.
-   */
+  // Le concluse servono per lo storico dei voti; la rosa apre sulla stagione attiva.
   const giocate = (anni.dati ?? []).filter((a) => a.conclusa)
-  const stagioneRosa = giocate[0]?.id ?? LAST_PLAYED_SEASON
   const ro = useArchivio(['rosa', stagioneRosa, team.id],
     () => roseStagione(stagioneRosa), [stagioneRosa])
 
@@ -69,7 +63,7 @@ function useSocieta() {
    * sempre vuota e' peggio di una scheda che non c'e'. Con questa si mostrano
    * i voti dell'ultimo anno che ce li ha, dicendo di che anno sono.
    */
-  const stagionePrima = giocate[1]?.id ?? null
+  const stagionePrima = giocate.find((a) => a.id < stagioneRosa)?.id ?? null
   const roPrima = useArchivio(['rosa', stagionePrima, team.id],
     () => (stagionePrima ? roseStagione(stagionePrima) : Promise.resolve([])),
     [stagionePrima])
@@ -163,7 +157,7 @@ function useSocieta() {
    * Un numero che era giusto per caso e ha smesso di esserlo quando sono
    * arrivati i dati veri.
    */
-  const stagioneContratti = LAST_PLAYED_SEASON
+  const stagioneContratti = stagioneRosa
 
   const attivi = contracts.filter((c) => c.team === team.id
     && c.from <= stagioneContratti && stagioneContratti <= c.to)
@@ -233,12 +227,8 @@ function useSocieta() {
     if (aMaggio.has(n)) return { ...c, perche: 'tornato' }
     return { ...c, perche: 'fuori' }
   })
-  /* L'ultimo bilancio **con un'asta dentro**. Dal 2026-27 esiste una riga di
-     finanze prima che la stagione si giochi: ha i crediti iniziali e basta,
-     `spesi` e `residui` sono vuoti apposta. Prenderla come «ultima» faceva
-     aprire i Crediti su un bilancio senza niente da bilanciare. */
-  const ultimaFinanza = (fi.dati ?? [])
-    .filter((f) => f.spesi != null).map((f) => f.stagione).sort().pop()
+  // Il bilancio in corso puo' avere voci ancora non registrate: restano vuote.
+  const ultimaFinanza = stagioneRosa
 
   return {
     presidenza,
@@ -285,11 +275,11 @@ function useSocieta() {
     contrattiAttivi: attiviInRosa,
     contrattiFuori: attiviFuoriRosa,
     tuttiContratti: contracts.filter((c) => c.team === team.id),
-    posizione: sue.find((r) => r.stagione === LAST_PLAYED_SEASON)
-      ? { position: sue.find((r) => r.stagione === LAST_PLAYED_SEASON).posizione,
-          points: sue.find((r) => r.stagione === LAST_PLAYED_SEASON).punti,
-          goalDiff: sue.find((r) => r.stagione === LAST_PLAYED_SEASON).gol_fatti
-                    - sue.find((r) => r.stagione === LAST_PLAYED_SEASON).gol_subiti }
+    posizione: (ca.dati ?? []).find((r) => r.societa === team.id)
+      ? { position: ca.dati.find((r) => r.societa === team.id).posizione,
+          points: ca.dati.find((r) => r.societa === team.id).punti,
+          goalDiff: ca.dati.find((r) => r.societa === team.id).gol_fatti
+                    - ca.dati.find((r) => r.societa === team.id).gol_subiti }
       : null,
     forma: (fo.dati ?? []).filter((g) => g.societa === team.id).slice(-5)
       .map((g) => ({ id: g.id, round: g.giornata, result: g.esito,
@@ -346,7 +336,7 @@ export function Panoramica() {
     <>
       <header className="pan-testa">
         <div>
-          <p className="eyebrow">Area mister · {LAST_PLAYED_SEASON}</p>
+          <p className="eyebrow">Area mister · {d.stagioneRosa}</p>
           <h1>{d.team.name}</h1>
         </div>
         {daFare.length > 0 && (
@@ -356,6 +346,9 @@ export function Panoramica() {
         )}
       </header>
 
+      <CruscottoMister d={d} />
+      <details className="pan-archivio">
+      <summary>Storia, bacheca e gestione dei contratti</summary>
       <div className="pan-griglia">
         {/* ---------------------------------------------- colonna stretta */}
         <div className="pan-col pan-sinistra">
@@ -423,7 +416,7 @@ export function Panoramica() {
 
           <section className="pan-ultime card">
             <h2>
-              Ultime cinque · {LAST_PLAYED_SEASON}
+              Ultime cinque · {d.stagioneRosa}
               <Link to="/risultati">calendario →</Link>
             </h2>
             {d.forma.length ? (
@@ -531,6 +524,7 @@ export function Panoramica() {
           </section>
         </div>
       </div>
+      </details>
     </>
   )
 }
@@ -614,11 +608,9 @@ export function Rosa() {
   const [ordine, setOrdine] = useState('costo')
 
   const anni = useArchivio('stagioni', stagioniDb)
-  /* Nel menu della rosa vanno solo le stagioni giocate: una stagione senza
-     asta non ha una rosa da mostrare, e offrirla e' offrire una pagina vuota.
-     Il budget del 2026-27 si vede nei Crediti, che e' il posto dove esiste. */
+  // La stagione aperta e' selezionabile insieme allo storico, senza richiederla conclusa.
   const stagioni = useMemo(
-    () => (anni.dati ?? []).filter((a) => a.conclusa).map((a) => a.id).sort().reverse(),
+    () => (anni.dati ?? []).map((a) => a.id).sort().reverse(),
     [anni.dati]
   )
   const scelta = stagione ?? d.stagioneRosa
@@ -2171,8 +2163,8 @@ export function Crediti() {
    * cioe' pagina nera senza un messaggio. La riga sopra la guardia sembrava un
    * posto ragionevole perche' li' stanno gli altri conti; non lo era.
    */
-  const restaCalcolato = f.spent == null
-    ? null : f.initial - f.spent + (f.trades ?? 0)
+  const restaCalcolato = f.spent == null || f.initial == null || f.trades == null
+    ? null : f.initial - f.spent + f.trades
   const scartoResidui = (f.left == null || restaCalcolato == null)
     ? null : f.left - restaCalcolato
 
@@ -2189,6 +2181,14 @@ export function Crediti() {
         <Kpi label="Residui" value={f.left} gold />
         <Kpi label="Riportati" value={f.carried} />
       </div>
+      {f.left == null && (
+        <p className="pannello-sub">
+          Il saldo residuo non è ancora disponibile nella fonte. I costi della rosa
+          sono registrati; scambi e altri movimenti vanno verificati prima di
+          indicare quanti crediti restano.
+        </p>
+      )}
+      <BilancioGrafici bilanci={d.finanzePerStagione} stagione={d.stagioneFinanze}/>
 
       <section className="pannello card">
         <h2>Come si compone il budget</h2>
@@ -2523,7 +2523,8 @@ export function Storia() {
 /* ========================================================= 6 · Coppe */
 export function Coppe() {
   const d = useSocieta()
-  const co = useArchivio(['coppeStagione', STAGIONE_COPPE], () => coppeStagione(STAGIONE_COPPE))
+  const STAGIONE_COPPE = d.stagioneRosa
+  const co = useArchivio(['coppeStagione', STAGIONE_COPPE], () => coppeStagione(STAGIONE_COPPE), [STAGIONE_COPPE])
   const corrente = useMemo(
     () => (co.dati ? percorsoFra(d.team.id, co.dati) : []),
     [co.dati, d.team.id]

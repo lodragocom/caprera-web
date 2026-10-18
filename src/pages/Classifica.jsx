@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { stagioneAttiva } from '../lib/stagioni'
 import { getTeam, logoUrl, LAST_PLAYED_SEASON } from '../lib/core'
 import {
   useArchivio, classifica, classificaFantapunti, classificaPerpetua, forma, stagioni,
 } from '../lib/archivio'
 import { Pagina, CorpoTabella, Riga, Numero, Sezione } from '../components/moto'
 import './Classifica.css'
+import AnalisiLega from '../components/AnalisiLega'
 
 /**
  * La classifica, letta dall'archivio su Supabase.
@@ -38,10 +40,11 @@ const COLONNE = [
 ]
 
 export default function Classifica() {
-  const [stagione, setStagione] = useState(LAST_PLAYED_SEASON)
+  const [scelta, setStagione] = useState(null)
   const [modo, setModo] = useState('classifica')
 
   const anni = useArchivio('stagioni', stagioni)
+  const stagione = scelta ?? stagioneAttiva(anni.dati ?? [])?.id ?? LAST_PLAYED_SEASON
   const camp = useArchivio(['classifica', stagione], () => classifica(stagione), [stagione])
   const fp = useArchivio(['fantapunti', stagione], () => classificaFantapunti(stagione), [stagione])
   const fo = useArchivio(['forma', stagione], () => forma(stagione), [stagione])
@@ -87,7 +90,7 @@ export default function Classifica() {
           <label className="cl-stagione">
             <span>Stagione</span>
             <select value={stagione} onChange={(e) => setStagione(e.target.value)}>
-              {(anni.dati ?? []).filter((s) => s.conclusa).map((s) => (
+              {(anni.dati ?? []).map((s) => (
                 <option key={s.id} value={s.id}>{s.id}</option>
               ))}
             </select>
@@ -117,6 +120,7 @@ export default function Classifica() {
           ? 'Somma dei fantapunti di campionato senza il +1 di chi gioca in casa, come prevede il regolamento. È la graduatoria che decide chi va in Coppa Italia.'
           : 'Le posizioni si riferiscono al solo campionato. Coppa Italia, Champions, Europa e Conference League seguono tabelloni separati.'}
       </p>
+      {modo !== 'storico' && <details className="cl-analisi"><summary>Grafici e classifiche per intervallo</summary><AnalisiLega key={stagione} stagioneIniziale={stagione} soloCampionato/></details>}
     </Pagina>
   )
 }

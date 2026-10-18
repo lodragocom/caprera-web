@@ -1,6 +1,7 @@
 import { useDeferredValue, useMemo, useState } from 'react'
 import TeamBadge from '../components/TeamBadge'
 import { getTeam } from '../lib/core'
+import { stagioneAttiva } from '../lib/stagioni'
 import { useArchivio, roseStagione, stagioni, momentiDelleRose } from '../lib/archivio'
 import { Pagina, Cascata, Voce, Sezione, Numero } from '../components/moto'
 import { Barra, Campo, Cerca, Gruppo } from '../components/Filtri'
@@ -20,11 +21,8 @@ const RUOLI = ['P', 'D', 'C', 'A']
 export default function Rose() {
   const anni = useArchivio('stagioni', stagioni)
   const elenco = (anni.dati ?? []).map((s) => s.id)
-  /* Il menu le elenca tutte, anche quella che deve ancora cominciare - il
-     budget del prossimo anno esiste prima dell'asta. Ma la pagina non ci si
-     apre sopra: si apre sull'ultima **giocata**, se no il primo che arriva
-     trova dieci rose vuote e pensa che l'archivio sia rotto. */
-  const ultimaGiocata = (anni.dati ?? []).find((s) => s.conclusa)?.id
+  // L'anno in corso e' quello aperto nel database, non l'ultimo concluso.
+  const ultimaGiocata = stagioneAttiva(anni.dati ?? [])?.id
   const [stagione, setStagione] = useState('')
   const scelta = stagione || ultimaGiocata || elenco[0] || ''
 
@@ -47,7 +45,7 @@ export default function Rose() {
   const conPartenza = mo.dati?.partenza ?? []
   const ricostruite = mo.dati?.ricostruite ?? []
   const duePunti = conPartenza.includes(scelta)
-  const vista = duePunti ? momento : 'fine'
+  const vista = (mo.dati?.corrente ?? []).includes(scelta) ? 'corrente' : duePunti ? momento : 'fine'
   const dedotta = vista === 'partenza' && ricostruite.includes(scelta)
 
   const stato = useArchivio(['roseStagione', scelta, vista],
@@ -96,7 +94,7 @@ export default function Rose() {
         <h2 className="section-title">
           {vista === 'partenza'
             ? `Crediti investiti all'asta · ${scelta}`
-            : `Valore delle rose a maggio · ${scelta}`}
+            : vista === 'corrente' ? `Rose correnti · ${scelta}` : `Valore delle rose a maggio · ${scelta}`}
         </h2>
         <Sezione stato={stato} righe={10}>
           <Cascata className="budget-list" tetto={12}>
@@ -120,7 +118,7 @@ export default function Rose() {
             ? `Questa è la somma dei prezzi d'asta di settembre, e combacia con la voce
                «spesi all'asta» del bilancio: verificata su tutte e dieci le società
                nelle sei stagioni in cui il bilancio esiste.`
-            : `Attenzione: a maggio la somma non è quello che è stato speso. Contiene chi
+            : vista === 'corrente' ? 'Rosa corrente dall’export Fantapazz: i costi dei giocatori non sostituiscono il bilancio della società.' : `Attenzione: a maggio la somma non è quello che è stato speso. Contiene chi
                è arrivato a gennaio e non contiene chi è uscito. Per i crediti investiti
                scegli «settembre».`}
           {' '}Il bilancio completo — crediti iniziali, scambi, residui, premi e FFP —

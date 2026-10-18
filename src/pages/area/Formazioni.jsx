@@ -152,7 +152,7 @@ export default function Formazioni() {
   const [stagione, setStagione] = useState(null)
   const [impegni, setImpegni] = useState([])
   const [n, setN] = useState(null)
-  const [p, setP] = useState(null)
+  const [p, setP] = useState(undefined)
   const [guasto, setGuasto] = useState(null)
 
   /* Le stagioni in cui questa societa' ha giocato. */
@@ -168,12 +168,14 @@ export default function Formazioni() {
   useEffect(() => {
     if (!stagione) return undefined
     let vivo = true
-    setImpegni([]); setN(null); setP(null)
+    setImpegni([]); setN(null); setP(undefined)
     impegniDi(team.id, stagione).then((imp) => {
       if (!vivo) return
       setImpegni(imp)
       // si apre sull'ultima giornata di campionato, non sull'ultima coppa
-      const ultima = [...imp].reverse().find((x) => !x.coppa) ?? imp[imp.length - 1]
+      const ultime = [...imp].reverse()
+      const ultima = ultime.find(x => !x.coppa && x.formazioneDisponibile)
+        ?? ultime.find(x => !x.coppa && x.giocata) ?? imp[0]
       setN(ultima?.chiave ?? null)
     }).catch((e) => vivo && setGuasto(e.message))
     return () => { vivo = false }
@@ -183,7 +185,7 @@ export default function Formazioni() {
   useEffect(() => {
     if (n == null || !stagione) return undefined
     let vivo = true
-    setP(null)
+    setP(undefined)
     partitaDi(n, team.id, stagione)
       .then((x) => vivo && setP(x))
       .catch((e) => vivo && setGuasto(e.message))
@@ -252,7 +254,12 @@ export default function Formazioni() {
   if (n == null) {
     return <>{testa}{scelte}<p className="vuoto">Carico la stagione…</p></>
   }
-  if (!p) return <>{testa}{scelte}<p className="vuoto">Carico la giornata…</p></>
+  if (p === undefined) return <>{testa}{scelte}<p className="vuoto">Carico la giornata…</p></>
+  if (p === null) return <>{testa}{scelte}<p className="vuoto">
+    {impegni.find(g => g.chiave === n)?.giocata
+      ? 'Le formazioni di questa partita non sono ancora disponibili nell’archivio.'
+      : 'Questa partita non è ancora stata giocata. Gli schieramenti non sono disponibili nell’archivio.'}
+  </p></>
 
   const avversario = getTeam(p.avversario)
   const campo = disponi(p.mia.titolari, p.mia.modulo)
@@ -407,7 +414,7 @@ export default function Formazioni() {
 
             {p.mia.inviata && (
               <p className="note">
-                Formazione inviata da <b>{p.mia.mister}</b> — {p.mia.inviata}.
+                Formazione inviata{p.mia.mister && <> da <b>{p.mia.mister}</b></>} — {p.mia.inviata}.
                 {p.mia.avviso && <> {p.mia.avviso}</>}
               </p>
             )}

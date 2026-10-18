@@ -10,7 +10,9 @@ import './AreaLayout.css'
  */
 const VOCI = [
   { to: '/area', end: true, label: 'Panoramica', icona: '◈' },
+  { to: '/area/analisi', label: 'Analisi della lega', icona: '▥' },
   { to: '/area/rosa', label: 'La mia rosa', icona: '☰' },
+  { to: '/area/schiera', label: 'Schiera formazione', icona: '⚽' },
   { to: '/area/formazioni', label: 'Formazioni', icona: '⬡' },
   { to: '/area/contratti', label: 'Contratti', icona: '✎' },
   { to: '/area/crediti', label: 'Crediti', icona: '◎' },

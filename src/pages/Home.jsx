@@ -3,17 +3,23 @@ import { Link } from 'react-router-dom'
 import TeamBadge from '../components/TeamBadge'
 import {
   ACTIVE_TEAMS, capreraLogo, federazioneStemma, dieciAnniBlocco, logoUrl, summary,
-  CURRENT_SEASON, LAST_PLAYED_SEASON,
+  CURRENT_SEASON,
 } from '../lib/core'
-import { useArchivio, classifica, classificaPerpetua } from '../lib/archivio'
+import { useArchivio, classifica, classificaPerpetua, useStagioneCorrente, partite } from '../lib/archivio'
 import { Sezione } from '../components/moto'
 import './Home.css'
 
-const { totals, nextRound } = summary
+const { totals } = summary
 
 export default function Home() {
-  const cl = useArchivio(['classifica', LAST_PLAYED_SEASON],
-    () => classifica(LAST_PLAYED_SEASON))
+  const { stagione: stagioneAperta } = useStagioneCorrente()
+  const stagioneCorrente = stagioneAperta?.id ?? CURRENT_SEASON
+  const cl = useArchivio(['classifica', stagioneCorrente],
+    () => classifica(stagioneCorrente), [stagioneCorrente])
+  const calendario = useArchivio(['partite', stagioneCorrente, 'campionato'], () => partite(stagioneCorrente), [stagioneCorrente])
+  const prossime = (calendario.dati ?? []).filter((p) => !p.giocata && p.giornata != null)
+  const giornata = prossime.length ? Math.min(...prossime.map((p) => p.giornata)) : null
+  const nextRound = giornata == null ? null : { round: giornata, fixtures: prossime.filter((p) => p.giornata === giornata).map((p) => ({ home:p.casa, away:p.fuori })) }
   const pe = useArchivio('perpetua', classificaPerpetua)
 
   /* La classifica dell'ultima stagione, con i nomi di prima. */
@@ -40,7 +46,7 @@ export default function Home() {
       <section className="hero">
         <div className="container wide hero-inner">
           <div className="hero-copy">
-            <p className="eyebrow">Stagione {CURRENT_SEASON} · Decima edizione</p>
+            <p className="eyebrow">Stagione {stagioneCorrente}</p>
             <h1>
               Dieci società.<br />
               Trentasei giornate.<br />
@@ -128,7 +134,7 @@ export default function Home() {
 
       {/* --------------------------------------------------- teams strip */}
       <section className="container wide block">
-        <h2 className="section-title">Le società {CURRENT_SEASON}</h2>
+        <h2 className="section-title">Le società {stagioneCorrente}</h2>
         <div className="team-strip">
           {ACTIVE_TEAMS.map((t) => (
             <Link key={t.id} to={`/squadre/${t.id}`} className="team-chip card">
@@ -146,7 +152,7 @@ export default function Home() {
       <section className="container wide block">
         <div className="two-col">
           <div>
-            <h2 className="section-title">Classifica {LAST_PLAYED_SEASON}</h2>
+            <h2 className="section-title">Classifica {stagioneCorrente}</h2>
             <Sezione stato={cl} righe={10}>
             <div className="table-wrap">
               <table>
@@ -203,7 +209,7 @@ export default function Home() {
       {nextRound && (
         <section className="container wide block">
           <h2 className="section-title">
-            Prossima giornata · {CURRENT_SEASON} · {nextRound.round}ª
+            Prossima giornata · {stagioneCorrente} · {nextRound.round}ª
           </h2>
           <div className="fixture-grid">
             {nextRound.fixtures.map((m, i) => (

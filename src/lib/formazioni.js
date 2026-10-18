@@ -10,7 +10,7 @@
  * dati.
  */
 import { supabase } from './supabase'
-import { partiteDi, formazioniPartita, bonusTipi } from './archivio'
+import { partiteDi, formazioniPartita, bonusTipi, partiteConFormazione } from './archivio'
 
 /* Sigle per i bottoni dei turni di coppa: per esteso occupano quattro righe. */
 const SIGLA = {
@@ -62,7 +62,9 @@ export async function impegniDi(teamId, stagione) {
    * giornata smette di essere un elenco di numeri e diventa l'andamento della
    * stagione - si naviga e si legge con lo stesso gesto.
    */
+  const disponibili = await partiteConFormazione((gare ?? []).map(g => g.id), teamId)
   const comune = (g) => ({
+    formazioneDisponibile: disponibili.has(String(g.id)),
     esito: !g.giocata ? null
       : g.gol_fatti > g.gol_subiti ? 'V' : g.gol_fatti === g.gol_subiti ? 'N' : 'P',
     gol: g.gol_fatti, golSubiti: g.gol_subiti,
@@ -221,7 +223,7 @@ export function disponi(titolari, modulo) {
 /** Somma dei bonus di una formazione, per capire da dove vengono i fantapunti. */
 export function contaBonus(lato) {
   const conta = new Map()
-  for (const g of [...lato.titolari, ...lato.panchina]) {
+  for (const g of [...lato.titolari, ...lato.panchina.filter(g => g.entrato)]) {
     if (g.voto == null) continue
     for (const b of g.bonus) {
       const c = conta.get(b.id) ?? { ...b, n: 0 }

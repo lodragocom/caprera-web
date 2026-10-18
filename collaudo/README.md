@@ -1,5 +1,16 @@
 # Collaudo del sito
 
+## Consegna delle formazioni
+
+- `node --test collaudo/consegna-regole.test.mjs`: validazione titolari, modulo e panchina.
+- `node collaudo/consegna-database.mjs`: test SQL su cluster temporaneo dedicato
+  (`/tmp`, porta 55439, utente `caprera`), senza credenziali di produzione.
+- `node collaudo/collaudo-schiera.mjs`: browser contro il sito locale sulla
+  porta 4180, con auth e RPC simulate. Verifica invio, ordine panchina,
+  rilettura, conflitti, scadenza e vista telefono.
+
+Attivazione: `../caprera-dati/PROTOCOLLI/PROTOCOLLO_Consegna_Formazioni.md`.
+
 ## Provare le pagine che leggono dal database
 
 `finto-supabase.mjs` è un finto Supabase: parla il minimo dialetto di
@@ -50,3 +61,18 @@ laterale e non ricaricando la pagina: la sessione sta in memoria e un
 caricamento da zero riporterebbe al login (scelta voluta, vedi `src/lib/auth.jsx`).
 
 Alla fine stampano "nessun problema" oppure l'elenco di cosa non va.
+# Analisi native e Panoramica
+
+`node --test collaudo/analisi.test.mjs collaudo/stagioni.test.mjs` verifica
+matematica del campionato, bonus casa, filtri, dati mancanti e foto delle rose.
+`node collaudo/collaudo-analisi.mjs` usa Playwright con tutte le API intercettate:
+Panoramica, analisi private/pubbliche, Fair Play, listone/svincolati,
+medie attuali, Top 11, scontri, storico, desktop e telefono. Nessuna richiesta
+o scrittura al database reale. Fonti normalizzate locali necessarie nel repo dati.
+
+`node collaudo/collaudo-performance-formazioni.mjs` verifica l'HTML normalizzato
+della giornata 2 e le Performance Shiny: scelta iniziale, sostituzioni/bonus,
+assenza di formazioni, paginazione API oltre 1.000 righe, filtri, confronto,
+Top 11, telefono e stagioni senza dati. Richiede il server Vite di sviluppo
+sulla porta 4180 (include un controllo diretto della funzione di conteggio bonus).
+Auth e PostgREST sono intercettati; fonti in `../caprera-dati/FONTI/2026-27/`.
