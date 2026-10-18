@@ -130,7 +130,7 @@ function Maglia({ g }) {
     <div
       className={`giocatore${uscito ? ' fuori' : ''}`}
       style={{ left: `${g.x}%`, top: `${g.y}%` }}
-      title={uscito ? `${g.nome} — non ha giocato, sostituito da un riserva` : g.nome}
+      title={uscito ? `${g.nome} — senza voto` : g.nome}
     >
       <span className={`pallino role-${g.ruolo}`}>
         <b className="v">{g.voto ?? '–'}</b>
@@ -353,7 +353,7 @@ export default function Formazioni() {
             </div>
             <p className="legenda">
               Il numero nel pallino è il voto. Le maglie sbiadite sono i titolari
-              che non hanno giocato: al loro posto è entrato un riserva.
+              senza voto. Le riserve effettivamente entrate sono indicate nella panchina.
             </p>
           </section>
 
