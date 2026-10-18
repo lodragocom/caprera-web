@@ -27,6 +27,25 @@ test('conserva esclusivamente cookie Fantapazz validi',()=>{assert.deepEqual(sco
 test('login non autenticato non viene salvato',async()=>{const h=harness({loggedIn:false});assert.equal((await h.connect()).status,422);assert.equal(h.values.has('session'),false);assert.equal(h.calls.disconnect,1)})
 test('sessionId non può diventare URL arbitrario',async()=>{const h=harness();const r=await h.session.fetch(h.request('/connect',{sessionId:'https://evil.test'}));assert.equal(r.status,422);assert.equal(h.calls.connect,0)})
 test('prova riparte in un browser nuovo e lo chiude',async()=>{const h=harness();await h.connect();const r=await h.session.fetch(h.request('/probe'));assert.equal((await r.json()).stato,'accesso_riutilizzabile');assert.deepEqual(h.calls.restored,[cookie]);assert.equal(h.calls.launch,1);assert.equal(h.calls.close,1)})
+test('solo una prova riuscita rinnova i 30 giorni di conservazione',async()=>{
+  for(const error of [false,true]) {
+    const h=harness({error});await h.connect()
+    const previous=Date.now()+60_000
+    h.values.get('session').expiresAt=previous
+    h.calls.alarm=previous
+    const before=Date.now()
+    await h.session.fetch(h.request('/probe'))
+    const expiry=h.values.get('session').expiresAt
+    if(error)assert.equal(expiry,previous)
+    else {
+      const ttl=30*24*60*60*1000
+      assert.ok(expiry>=before+ttl&&expiry<=Date.now()+ttl)
+      await h.session.alarm()
+      assert.ok(h.values.has('session'),'un alarm precedente non elimina la sessione rinnovata')
+    }
+    assert.equal(h.calls.alarm,expiry)
+  }
+})
 test('errore upstream non rivela segreti e chiude browser',async()=>{const h=harness({error:true});await h.connect();const r=await h.session.fetch(h.request('/probe'));assert.equal(r.status,422);assert.ok(!(await r.text()).includes('sensitive'));assert.equal(h.calls.close,1)})
 test('quarto tentativo giornaliero non lancia browser',async()=>{const h=harness();await h.connect();for(let i=0;i<3;i++)await h.session.fetch(h.request('/probe'));const r=await h.session.fetch(h.request('/probe'));assert.equal((await r.json()).codice,'LIMITE_PROVE_GIORNALIERO');assert.equal(h.calls.launch,3)})
 test('scadenza rimuove la credenziale e blocca il riuso',async()=>{const h=harness();await h.connect();h.values.get('session').expiresAt=Date.now()-1;const r=await h.session.fetch(h.request('/probe'));assert.equal((await r.json()).codice,'ACCESSO_DA_RINNOVARE');assert.equal(h.values.has('session'),false);assert.equal(h.calls.launch,0)})

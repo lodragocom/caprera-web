@@ -1,6 +1,7 @@
 // Private session connector. No cron, database credentials, or sports writes.
 export const PROBE_URL='https://www.fantapazz.com/fantacalcio/formazioni-in-campo-lega/767/1/342460'
-const WEEK=7*24*60*60*1000
+// Expire after 30 days without a successful access; Fantapazz may revoke sooner.
+const SESSION_TTL=30*24*60*60*1000
 const json=(body,status=200)=>Response.json(body,{status,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}})
 const fail=code=>{const e=new Error(code);e.safeCode=code;throw e}
 const hex=bytes=>Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('')
@@ -77,7 +78,7 @@ export function createConnector(browserAPI) {
             const page=(await browser.pages()).find(p=>p.url()===PROBE_URL)
             if(!page)fail('PAGINA_NON_ATTESA')
             const counts=await inspect(page),cookies=scopeCookies(await page.cookies(PROBE_URL))
-            const expiresAt=now+WEEK
+            const expiresAt=now+SESSION_TTL
             await store.put('session',{sealed:await seal(cookies,this.env.SESSION_KEY),expiresAt})
             await store.setAlarm(expiresAt)
             await store.put('last',{stato:'accesso_memorizzato',al:now,...counts})
@@ -100,7 +101,9 @@ export function createConnector(browserAPI) {
           await page.waitForSelector('#block-system-main .fic-calciatore',{timeout:15000})
           const counts=await inspect(page)
           const fresh=scopeCookies(await page.cookies(PROBE_URL))
-          await store.put('session',{...saved,sealed:await seal(fresh,this.env.SESSION_KEY)})
+          const expiresAt=Date.now()+SESSION_TTL
+          await store.put('session',{expiresAt,sealed:await seal(fresh,this.env.SESSION_KEY)})
+          await store.setAlarm(expiresAt)
           const outcome={stato:'accesso_riutilizzabile',al:now,...counts}
           await store.put('last',outcome)
           return json({...outcome,automatico:false})
