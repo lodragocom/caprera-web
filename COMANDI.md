@@ -10,6 +10,11 @@ npm run dev
 Apre l'indirizzo che stampa in console (di solito `http://localhost:5173`).
 È l'unico comando che serve nell'uso normale.
 
+Se il server è già avviato, riusare quell'indirizzo senza aprire un altro
+processo: 5173 è la porta usuale di sviluppo, 4180 quella usata nei collaudi
+del 18/10. Rose attuali e storico si trova in
+`/area/analisi?sezione=rose-storico`, sulla stessa porta dell'app aperta.
+
 Serve però che `.env` esista, perché **il sito legge da Supabase**: copia
 `.env.esempio` in `.env` e riempi `VITE_SUPABASE_URL` e
 `VITE_SUPABASE_ANON_KEY` (cruscotto Supabase → Project Settings → API).
@@ -26,6 +31,11 @@ che si carica nel database** e il riferimento con cui si controlla che i conti
 tornino — non è più da lì che il sito legge.
 
 ### Ricaricare il database
+
+Questo è un caricamento generale della vecchia pipeline. **Non usarlo per
+aggiornamenti parziali o per sincronizzare Git.** Gli import correnti seguono
+`../caprera-dati/PROTOCOLLI/PROTOCOLLO_Aggiornamento_Dati.md`, con prova in
+rollback, migrazione dedicata e verifica dei dati preesistenti.
 
 ```
 sh ~/dev/caprera/caprera-dati/SUPABASE/carica.sh
@@ -131,9 +141,25 @@ Spiegazione completa in `collaudo/README.md`.
 npm run build
 ```
 
-Crea la cartella `dist/`, che è il sito pronto da caricare online (~892 KB).
-L'hosting è deciso — Cloudflare Pages, `caprera-dati/ADR/ADR-001-Hosting-Cloudflare.md` —
-ma non ancora eseguito.
+Crea la cartella `dist/`. Il primo rilascio è documentato il 30/08/2026 su
+Cloudflare Worker con static assets: configurazione in `wrangler.jsonc`.
+Il deploy dell'ultima versione va verificato separatamente dal push Git.
+Procedura aggiornata: `../caprera-dati/PROTOCOLLI/PROTOCOLLO_Deploy_Sito.md`.
+
+### Consegnare codice e documentazione
+
+Nel web, dopo revisione e commit:
+
+```
+git push origin main
+git push github main
+```
+
+Nel repository `caprera-dati`, dopo revisione e commit: `git push origin main`.
+I dati riservati non vanno su GitHub. Verificare i tre hash remoti con
+`git ls-remote <remoto> refs/heads/main` e confrontarli con il rispettivo HEAD.
+Per una modifica solo documentale controllare `git diff --check`; non occorre
+rilanciare import o collaudi funzionali già superati sul codice invariato.
 
 ## Se `npm run dev` non parte
 

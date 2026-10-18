@@ -31,3 +31,15 @@ Lo snapshot non attiva una sincronizzazione periodica e non cambia le regole di 
 
 Un grafico di assenze valorizzate è una serie cumulata: moltiplicare il conteggio
 per la quotazione attuale altera la fonte. Acquisire tutte le metriche pubblicate.
+
+## Chiusura protocolli e Git, richiesta successiva del 18 ottobre
+
+Consegna funzionale: web `f19d394` pubblicato su origin e GitHub, dati
+`cb366b2` su origin privato. Tutte le 154 migrazioni allineate.
+Aggiornati Dati, Deploy, STATO, aggiornamento di sessione e COMANDI:
+rimossa la giornata 1 dall'elenco import mancanti; corretto il riferimento
+al deploy mai effettuato; esplicitati riuso delle porte locali e controllo
+degli hash remoti. Solo documentazione, nessuna nuova modifica al database.
+Controllo di questa revisione: coerenza dei riferimenti e `git diff --check`.
+Pattern: il commit inviato e la build online sono due esiti distinti,
+da registrare con evidenze separate.
