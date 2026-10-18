@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "caprera-fantapazz-connector",
+  "account_id": "50bd8e549b3430c27662fbc4cbd35788",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-10-18",
+  "compatibility_flags": ["nodejs_compat"],
+  "send_metrics": false,
+  "browser": {"binding": "BROWSER"},
+  "durable_objects": {"bindings": [{"name": "SESSION", "class_name": "FantapazzSession"}]},
+  "migrations": [{"tag": "v1", "new_sqlite_classes": ["FantapazzSession"]}],
+  "observability": {"enabled": false},
+  "triggers": {"crons": []}
+}
