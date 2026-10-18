@@ -84,3 +84,10 @@ assenza di formazioni, paginazione API oltre 1.000 righe, filtri, confronto,
 Top 11, telefono e stagioni senza dati. Richiede il server Vite di sviluppo
 sulla porta 4180 (include un controllo diretto della funzione di conteggio bonus).
 Auth e PostgREST sono intercettati; fonti in `../caprera-dati/FONTI/2026-27/`.
+
+## Calendari Fantapazz
+
+`node collaudo/collaudo-calendari-fantapazz.mjs` verifica l'app locale e la
+fonte sportiva reale in sola lettura: 9 calendari, graduatorie FP, filtri,
+20 riposi, accoppiamenti da definire, tabellino Mondiale, G5 senza finti
+risultati, stagione attiva e mobile. Non modifica formazioni o risultati.

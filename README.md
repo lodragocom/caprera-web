@@ -122,3 +122,11 @@ bundle al momento della build, non vengono lette a runtime.
   Federazione.
 - La pagina Statistiche incorpora `caprera.shinyapps.io` in un iframe. Sul piano
   gratuito l'app va in stand-by e il primo caricamento è lento.
+
+### Calendari Fantapazz (18 ottobre 2026)
+
+`/area/analisi?sezione=calendari` e `/statistiche?sezione=calendari` mostrano
+9 calendari, quattro classifiche, gironi, riposi e tabellini della stagione
+2026-27. Coppe apre la stagione attiva. In campo comprende anche la G5
+consegnata (senza voti definitivi), Mondiale e supercoppe. Le fonti restano
+nel repository privato; il sito legge la fotografia sportiva da Supabase.

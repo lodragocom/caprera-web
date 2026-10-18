@@ -10,7 +10,7 @@
  * dati.
  */
 import { supabase } from './supabase'
-import { partiteDi, formazioniPartita, bonusTipi, partiteConFormazione } from './archivio'
+import { partiteDi, formazioniPartita, bonusTipi, partiteConFormazione, nomiTurni } from './archivio'
 
 /* Sigle per i bottoni dei turni di coppa: per esteso occupano quattro righe. */
 const SIGLA = {
@@ -21,6 +21,7 @@ const SIGLA = {
   'conference-league': 'ConfL',
   'supercoppa-italiana': 'SC Italiana',
   'supercoppa-europea': 'SC Europea',
+  'mondiale-per-club': 'Mondiale',
 }
 
 function abbrevia(competizione, turno) {
@@ -47,14 +48,8 @@ export async function stagioniDi(teamId) {
  * Ogni voce porta con se' l'id della partita: e' quello che poi si chiede.
  */
 export async function impegniDi(teamId, stagione) {
-  const [gare, turni] = await Promise.all([
-    partiteDi(stagione, teamId),
-    (async () => {
-      const { data, error } = await supabase.from('turni').select('id, nome')
-      if (error) throw new Error(error.message)
-      return new Map((data ?? []).map((t) => [t.id, t.nome]))
-    })(),
-  ])
+  const gare = await partiteDi(stagione, teamId)
+  const turni = new Map((await nomiTurni([...new Set(gare.map(g=>g.turno).filter(Boolean))])).map(t=>[t.id,t]))
   /*
    * L'esito viaggia con l'impegno, e non costa niente: `partiteDi` legge gia'
    * gol e fantapunti di ogni gara, e prima li buttavamo via tenendo solo il
@@ -80,15 +75,15 @@ export async function impegniDi(teamId, stagione) {
         coppa: false, giornata: g.giornata, ...comune(g),
       })
     } else {
-      const nome = turni.get(g.turno)
+      const nome = turni.get(g.turno)?.nome
       out.push({
         chiave: g.id, breve: abbrevia(g.competizione, nome),
-        titolo: `${g.competizione} · ${nome ?? ''}`.trim(), coppa: true, ...comune(g),
+        titolo: `${g.competizione} · ${nome ?? ''}`.trim(), coppa: true, competizione: g.competizione, ordine: turni.get(g.turno)?.ordine ?? 0, ...comune(g),
       })
     }
   }
   return out.sort((a, b) =>
-    Number(a.coppa) - Number(b.coppa) || (a.giornata ?? 0) - (b.giornata ?? 0))
+    Number(a.coppa) - Number(b.coppa) || (a.competizione ?? '').localeCompare(b.competizione ?? '') || (a.ordine ?? a.giornata ?? 0) - (b.ordine ?? b.giornata ?? 0))
 }
 
 /**
@@ -113,12 +108,13 @@ export async function partitaDi(partitaId, teamId, stagione) {
   const sua = vesti(lati.find((l) => l.societa !== teamId))
   if (!mia) return null
   return {
+    giocata: g.giocata,
     inCasa: g.in_casa,
     avversario: g.avversario,
     gol: g.gol_fatti,
     golSubiti: g.gol_subiti,
-    fp: Number(g.fantapunti),
-    fpAvversario: Number(g.fantapunti_avversario),
+    fp: g.fantapunti == null ? null : Number(g.fantapunti),
+    fpAvversario: g.fantapunti_avversario == null ? null : Number(g.fantapunti_avversario),
     mia, sua,
   }
 }

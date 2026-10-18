@@ -2537,6 +2537,7 @@ export function Coppe() {
       <header>
         <p className="eyebrow">Competizioni</p>
         <h1>Le coppe di {d.team.name}</h1>
+        <Link to="/area/analisi?sezione=calendari">Calendari, classifiche e formazioni delle competizioni</Link>
       </header>
 
       <div className="kpi-row">

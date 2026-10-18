@@ -8,6 +8,8 @@ import {
 import { Pagina } from '../components/moto'
 import { Barra, Campo, Gruppo } from '../components/Filtri'
 import './Coppe.css'
+import CalendariFantapazz from '../components/CalendariFantapazz'
+import { stagioneAttiva } from '../lib/stagioni'
 
 /**
  * Struttura delle competizioni, dal regolamento (§5.3 e §6), piu' il
@@ -249,9 +251,8 @@ function Tabellone({ coppa }) {
 export default function Coppe() {
   const anni = useArchivio('stagioni', stagioni)
   const elenco = (anni.dati ?? []).map((s) => s.id)
-  /* Non l'ultima in elenco: l'ultima **giocata**. Una stagione che deve
-     ancora cominciare non ha coppe da mostrare. */
-  const ultimaGiocata = (anni.dati ?? []).find((s) => s.conclusa)?.id
+  // Apri la stagione attiva, inclusi i calendari delle coppe future.
+  const ultimaGiocata = stagioneAttiva(anni.dati ?? [])?.id
   const [scelta, setScelta] = useState('')
   const stagione = scelta || ultimaGiocata || elenco[0] || ''
   /* Una competizione alla volta. Nove tabelloni tutti aperti sono nove schede
@@ -264,7 +265,8 @@ export default function Coppe() {
   const cl = useArchivio(['classifica', stagione],
     () => (stagione ? classifica(stagione) : Promise.resolve([])), [stagione])
 
-  const campione = getTeam((cl.dati ?? []).find((r) => r.posizione === 1)?.societa)
+  const conclusa = (anni.dati ?? []).find(s=>s.id===stagione)?.conclusa
+  const campione = conclusa && getTeam((cl.dati ?? []).find((r) => r.posizione === 1)?.societa)
 
   /* L'albo d'oro di ogni competizione, gia' pronto da leggere. */
   const alboPerCoppa = useMemo(() => {
@@ -293,6 +295,8 @@ export default function Coppe() {
           di ciascuno, i premi e i tabelloni di ogni stagione dal 2016-17.
         </p>
       </header>
+
+      {!conclusa && stagione && <CalendariFantapazz key={stagione} stagione={stagione}/>}
 
       {/* Una scheda per competizione con l'elenco delle vincenti e l'anno.
           Prima era una tabella incrociata di stemmi senza nomi: ci stava tutto
@@ -348,7 +352,7 @@ export default function Coppe() {
       </section>
 
       <section className="block">
-        <h2 className="section-title">Albo {stagione}</h2>
+        <h2 className="section-title">{conclusa?'Albo':'Titoli assegnati'} {stagione}</h2>
         <div className="albo-stagione">
           {campione && (
             <article className="trofeo campione">
@@ -413,7 +417,7 @@ export default function Coppe() {
               <p className="formula">{c.formula}</p>
               {c.note && <p className="nota-coppa">{c.note}</p>}
 
-              {dati
+              {!conclusa ? <Link to="/statistiche?sezione=calendari">Consulta calendario, risultati e formazioni della stagione</Link> : dati
                 ? <Tabellone coppa={dati} />
                 : <p className="nota-coppa">
                     Nel {stagione} questa competizione non si è giocata, oppure

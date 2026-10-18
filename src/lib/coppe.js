@@ -25,6 +25,7 @@ const TITOLO = {
 
 /** Somma le gare di una sfida e dice chi passa, e per quale criterio. */
 function esito(legs) {
+  if (legs.some(p => p.giocata === false || p.golCasa == null || p.golFuori == null)) return { vincente: null, come: null, aggregato: null, squadre: [legs[0].casa, legs[0].fuori] }
   const t = {}
   const somma = (id, gol, fp, inTrasferta) => {
     const e = (t[id] ??= [0, 0, 0])

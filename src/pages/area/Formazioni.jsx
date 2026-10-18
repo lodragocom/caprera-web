@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../../lib/auth'
 import { getTeam, teamName, logoUrl } from '../../lib/core'
 import {
@@ -245,6 +246,7 @@ export default function Formazioni() {
     <header>
       <p className="eyebrow">Formazioni · {stagione}</p>
       <h1>In campo</h1>
+      <Link to="/area/analisi?sezione=calendari">Calendari e formazioni di tutte le società</Link>
     </header>
   )
 
@@ -265,7 +267,7 @@ export default function Formazioni() {
   const campo = disponi(p.mia.titolari, p.mia.modulo)
   const { entrati, assenti } = schierati(p.mia)
   const bonus = contaBonus(p.mia)
-  const esito = p.gol > p.golSubiti ? 'V' : p.gol === p.golSubiti ? 'N' : 'P'
+  const esito = !p.giocata ? null : p.gol > p.golSubiti ? 'V' : p.gol === p.golSubiti ? 'N' : 'P'
   const senzaFormazione = p.mia.titolari.length === 0
 
   /* Il voto medio si fa sui titolari che hanno giocato: contare come zero chi
@@ -279,6 +281,7 @@ export default function Formazioni() {
     <>
       {testa}
       {scelte}
+      {!p.giocata && <p className="note">Formazione consegnata su Fantapazz. Turno in corso: voti e risultato definitivo non ancora disponibili.</p>}
 
       <section className="pannello card testa-partita">
         <div className="squadra-riga">
@@ -287,8 +290,8 @@ export default function Formazioni() {
           {!senzaFormazione && <span className="num modulo">{p.mia.modulo}</span>}
         </div>
         <div className={`risultato esito-${esito}`}>
-          <b className="num">{p.gol} - {p.golSubiti}</b>
-          <span className="num fp">{p.fp} · {p.fpAvversario}</span>
+          <b className="num">{p.giocata ? `${p.gol} - ${p.golSubiti}` : 'In corso'}</b>
+          <span className="num fp">{p.fp ?? '—'} · {p.fpAvversario ?? '—'}</span>
           <em>{p.inCasa ? 'in casa' : 'in trasferta'}</em>
         </div>
         <div className="squadra-riga fine">
@@ -300,7 +303,7 @@ export default function Formazioni() {
 
       {/* Il riassunto della giornata prima del dettaglio: quattro numeri che
           rispondono a «com'e' andata» senza dover leggere il campo. */}
-      <Schede>
+      {p.giocata && <Schede>
         <Scheda etichetta="Fantapunti" valore={p.fp}
                 sotto={`avversario ${p.fpAvversario}`} />
         <Scheda etichetta="Risultato" valore={`${p.gol}-${p.golSubiti}`}
@@ -314,7 +317,7 @@ export default function Formazioni() {
                   sotto={p.mia.modificatori.length
                     ? `${p.mia.modificatori.length} in gioco` : 'nessuno'} />
         )}
-      </Schede>
+      </Schede>}
 
       {senzaFormazione ? (
         <p className="note">
@@ -359,14 +362,14 @@ export default function Formazioni() {
 
           <div className="colonna">
             <section className="pannello card">
-              <h2>Come sono nati i fantapunti</h2>
+              <h2>{p.giocata ? 'Come sono nati i fantapunti' : 'In attesa dei voti'}</h2>
               <div className="mod-riga">
                 {p.mia.modificatori.length ? p.mia.modificatori.map((m, i) => (
                   <span key={i} className="mod">
                     <b className="num">{m.valore > 0 ? '+' : ''}{m.valore}</b>
                     <em>{m.nome}</em>
                   </span>
-                )) : <span className="vuoto">Nessun modificatore.</span>}
+                )) : <span className="vuoto">{p.giocata ? 'Nessun modificatore.' : 'Bonus e modificatori saranno disponibili a turno concluso.'}</span>}
               </div>
               {bonus.length > 0 && (
                 <ul className="conta-bonus">

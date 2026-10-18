@@ -58,7 +58,7 @@ RISERVATE = re.compile(
 # Export acquisiti nel repository delle fonti il 18/10: conservarne la sede
 # canonica anche se contengono dati sportivi. Non duplicarli su GitHub.
 FONTI_PRIVATE = {
-    '20261018173000', '20261018181000', '20261018200000', '20261018201000',
+    '20261018221000', '20261018173000', '20261018181000', '20261018200000', '20261018201000',
 }
 
 

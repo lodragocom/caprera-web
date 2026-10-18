@@ -43,7 +43,9 @@ export default function Partita() {
     if (!g || !fo.dati?.length) return null
     const trova = (societa, fp) => {
       const l = fo.dati.find((x) => x.societa === societa)
-      return l ? tabellinoLato(l, valori, g.stagione, fp) : null
+      if (!l) return null
+      const tabellino = tabellinoLato(l, valori, g.stagione, fp)
+      return g.giocata ? tabellino : { ...tabellino, campo: tabellino.campo.map(p=>({...p,come:'in-attesa'})) }
     }
     return { casa: trova(g.casa, g.fp_casa), fuori: trova(g.fuori, g.fp_fuori) }
   }, [g, fo.dati, valori])
@@ -81,7 +83,7 @@ export default function Partita() {
 
   return (
     <Pagina className="page container wide pt">
-      <p className="pt-torna"><Link to="/risultati">← Calendario</Link></p>
+      <p className="pt-torna"><Link to="/statistiche?sezione=calendari">← Calendari e competizioni</Link></p>
 
       <Sezione stato={pa} righe={6} vuoto="Questa partita non esiste in archivio.">
         {g && (
@@ -107,7 +109,8 @@ export default function Partita() {
                      vuoto="Di questa partita l'archivio non ha le formazioni.">
               {lati && (
                 <>
-                  {nonQuadra?.length > 0 && (
+                  {!g.giocata && <p className="note">Formazioni consegnate su Fantapazz. Turno in corso: voti, sostituzioni e risultato definitivo non ancora disponibili.</p>}
+                  {g.giocata && nonQuadra?.length > 0 && (
                     <div className="avviso card pt-scarto">
                       <strong>Il conto non torna.</strong>{' '}
                       {nonQuadra.map((l) => (
@@ -128,8 +131,8 @@ export default function Partita() {
                   )}
 
                   <div className="pt-lati">
-                    <Formazione l={lati.casa} nomi={nomiBonus} />
-                    <Formazione l={lati.fuori} nomi={nomiBonus} />
+                    <Formazione l={lati.casa} nomi={nomiBonus} inCorso={!g.giocata} />
+                    <Formazione l={lati.fuori} nomi={nomiBonus} inCorso={!g.giocata} />
                   </div>
 
                   {legenda.length > 0 && (
@@ -159,7 +162,7 @@ export default function Partita() {
                     </div>
                   )}
 
-                  <p className="pt-nota">
+                  {g.giocata && <p className="pt-nota">
                     L'archivio non registra chi è entrato: registra chi era in
                     formazione e che voto ha preso. Le sostituzioni qui sopra
                     sono applicate con la regola della lega — al posto di un
@@ -169,7 +172,7 @@ export default function Partita() {
                     formazioni di dieci stagioni il totale coincide con quello
                     registrato nel 98,7% dei casi, e nelle ultime tre stagioni
                     sempre.
-                  </p>
+                  </p>}
                 </>
               )}
             </Sezione>
@@ -191,7 +194,7 @@ function Lato({ id, ospite }) {
   )
 }
 
-function Formazione({ l, nomi }) {
+function Formazione({ l, nomi, inCorso = false }) {
   if (!l) return <div className="pt-form card"><p className="muted">Formazione non in archivio.</p></div>
 
   return (
@@ -211,7 +214,7 @@ function Formazione({ l, nomi }) {
         ))}
       </div>
 
-      <div className="pt-conti">
+      {!inCorso && <div className="pt-conti">
         <div className="pt-riga">
           <span>Voti in campo</span>
           <b>{l.sommaCampo.toFixed(1)}</b>
@@ -233,16 +236,16 @@ function Formazione({ l, nomi }) {
           <span>Totale</span>
           <b><Numero valore={l.registrati ?? l.totale} decimali={1} /></b>
         </div>
-      </div>
+      </div>}
 
       <details className="pt-panchina">
         <summary>
           Panchina
-          <em>
+          {!inCorso && <em>
             {l.cambi.length} {l.cambi.length === 1 ? 'sostituzione' : 'sostituzioni'}
             {' · '}
             {l.panchina.filter((p) => p.disponibile && !p.entrato).length} non entrati
-          </em>
+          </em>}
         </summary>
         <ul>
           {l.panchina.map((p, i) => (
@@ -322,7 +325,7 @@ function Giocatore({ g, nomi }) {
         </em>
       )}
 
-      {g.come === 'assente' ? (
+      {g.come === 'in-attesa' ? <em className="pt-esito">in attesa dei voti</em> : g.come === 'assente' ? (
         <em className="pt-nessuno">nessun sostituto</em>
       ) : (
         <>

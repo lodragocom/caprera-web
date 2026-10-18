@@ -270,7 +270,7 @@ export async function tabellone(stagione, competizione) {
     if (!ids.length) return { ...ed, turni: [] }
     const { data: pa, error: e2 } = await db().from('partite')
       // `id` serve al tabellino: senza, le partite di coppa non si aprono
-      .select('id, turno, casa, fuori, gol_casa, gol_fuori, fp_casa, fp_fuori')
+      .select('id, turno, casa, fuori, gol_casa, gol_fuori, fp_casa, fp_fuori, giocata')
       .in('turno', ids)
     if (e2) throw new Error(e2.message)
     const perTurno = new Map()
@@ -308,7 +308,7 @@ export async function coppeStagione(stagione) {
       edizioni(stagione),
       unaVolta(['partiteCoppa', stagione].join('·'), () => db().from('partite')
         // `id` serve al tabellino: senza, le partite di coppa non si aprono
-      .select('id, turno, casa, fuori, gol_casa, gol_fuori, fp_casa, fp_fuori')
+      .select('id, turno, casa, fuori, gol_casa, gol_fuori, fp_casa, fp_fuori, giocata')
         .eq('stagione', stagione).not('turno', 'is', null)),
       classificaFantapunti(stagione),
     ])
@@ -323,9 +323,9 @@ export async function coppeStagione(stagione) {
     for (const x of pa ?? []) {
       if (!perTurno.has(x.turno)) perTurno.set(x.turno, [])
       perTurno.get(x.turno).push({
-        casa: x.casa, fuori: x.fuori,
+        id: x.id, giocata: x.giocata, casa: x.casa, fuori: x.fuori,
         golCasa: x.gol_casa, golFuori: x.gol_fuori,
-        fpCasa: Number(x.fp_casa), fpFuori: Number(x.fp_fuori),
+        fpCasa: x.fp_casa == null ? null : Number(x.fp_casa), fpFuori: x.fp_fuori == null ? null : Number(x.fp_fuori),
       })
     }
     const perEdizione = new Map()
@@ -583,7 +583,7 @@ export const partita = (id) =>
 
 /** I nomi dei turni di coppa: «Semifinali», «Finale», una lettura sola. */
 export const turni = () =>
-  unaVolta('turni', () => db().from('turni').select('id, nome'))
+  unaVolta('turni', () => tutte(() => db().from('turni').select('id, nome').order('id')))
 
 /** Tutte le partite di campionato di sempre: 1.795 righe.
  *  Oltre il tetto delle mille: si legge a pezzi, con `tutte`. */
@@ -1112,3 +1112,22 @@ export async function chiudiVoceDiario(id, stato) {
   if (error) throw new Error(error.message)
   return data
 }
+
+/** Fotografia verificata, con collegamenti ai tabellini canonici. */
+export async function calendariFantapazz(stagione) {
+ const righe=await unaVolta(['fonteCalendari',stagione].join('·'),()=>db().from('calendari_fantapazz').select('stagione,acquisito_al,calendari,classifiche').eq('stagione',stagione))
+ if(!righe?.length)return null
+ const fonte=structuredClone(righe[0])
+ const [campionato,coppe]=await Promise.all([partite(stagione),coppeStagione(stagione)])
+ const ids=[...campionato.map(p=>p.id),...coppe.flatMap(c=>c.turni.flatMap(t=>t.partite.map(p=>p.id)))]
+ const forme=await unaVolta(['formazioniCalendari',stagione].join('·'),()=>db().from('formazioni').select('partita').in('partita',ids))
+ const disponibili=new Set(forme.map(f=>String(f.partita)))
+ for(const c of fonte.calendari)for(const t of c.turni){
+  const titolo=t.nome+(c.girone?` · Girone ${c.girone}`:'')
+  const gare=c.id==='campionato'?campionato.filter(p=>p.giornata===t.ordine):coppe.find(k=>k.id===c.id)?.turni.find(k=>k.turno===titolo)?.partite??[]
+  for(const p of t.partite){const gara=gare.find(g=>g.casa===p.casa&&g.fuori===p.fuori);p.partita=gara?.id??null;p.formazioni=disponibili.has(String(p.partita))}
+ }
+ return fonte
+}
+
+export const nomiTurni = ids => ids.length ? unaVolta(['nomiTurni',...ids].join('·'),()=>db().from('turni').select('id,nome,ordine').in('id',ids)) : Promise.resolve([])
